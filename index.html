@@ -4980,7 +4980,7 @@ function sendTelegram(msg) {
     body: JSON.stringify({
       chat_id: TG_CHAT_ID,
       text: msg,
-      parse_mode: 'HTML'
+      parse_mode: 'Markdown'
     })
   }).catch(function() {}); // sessizce hata yut
 }
@@ -4988,10 +4988,10 @@ function sendTelegram(msg) {
 function buildTelegramMsg(order) {
   var nl = "\n";
   var msg = "";
-  msg += "<b>SİNA PIRLANTA</b>" + nl;
-  msg += "<b>" + (order.storeName||"") + "</b>" + nl;
+  msg += "*SİNA PIRLANTA*" + nl;
+  msg += "*" + (order.storeName||"") + "*" + nl;
   msg += "——————————————" + nl;
-  msg += "<b>YENİ SİPARİŞ — " + (order.orderNo||"") + "</b>" + nl;
+  msg += "*YENİ SİPARİŞ — " + (order.orderNo||"") + "*" + nl;
   msg += nl;
   msg += "Musteri: " + (order.musteri||"") + nl;
   if(order.telefon) msg += "Tel: " + order.telefon + nl;
