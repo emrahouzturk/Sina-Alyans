@@ -1549,10 +1549,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <div style="margin-top:8px;">
           <div class="field-label" style="margin-bottom:6px;">Sembol Ekle</div>
           <div class="symbol-picker" style="gap:8px;">
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','♥',this)" style="padding:9px 12px;">♥ <span class="symbol-label">Kalp</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','∞',this)" style="padding:9px 12px;">∞ <span class="symbol-label">Sonsuzluk</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','★',this)" style="padding:9px 12px;">★ <span class="symbol-label">Yıldız</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','☽',this)" style="padding:9px 12px;">☽ <span class="symbol-label">Ay</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','(Kalp)',this)" style="padding:9px 12px;"><span class="symbol-label">(Kalp)</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','(Sonsuzluk)',this)" style="padding:9px 12px;"><span class="symbol-label">(Sonsuzluk)</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','(Yildiz)',this)" style="padding:9px 12px;"><span class="symbol-label">(Yildiz)</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','(Ay)',this)" style="padding:9px 12px;"><span class="symbol-label">(Ay)</span></button>
           </div>
         </div>
       </div>
@@ -1562,10 +1562,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <div style="margin-top:8px;">
           <div class="field-label" style="margin-bottom:6px;">Sembol Ekle</div>
           <div class="symbol-picker" style="gap:8px;">
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','♥',this)" style="padding:9px 12px;">♥ <span class="symbol-label">Kalp</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','∞',this)" style="padding:9px 12px;">∞ <span class="symbol-label">Sonsuzluk</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','★',this)" style="padding:9px 12px;">★ <span class="symbol-label">Yıldız</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','☽',this)" style="padding:9px 12px;">☽ <span class="symbol-label">Ay</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','(Kalp)',this)" style="padding:9px 12px;"><span class="symbol-label">(Kalp)</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','(Sonsuzluk)',this)" style="padding:9px 12px;"><span class="symbol-label">(Sonsuzluk)</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','(Yildiz)',this)" style="padding:9px 12px;"><span class="symbol-label">(Yildiz)</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','(Ay)',this)" style="padding:9px 12px;"><span class="symbol-label">(Ay)</span></button>
           </div>
         </div>
       </div>
@@ -4979,19 +4979,28 @@ function sendTelegram(msg) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       chat_id: TG_CHAT_ID,
-      text: msg,
-      parse_mode: 'Markdown'
+      text: msg
     })
   }).catch(function() {}); // sessizce hata yut
+}
+
+function cleanSymbols(txt) {
+  if(!txt) return '';
+  return txt
+    .replace(/♥/g, '(Kalp)')
+    .replace(/❤️/g, '(Kalp)')
+    .replace(/∞/g, '(Sonsuzluk)')
+    .replace(/★/g, '(Yildiz)')
+    .replace(/☽/g, '(Ay)');
 }
 
 function buildTelegramMsg(order) {
   var nl = "\n";
   var msg = "";
-  msg += "*SİNA PIRLANTA*" + nl;
-  msg += "*" + (order.storeName||"") + "*" + nl;
+  msg += "SİNA PIRLANTA" + nl;
+  msg += (order.storeName||"") + nl;
   msg += "——————————————" + nl;
-  msg += "*YENİ SİPARİŞ — " + (order.orderNo||"") + "*" + nl;
+  msg += "YENİ SİPARİŞ — " + (order.orderNo||"") + nl;
   msg += nl;
   msg += "Musteri: " + (order.musteri||"") + nl;
   if(order.telefon) msg += "Tel: " + order.telefon + nl;
@@ -5013,8 +5022,8 @@ function buildTelegramMsg(order) {
       if(order.ayar) msg += "Ayar: " + (AYAR_LABEL[order.ayar]||order.ayar) + nl;
       if(order.renk) msg += "Renk: " + renkLabel(order.renk) + (order.mixAciklama?" ("+order.mixAciklama+")":"") + nl;
     }
-    if(order.icYaziKadin) msg += "Kadin ic yazi: " + order.icYaziKadin + nl;
-    if(order.icYaziErkek) msg += "Erkek ic yazi: " + order.icYaziErkek + nl;
+    if(order.icYaziKadin) msg += "Kadin ic yazi: " + cleanSymbols(order.icYaziKadin) + nl;
+    if(order.icYaziErkek) msg += "Erkek ic yazi: " + cleanSymbols(order.icYaziErkek) + nl;
     if(order.icYapi)  msg += "Ic yapi: " + (order.icYapi==="dolu"?"Ici Dolu":"Ici Bos") + nl;
   }
   if(order.not) msg += "Not: " + order.not + nl;
