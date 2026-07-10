@@ -698,6 +698,43 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   .top-store-badge { max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; }
 }
 
+/* ── FLIP CARD ── */
+.flip-card { perspective:1000px; cursor:pointer; }
+.flip-card-inner {
+  position:relative; width:100%; height:100%;
+  transition:transform .45s cubic-bezier(.4,0,.2,1);
+  transform-style:preserve-3d;
+}
+.flip-card.flipped .flip-card-inner { transform:rotateY(180deg); }
+.flip-card-front, .flip-card-back {
+  position:absolute; inset:0;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  border-radius:inherit;
+  overflow:hidden;
+}
+.flip-card-back {
+  transform:rotateY(180deg);
+  background:var(--surface);
+  padding:12px;
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.flip-zoom-btn {
+  position:absolute; top:7px; right:7px; z-index:2;
+  background:rgba(0,0,0,.45); color:#fff;
+  border:none; border-radius:6px; width:28px; height:28px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; backdrop-filter:blur(4px);
+  transition:background .15s;
+}
+.flip-zoom-btn:hover { background:rgba(0,0,0,.7); }
+.flip-back-close {
+  position:absolute; top:7px; right:7px; z-index:2;
+  background:var(--rose); color:#fff;
+  border:none; border-radius:50%; width:24px; height:24px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; cursor:pointer;
+}
+
 /* ── ZOOM MODAL ── */
 #zoom-overlay {
   position:fixed; inset:0; background:rgba(0,0,0,.88);
@@ -4896,6 +4933,16 @@ function escHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+
+function flipCard(id, e) {
+  e.stopPropagation();
+  const card = document.getElementById('flip-'+id);
+  if(card) card.classList.toggle('flipped');
+}
+function flipCardClose(id) {
+  const card = document.getElementById('flip-'+id);
+  if(card) card.classList.remove('flipped');
+}
 
 function openProductDetail(productId) {
   const p = allProducts[productId];
