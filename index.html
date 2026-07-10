@@ -18,7 +18,58 @@
 <link rel="apple-touch-icon" href="https://www.sinapirlanta.com/themes/custom/sina/logo.svg">
 <link rel="manifest" id="pwa-manifest">
 <style>
-  #pwa-install-banner {
+  /* ── YENİ SİPARİŞ BİLDİRİMİ ── */
+#yeni-siparis-banner {
+  display:none;
+  position:fixed; top:0; left:0; right:0; z-index:9500;
+  background:linear-gradient(135deg, #c8244c, #9c1a38);
+  color:#fff; padding:0;
+  box-shadow:0 4px 24px rgba(200,36,76,.5);
+  animation:slideDown .3s ease;
+}
+#yeni-siparis-banner.show { display:block; }
+@keyframes slideDown {
+  from { transform:translateY(-100%); opacity:0; }
+  to   { transform:translateY(0);     opacity:1; }
+}
+.ysb-inner {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 18px; max-width:100%;
+}
+.ysb-icon {
+  width:44px; height:44px; background:rgba(255,255,255,.2);
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0; animation:pulse 1s ease infinite;
+}
+@keyframes pulse {
+  0%,100% { transform:scale(1); }
+  50%      { transform:scale(1.12); }
+}
+.ysb-text { flex:1; }
+.ysb-title { font-size:14px; font-weight:800; letter-spacing:.02em; }
+.ysb-sub   { font-size:11px; opacity:.85; margin-top:2px; }
+.ysb-btn {
+  background:#fff; color:#c8244c; border:none;
+  border-radius:var(--r-sm); padding:9px 16px;
+  font-family:'Poppins',sans-serif; font-weight:800; font-size:12px;
+  cursor:pointer; white-space:nowrap; flex-shrink:0;
+}
+.ysb-close {
+  background:rgba(255,255,255,.2); border:none; color:#fff;
+  width:32px; height:32px; border-radius:50%; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+}
+.ysb-progress {
+  height:3px; background:rgba(255,255,255,.3);
+  border-radius:0;
+}
+.ysb-progress-bar {
+  height:100%; background:#fff; border-radius:0;
+  transition:width linear;
+}
+
+#pwa-install-banner {
     display:none;
     position:fixed; bottom:80px; left:16px; right:16px; z-index:8000;
     background:var(--surface); border:1.5px solid var(--border);
@@ -659,6 +710,33 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   box-shadow:0 8px 40px rgba(0,0,0,.6);
 }
 
+/* ── GRAMAJ TABLO ── */
+.gramaj-row {
+  display:grid; grid-template-columns:1fr 1fr 1fr auto;
+  gap:8px; align-items:center; margin-bottom:8px;
+}
+.gramaj-row input { font-size:12px; padding:8px 10px; }
+.gramaj-row-label { font-size:10px; font-weight:700; color:var(--ink-dim); text-align:center; margin-bottom:4px; }
+.gramaj-header {
+  display:grid; grid-template-columns:1fr 1fr 1fr auto;
+  gap:8px; margin-bottom:4px;
+}
+.gramaj-header span { font-size:9px; font-weight:700; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.06em; }
+
+/* ── HESAP KUTUSU ── */
+.hesap-box {
+  background:linear-gradient(135deg,#fdf0f3,#fff);
+  border:1.5px solid var(--rose-soft); border-radius:var(--r-md);
+  padding:16px; margin-top:12px;
+}
+.hesap-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid var(--border); }
+.hesap-row:last-child { border-bottom:none; }
+.hesap-label { font-size:11px; color:var(--ink-dim); font-weight:600; }
+.hesap-value { font-size:13px; font-weight:800; color:var(--ink); }
+.hesap-value.rose { color:var(--rose); }
+.hesap-value.green { color:var(--success); }
+.hesap-value.gold  { color:var(--gold); }
+
 /* ── PRINT ── */
 @media print {
   .top-bar, .nav-tabs, .modal-overlay, .toast-wrap { display:none !important; }
@@ -669,6 +747,24 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 </style>
 </head>
 <body>
+
+<!-- YENİ SİPARİŞ BİLDİRİMİ -->
+<div id="yeni-siparis-banner">
+  <div class="ysb-inner">
+    <div class="ysb-icon"><i class="ph ph-bell-ringing"></i></div>
+    <div class="ysb-text">
+      <div class="ysb-title" id="ysb-title">Yeni Sipariş Geldi!</div>
+      <div class="ysb-sub" id="ysb-sub">Siparişler sekmesini kontrol et</div>
+      <div style="font-size:9px;opacity:.6;margin-top:3px;" id="ysb-reminder-info"></div>
+    </div>
+    <button class="ysb-btn" onclick="goToYeniSiparis()">Gör</button>
+    <button class="ysb-close" onclick="closeYeniSiparisBanner()" title="Kapat (hatırlatmaya devam eder)"><i class="ph ph-x"></i></button>
+    <button class="ysb-close" onclick="closeYeniSiparisBanner();stopReminder();" title="Sustur" style="background:rgba(255,255,255,.1);margin-left:-8px;">
+      <i class="ph ph-bell-slash"></i>
+    </button>
+  </div>
+  <div class="ysb-progress"><div class="ysb-progress-bar" id="ysb-bar" style="width:100%"></div></div>
+</div>
 
 <!-- PWA INSTALL BANNER -->
 <div id="pwa-install-banner">
@@ -782,10 +878,16 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <input type="search" class="text-field" id="katalog-search" placeholder="🔍  Ürün ara…" oninput="renderProductGrid()" style="font-size:13px;padding:10px 16px;">
       </div>
       <div id="product-grid-container" class="product-grid">
-        <div class="empty-state" style="grid-column:1/-1">
-          <div class="empty-state-icon"><i class="ph ph-diamond"></i></div>
-          <div class="empty-state-title">Ürün bulunamadı</div>
-          <div class="empty-state-sub">Admin henüz ürün eklememiş.</div>
+        <div class="empty-state" style="grid-column:1/-1;padding:48px 24px;">
+          <div style="width:80px;height:80px;background:var(--rose-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:36px;color:var(--rose);">
+            <i class="ph ph-diamond"></i>
+          </div>
+          <div class="empty-state-title">Hoş Geldiniz!</div>
+          <div class="empty-state-sub" style="max-width:260px;margin:0 auto;line-height:1.8;">
+            Ürün kataloğu henüz yüklenmedi.<br>
+            Siparişlerinizi <b>Özel Sipariş</b> sekmesinden iletebilirsiniz.<br><br>
+            <span style="font-size:10px;color:var(--ink-dim);">Sorularınız için adminle iletişime geçin.</span>
+          </div>
         </div>
       </div>
     </div>
@@ -885,9 +987,12 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <b>2.</b> Sipariş vermek istediğin ürünün <b>adına veya açıklamasına tıkla</b>.<br>
           <b>3.</b> Açılan formda şunları doldur:<br>
           &nbsp;&nbsp;• <b>Müşteri adı soyadı</b> — zorunlu<br>
+          &nbsp;&nbsp;• <b>Telefon</b> — isteğe bağlı, müşteri numarası<br>
           &nbsp;&nbsp;• <b>Cinsiyet</b> — Kadın / Erkek / Çift seç<br>
           &nbsp;&nbsp;• <b>Ölçü</b> — + ve − tuşlarıyla ya da direkt yazarak gir (12, 12.5, 13…)<br>
           &nbsp;&nbsp;• <b>Kalınlık</b> — ürünün standart kalınlığı gelir, müşteri farklı isterse değiştir<br>
+          &nbsp;&nbsp;• <b>Ayar</b> — modele göre 14 Ayar / 22 Ayar / Gümüş seçenekleri çıkar, birini seç<br>
+          &nbsp;&nbsp;• <b>İçi Dolu / Boş</b> — model destekliyorsa seç<br>
           &nbsp;&nbsp;• <b>Altın rengi</b> — Sarı / Beyaz / Rose / Mix<br>
           &nbsp;&nbsp;&nbsp;&nbsp;Mix seçersen açıklama kutusuna detay yaz (ör: dış sarı iç rose)<br>
           &nbsp;&nbsp;• <b>İç yazı</b> — Çift seçtiysen kadın ve erkek için ayrı ayrı doldurabilirsin<br>
@@ -1107,11 +1212,21 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       </div>
       <div class="card" style="margin-bottom:16px;">
         <label class="field-label">Yeni Grup Ekle</label>
-        <div style="display:flex;gap:10px;margin-top:6px;">
-          <input type="text" class="text-field" id="new-group-input" placeholder="ör: Klasik, Taşlı, Örgü…" style="flex:1;" onkeydown="if(event.key==='Enter')addGroup()">
+        <div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;margin-top:6px;align-items:center;">
+          <input type="text" class="text-field" id="new-group-input" placeholder="Grup adı (ör: Klasik)" oninput="autoGroupCode()" onkeydown="if(event.key==='Enter')addGroup()">
+          <div style="position:relative;">
+            <input type="text" class="text-field" id="new-group-code" placeholder="KOD" maxlength="5"
+              style="width:90px;text-transform:uppercase;font-weight:800;font-size:13px;letter-spacing:.08em;"
+              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+              onkeydown="if(event.key==='Enter')addGroup()">
+            <div style="position:absolute;top:-18px;left:0;font-size:9px;font-weight:700;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;">Kısa Kod</div>
+          </div>
           <button class="btn-primary" onclick="addGroup()" style="white-space:nowrap;padding:10px 18px;">
             <i class="ph ph-plus"></i> Ekle
           </button>
+        </div>
+        <div style="font-size:10px;color:var(--ink-dim);margin-top:8px;">
+          Kısa kod ürün numarasında kullanılır — ör: <b>KLS</b>-001, <b>TAS</b>-001
         </div>
       </div>
       <div id="admin-group-list" class="admin-product-list">
@@ -1221,9 +1336,15 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       <hr class="divider" style="margin-top:0;">
 
       <!-- Müşteri -->
-      <div class="form-group">
-        <label class="field-label">Müşteri Adı Soyadı *</label>
-        <input type="text" class="text-field" id="ord-musteri" placeholder="Ad Soyad" style="font-size:15px;padding:13px 16px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Müşteri Adı Soyadı *</label>
+          <input type="text" class="text-field" id="ord-musteri" placeholder="Ad Soyad" style="font-size:15px;padding:13px 16px;">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Telefon <span style="color:var(--ink-dim);font-weight:400;">(isteğe bağlı)</span></label>
+          <input type="tel" class="text-field" id="ord-telefon" placeholder="05XX XXX XX XX" style="font-size:15px;padding:13px 16px;">
+        </div>
       </div>
 
       <!-- Cinsiyet — büyük butonlar -->
@@ -1274,6 +1395,42 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <button type="button" class="stepper-btn" onclick="stepVal('ord-kalinlik',-0.5)">−</button>
           <input type="number" inputmode="decimal" step="0.5" class="text-field stepper-field" id="ord-kalinlik" placeholder="3">
           <button type="button" class="stepper-btn" onclick="stepVal('ord-kalinlik',0.5)">+</button>
+        </div>
+      </div>
+
+      <!-- Ayar -->
+      <div class="form-group" id="ord-ayar-wrap">
+        <label class="field-label">Ayar</label>
+        <div style="display:flex;gap:8px;margin-top:6px;" id="ord-ayar-btns"></div>
+        <input type="hidden" id="ord-ayar" value="">
+      </div>
+
+      <!-- İçi Boş/Dolu -->
+      <div class="form-group" id="ord-ic-wrap" style="display:none;">
+        <label class="field-label">İç Yapı</label>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="seg-btn" id="ord-ic-dolu-btn" onclick="selectIcYapi('dolu')" style="flex:1;">
+            <i class="ph ph-circle-fill" style="font-size:18px;"></i><br>İçi Dolu
+          </button>
+          <button class="seg-btn" id="ord-ic-bos-btn" onclick="selectIcYapi('bos')" style="flex:1;">
+            <i class="ph ph-circle" style="font-size:18px;"></i><br>İçi Boş
+          </button>
+        </div>
+        <input type="hidden" id="ord-ic-yapi" value="">
+      </div>
+
+      <!-- Hesap Kutusu -->
+      <div id="ord-hesap-wrap" style="display:none;">
+        <div class="hesap-box">
+          <div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;"><i class="ph ph-calculator"></i> Gramaj Hesabı</div>
+          <div class="hesap-row">
+            <span class="hesap-label">Tahmini Gramaj</span>
+            <span class="hesap-value" id="hesap-gramaj">–</span>
+          </div>
+          <div class="hesap-row">
+            <span class="hesap-label">Saf Altın (Satış)</span>
+            <span class="hesap-value rose" id="hesap-saf-satis">–</span>
+          </div>
         </div>
       </div>
 
@@ -1344,53 +1501,158 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 
 <!-- Ürün Ekle/Düzenle Modal -->
 <div class="modal-overlay" id="modal-add-product">
-  <div class="modal-box">
+  <div class="modal-box modal-lg">
     <div class="modal-header">
       <div class="modal-title" id="product-modal-title">Ürün Ekle</div>
       <button class="modal-close" onclick="closeModal('modal-add-product')"><i class="ph ph-x"></i></button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="edit-product-id">
-      <div class="form-group">
-        <label class="field-label">Ürün Fotoğrafı</label>
-        <div class="photo-upload-area" id="product-photo-area" onclick="document.getElementById('product-photo-input').click()">
-          <img class="photo-preview" id="product-photo-preview" src="">
-          <div id="product-photo-placeholder">
-            <i class="ph ph-camera" style="font-size:28px; color:var(--ink-dim);"></i>
-            <div class="photo-upload-text">Fotoğraf Yükle</div>
-            <div class="photo-upload-sub">JPG, PNG — maks. 5MB</div>
+
+      <!-- Temel Bilgiler -->
+      <div style="font-size:11px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">Temel Bilgiler</div>
+      <div style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start;">
+        <div>
+          <div class="photo-upload-area" id="product-photo-area" onclick="document.getElementById('product-photo-input').click()" style="width:100px;height:100px;padding:0;display:flex;align-items:center;justify-content:center;position:relative;">
+            <img class="photo-preview" id="product-photo-preview" src="" style="width:100%;height:100%;object-fit:cover;border-radius:var(--r-md);">
+            <div id="product-photo-placeholder" style="text-align:center;">
+              <i class="ph ph-camera" style="font-size:22px;color:var(--ink-dim);"></i>
+              <div style="font-size:9px;color:var(--ink-dim);margin-top:4px;">Fotoğraf</div>
+            </div>
+            <div id="product-photo-spinner" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.8);align-items:center;justify-content:center;border-radius:var(--r-md);">
+              <div class="spinner" style="width:24px;height:24px;border-width:2px;"></div>
+            </div>
           </div>
+          <input type="file" id="product-photo-input" accept="image/*" style="display:none" onchange="handleProductPhotoSelect(this)">
         </div>
-        <input type="file" id="product-photo-input" accept="image/*" style="display:none" onchange="handleProductPhotoSelect(this)">
-        <div class="upload-progress" id="product-upload-progress">
-          <div class="upload-progress-bar" id="product-upload-bar" style="width:0%"></div>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="field-label">Ürün Kodu *</label>
-          <input type="text" class="text-field" id="product-code" placeholder="ör: AL-001">
-        </div>
-        <div class="form-group">
-          <label class="field-label">Ürün Adı *</label>
-          <input type="text" class="text-field" id="product-name" placeholder="ör: Klasik Alyans">
+        <div style="flex:1;">
+          <div class="form-row" style="margin-bottom:10px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="field-label">Ürün Kodu *</label>
+              <input type="text" class="text-field" id="product-code" placeholder="ör: KLS-001">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="field-label">Ürün Adı *</label>
+              <input type="text" class="text-field" id="product-name" placeholder="ör: Klasik Alyans">
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:0;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="field-label">Ürün Grubu</label>
+              <select class="select-field" id="product-category">
+                <option value="">— Grup seç —</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="field-label">Kalınlık (mm)</label>
+              <input type="text" class="text-field" id="product-thickness" placeholder="ör: 3">
+            </div>
+          </div>
         </div>
       </div>
       <div class="form-group">
         <label class="field-label">Açıklama</label>
-        <textarea class="text-field" id="product-desc" placeholder="Ürün hakkında kısa açıklama…" rows="3"></textarea>
+        <textarea class="text-field" id="product-desc" placeholder="Ürün hakkında kısa açıklama…" rows="2"></textarea>
       </div>
+
+      <hr class="divider">
+
+      <!-- Ayar ve İçi Boş/Dolu -->
+      <div style="font-size:11px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">Üretim Özellikleri</div>
       <div class="form-row">
         <div class="form-group">
-          <label class="field-label">Ürün Grubu</label>
-          <select class="select-field" id="product-category">
-            <option value="">— Grup seç —</option>
-          </select>
+          <label class="field-label">Ayar Seçenekleri</label>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;">
+              <input type="checkbox" id="ayar-14" value="14" style="accent-color:var(--rose);width:16px;height:16px;"> 14 Ayar
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;">
+              <input type="checkbox" id="ayar-22" value="22" style="accent-color:var(--rose);width:16px;height:16px;"> 22 Ayar
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;">
+              <input type="checkbox" id="ayar-gumus" value="gumus" style="accent-color:var(--rose);width:16px;height:16px;"> Gümüş
+            </label>
+          </div>
         </div>
         <div class="form-group">
-          <label class="field-label">Varsayılan Kalınlık (mm)</label>
-          <input type="text" class="text-field" id="product-thickness" placeholder="ör: 5">
+          <label class="field-label">İç Yapı</label>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;">
+              <input type="checkbox" id="ic-dolu" style="accent-color:var(--rose);width:16px;height:16px;"> İçi Dolu
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer;">
+              <input type="checkbox" id="ic-bos" style="accent-color:var(--rose);width:16px;height:16px;"> İçi Boş
+            </label>
+          </div>
+          <div style="font-size:10px;color:var(--ink-dim);margin-top:8px;">İkisi birden seçilebilir</div>
         </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- İşçilik -->
+      <div style="font-size:11px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">İşçilik (gram)</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Maliyet İşçiliği (gr) <span style="color:var(--ink-dim);font-weight:400;">— sadece sen görürsün</span></label>
+          <input type="number" step="0.01" class="text-field" id="product-iscil-maliyet" placeholder="ör: 0.10">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Satış İşçiliği (gr) <span style="color:var(--ink-dim);font-weight:400;">— hesaba yansır</span></label>
+          <input type="number" step="0.01" class="text-field" id="product-iscil-satis" placeholder="ör: 0.30">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="field-label">22 Ayar Ekstra Ağırlık (gr) <span style="color:var(--ink-dim);font-weight:400;">— 14 ayara göre fark</span></label>
+        <input type="number" step="0.1" class="text-field" id="product-22-ekstra" placeholder="ör: 1.25">
+      </div>
+
+      <hr class="divider">
+
+      <!-- Gramaj Tablosu -->
+      <div style="font-size:11px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Gramaj Tablosu</div>
+      <div style="font-size:11px;color:var(--ink-dim);margin-bottom:12px;">İçi dolu ve boş için ayrı ayrı gir. Ölçü 27 üzeri otomatik +0.50 gr eklenir.</div>
+
+      <!-- İçi Dolu Tablo -->
+      <div id="gramaj-dolu-wrap" style="display:none;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+          <i class="ph ph-circle-fill" style="color:var(--gold);"></i> İçi Dolu Gramaj
+        </div>
+        <div id="gramaj-dolu-rows"></div>
+        <button class="btn-ghost" onclick="addGramajRow('dolu')" style="font-size:11px;margin-top:6px;">
+          <i class="ph ph-plus"></i> Ölçü Aralığı Ekle
+        </button>
+      </div>
+
+      <!-- İçi Boş Tablo -->
+      <div id="gramaj-bos-wrap" style="display:none;">
+        <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+          <i class="ph ph-circle" style="color:var(--rose);"></i> İçi Boş Gramaj
+        </div>
+        <div id="gramaj-bos-rows"></div>
+        <button class="btn-ghost" onclick="addGramajRow('bos')" style="font-size:11px;margin-top:6px;">
+          <i class="ph ph-plus"></i> Ölçü Aralığı Ekle
+        </button>
+      </div>
+
+      <div id="gramaj-empty-note" style="font-size:11px;color:var(--ink-dim);padding:12px;background:var(--bg);border-radius:var(--r-sm);text-align:center;">
+        İçi dolu ve/veya boş seçimi yapınca gramaj tablosu buraya gelir.
+      </div>
+
+      <hr class="divider">
+
+      <!-- Durum -->
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="field-label">Ürün Durumu</label>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="seg-btn active" id="product-active-btn" onclick="setProductActive(true)" style="flex:1;padding:10px;">
+            <i class="ph ph-check-circle"></i> Aktif
+          </button>
+          <button class="seg-btn" id="product-passive-btn" onclick="setProductActive(false)" style="flex:1;padding:10px;">
+            <i class="ph ph-pause-circle"></i> Pasif
+          </button>
+        </div>
+        <input type="hidden" id="product-active" value="true">
       </div>
     </div>
     <div class="modal-footer">
@@ -1473,9 +1735,17 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     </div>
     <div class="modal-body">
       <input type="hidden" id="edit-group-id">
-      <div class="form-group">
-        <label class="field-label">Grup Adı</label>
-        <input type="text" class="text-field" id="edit-group-name" placeholder="Grup adı…" onkeydown="if(event.key==='Enter')saveGroupEdit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Grup Adı</label>
+          <input type="text" class="text-field" id="edit-group-name" placeholder="Grup adı…" onkeydown="if(event.key==='Enter')saveGroupEdit()">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Kısa Kod</label>
+          <input type="text" class="text-field" id="edit-group-code" placeholder="KOD" maxlength="5"
+            style="text-transform:uppercase;font-weight:800;font-size:13px;letter-spacing:.08em;"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+        </div>
       </div>
       <div style="background:var(--warn-bg);border:1px solid #f0d99a;border-radius:var(--r-sm);padding:10px 14px;font-size:11px;color:var(--warn);line-height:1.6;">
         <i class="ph ph-warning"></i> Grup adını değiştirince bu gruba bağlı tüm ürünlerin grubu da otomatik güncellenir.
@@ -1770,12 +2040,15 @@ function renderProductGrid() {
           ? `<img src="${escHtml(p.photoUrl)}" alt="${escHtml(p.name)}" loading="lazy">`
           : `<i class="ph ph-diamond"></i>`}
       </div>
-      <div onclick="openOrderModal('${id}')" style="cursor:pointer;">
+      <div>
       <div class="product-card-body">
         <div class="product-card-code">${escHtml(p.code||'')}${p.category ? ' · '+escHtml(p.category) : ''}</div>
         <div class="product-card-name">${escHtml(p.name||'')}</div>
         ${p.desc ? `<div class="product-card-desc">${escHtml(p.desc)}</div>` : ''}
-        ${p.thickness ? `<div style="margin-top:6px;font-size:10px;color:var(--ink-dim);font-weight:600;">${escHtml(p.thickness)} mm</div>` : ''}
+        ${p.thickness ? `<div style="margin-top:4px;font-size:10px;color:var(--ink-dim);font-weight:600;">${escHtml(p.thickness)} mm</div>` : ''}
+        <button onclick="openOrderModal('${id}')" style="margin-top:10px;width:100%;background:var(--rose);color:#fff;border:none;border-radius:var(--r-sm);padding:9px;font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">
+          <i class="ph ph-paper-plane-tilt"></i> Sipariş Ver
+        </button>
       </div></div>
     </div>
   `).join('');
@@ -1840,6 +2113,21 @@ function openOrderModal(productId) {
   document.getElementById('ord-olcu-kadin').value= '';
   document.getElementById('ord-olcu-erkek').value= '';
   document.getElementById('ord-kalinlik').value  = p.thickness || '';
+
+  // Ayar butonları
+  buildAyarButtons(p.ayarlar || []);
+  // İçi boş/dolu
+  const icWrap = document.getElementById('ord-ic-wrap');
+  const hasIcSecim = p.icYapi && p.icYapi.length > 1;
+  if(icWrap) icWrap.style.display = (p.icYapi && p.icYapi.length) ? '' : 'none';
+  document.getElementById('ord-ic-yapi').value = '';
+  document.getElementById('ord-ic-dolu-btn').classList.remove('active');
+  document.getElementById('ord-ic-bos-btn').classList.remove('active');
+  // Eğer sadece biri varsa otomatik seç
+  if(p.icYapi && p.icYapi.length === 1) {
+    selectIcYapi(p.icYapi[0]);
+  }
+  updateHesap();
   document.getElementById('ord-ic-yazi-kadin').value = '';
   document.getElementById('ord-ic-yazi-erkek').value = '';
   document.getElementById('ord-not').value       = '';
@@ -1880,6 +2168,77 @@ function toggleSymbolField(inputId, emoji, btn) {
   setTimeout(function() { btn.classList.remove('active'); }, 250);
 }
 
+const MILYEM = { '14': 0.585, '22': 0.916, 'gumus': 0.995 };
+const AYAR_LABEL = { '14': '14 Ayar', '22': '22 Ayar', 'gumus': 'Gümüş' };
+
+function buildAyarButtons(ayarlar) {
+  const wrap = document.getElementById('ord-ayar-btns');
+  const ayarWrap = document.getElementById('ord-ayar-wrap');
+  if(!wrap) return;
+  if(!ayarlar || !ayarlar.length) { ayarWrap.style.display='none'; return; }
+  ayarWrap.style.display = '';
+  wrap.innerHTML = ayarlar.map(a => `
+    <button class="seg-btn" id="ord-ayar-btn-${a}" onclick="selectAyar('${a}')" style="flex:1;padding:10px 8px;">
+      ${AYAR_LABEL[a]||a}
+    </button>`).join('');
+  document.getElementById('ord-ayar').value = '';
+  // Tek seçenek varsa otomatik seç
+  if(ayarlar.length === 1) selectAyar(ayarlar[0]);
+}
+
+function selectAyar(ayar) {
+  document.getElementById('ord-ayar').value = ayar;
+  document.querySelectorAll('[id^="ord-ayar-btn-"]').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('ord-ayar-btn-'+ayar);
+  if(btn) btn.classList.add('active');
+  updateHesap();
+}
+
+function selectIcYapi(tip) {
+  document.getElementById('ord-ic-yapi').value = tip;
+  document.getElementById('ord-ic-dolu-btn').classList.toggle('active', tip==='dolu');
+  document.getElementById('ord-ic-bos-btn').classList.toggle('active', tip==='bos');
+  updateHesap();
+}
+
+function updateHesap() {
+  const p = currentOrderProductId ? allProducts[currentOrderProductId] : null;
+  if(!p) return;
+  const ayar   = document.getElementById('ord-ayar').value;
+  const icYapi = document.getElementById('ord-ic-yapi').value;
+  const cinsiyet = document.getElementById('ord-cinsiyet').value;
+
+  // Ölçü — cinsiyet ve çift durumuna göre
+  let olcu = null;
+  if(cinsiyet === 'kadin' || cinsiyet === 'cift') {
+    olcu = parseFloat(document.getElementById('ord-olcu-kadin').value);
+  } else {
+    olcu = parseFloat(document.getElementById('ord-olcu-erkek').value);
+  }
+
+  const hesapWrap = document.getElementById('ord-hesap-wrap');
+  if(!ayar || !icYapi || isNaN(olcu)) { if(hesapWrap) hesapWrap.style.display='none'; return; }
+
+  // Gramaj tablosunu bul
+  const tablo = icYapi === 'dolu' ? p.gramajDolu : p.gramajBos;
+  let gramaj = findGramaj(tablo, olcu);
+  if(!gramaj) { if(hesapWrap) hesapWrap.style.display='none'; return; }
+
+  // 22 ayar ekstrası
+  if(ayar === '22' && p.ekstra22) gramaj += p.ekstra22;
+
+  // Saf altın hesabı
+  const milyem   = MILYEM[ayar] || 1;
+  const iscilSat = p.iscilSatis || 0;
+  const safSatis = (gramaj + iscilSat) * milyem;
+
+  // Göster
+  document.getElementById('hesap-gramaj').textContent   = gramaj.toFixed(2) + ' gr';
+  document.getElementById('hesap-saf-satis').textContent = safSatis.toFixed(3) + ' gr saf';
+
+  if(hesapWrap) hesapWrap.style.display = '';
+}
+
 function selectSeg(group, value, btn) {
   const inputId = group === 'cinsiyet' ? 'ord-cinsiyet' : 'ord-adet';
   document.getElementById(inputId).value = value;
@@ -1895,6 +2254,7 @@ function selectSeg(group, value, btn) {
 }
 
 function updateOlcuFields() {
+  updateHesap();
   const v = document.getElementById('ord-cinsiyet').value;
   document.getElementById('olcu-kadin-wrap').style.display = (v === 'erkek') ? 'none' : '';
   document.getElementById('olcu-erkek-wrap').style.display = (v === 'kadin') ? 'none' : '';
@@ -1955,6 +2315,11 @@ function submitOrder() {
   const olcuE = document.getElementById('ord-olcu-erkek').value.trim();
   if(cinsiyet !== 'erkek' && !olcuK) { showToast('Kadın ölçüsü zorunlu.','error'); return; }
   if(cinsiyet !== 'kadin' && !olcuE) { showToast('Erkek ölçüsü zorunlu.','error'); return; }
+  const ordProd = allProducts[currentOrderProductId];
+  const ayar   = document.getElementById('ord-ayar')    ? document.getElementById('ord-ayar').value    : '';
+  const icYapi = document.getElementById('ord-ic-yapi') ? document.getElementById('ord-ic-yapi').value : '';
+  if(ordProd && ordProd.ayarlar && ordProd.ayarlar.length && !ayar) { showToast('Ayar seçimi zorunlu.','error'); return; }
+  if(ordProd && ordProd.icYapi  && ordProd.icYapi.length  && !icYapi) { showToast('İçi dolu/boş seçimi zorunlu.','error'); return; }
   const olcuKadin = olcuK;
   const olcuErkek = olcuE;
   const kalinlik  = document.getElementById('ord-kalinlik').value.trim();
@@ -1973,11 +2338,14 @@ function submitOrder() {
     productName: p.name || '',
     productPhoto:p.photoUrl || '',
     musteri,
+    telefon:     document.getElementById('ord-telefon') ? document.getElementById('ord-telefon').value.trim() : '',
     cinsiyet,
     adet,
     olcuKadin:   (cinsiyet !== 'erkek') ? olcuKadin : '',
     olcuErkek:   (cinsiyet !== 'kadin') ? olcuErkek : '',
     kalinlik,
+    ayar,
+    icYapi,
     renk:        selectedColor,
     mixAciklama: selectedColor === 'mix' ? mixAcik : '',
     icYaziKadin,
@@ -2239,15 +2607,19 @@ function initNotifSound() {
   try {
     const ctx = new (window.AudioContext||window.webkitAudioContext)();
     notifSound = function() {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.frequency.value = 880;
-      osc.type = 'sine';
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.4);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime+0.4);
+      // Üç tonlu bildirim sesi
+      [[880,0],[1100,0.15],[880,0.3]].forEach(function([freq, delay]) {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0, ctx.currentTime+delay);
+        gain.gain.linearRampToValueAtTime(0.4, ctx.currentTime+delay+0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+delay+0.35);
+        osc.start(ctx.currentTime+delay);
+        osc.stop(ctx.currentTime+delay+0.35);
+      });
     };
   } catch(e) {}
 }
@@ -2268,17 +2640,18 @@ function loadAdminData() {
     allOrders = snap.val() || {};
     const count = Object.keys(allOrders).length;
     if(prevOrderCount >= 0 && count > prevOrderCount) {
-      // Yeni sipariş geldi
       const yeni = count - prevOrderCount;
-      showToast(yeni + ' yeni sipariş geldi!', 'warn');
+      showYeniSiparisBanner(yeni, false);
       if(notifSound) notifSound();
-      // Siparişler sekmesine geç
-      const siparisTab = document.querySelector('#screen-admin .nav-tab:first-child');
-      if(siparisTab && !siparisTab.classList.contains('active')) {
-        document.title = '🔔 Yeni Sipariş! · Sina Alyans';
-        setTimeout(function() { document.title = 'Sina Alyans · Admin'; }, 5000);
-      }
+      if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+      document.title = '🔔 ' + yeni + ' Yeni Sipariş! · Sina Alyans';
+      setTimeout(function() { document.title = 'Sina Alyans · Admin'; }, 8000);
+      // Hatırlatıcıyı başlat
+      startReminder();
     }
+    // Bekleyen yoksa hatırlatıcıyı durdur
+    const bekleyenVar = Object.values(allOrders).some(o => o.status === 'beklemede');
+    if(!bekleyenVar) stopReminder();
     prevOrderCount = count;
     renderAdminOrders();
     updateAdminStats();
@@ -2521,6 +2894,7 @@ function openOrderDetail(orderId) {
     ${buildTimelineHtml(o)}
     <hr class="divider">
     <div class="detail-grid">${detailRows}</div>
+    ${buildAdminHesapHtml(o)}
     ${o.not ? `<hr class="divider"><div><div class="detail-item-label" style="margin-bottom:4px;">Not</div><div style="font-size:13px;color:var(--ink-mid);line-height:1.6;">${escHtml(o.not)}</div></div>` : ''}
     <hr class="divider">
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -2700,6 +3074,51 @@ function showConfirm(title, message, onOk, okLabel, okIcon) {
   openModal('modal-confirm');
 }
 
+function buildAdminHesapHtml(o) {
+  if(!o.ayar || !o.icYapi) return '';
+  const p = allProducts[o.productId];
+  if(!p) return '';
+
+  const olcu = parseFloat(o.cinsiyet === 'erkek' ? o.olcuErkek : o.olcuKadin) || 0;
+  const tablo = o.icYapi === 'dolu' ? p.gramajDolu : p.gramajBos;
+  let gramaj = findGramaj(tablo, olcu);
+  if(!gramaj) return '';
+
+  if(o.ayar === '22' && p.ekstra22) gramaj += p.ekstra22;
+
+  const milyem = MILYEM[o.ayar] || 1;
+  const iscilSatis   = p.iscilSatis   || 0;
+  const iscilMaliyet = p.iscilMaliyet || 0;
+  const safSatis   = (gramaj + iscilSatis)   * milyem;
+  const safMaliyet = (gramaj + iscilMaliyet) * milyem;
+  const kar = safSatis - safMaliyet;
+
+  const ayarLabel = AYAR_LABEL[o.ayar] || o.ayar;
+
+  return `<hr class="divider">
+  <div class="hesap-box" style="background:linear-gradient(135deg,#f9f5ef,#fff);border-color:var(--gold);">
+    <div style="font-size:10px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">
+      <i class="ph ph-calculator"></i> Maliyet & Kar Hesabı — ${ayarLabel}
+    </div>
+    <div class="hesap-row">
+      <span class="hesap-label">Gramaj</span>
+      <span class="hesap-value">${gramaj.toFixed(2)} gr</span>
+    </div>
+    <div class="hesap-row">
+      <span class="hesap-label">Saf Altın (Satış)</span>
+      <span class="hesap-value rose">${safSatis.toFixed(3)} gr</span>
+    </div>
+    <div class="hesap-row">
+      <span class="hesap-label">Saf Altın (Maliyet)</span>
+      <span class="hesap-value">${safMaliyet.toFixed(3)} gr</span>
+    </div>
+    <div class="hesap-row">
+      <span class="hesap-label" style="font-weight:800;">Kar (gram)</span>
+      <span class="hesap-value green">${kar.toFixed(3)} gr</span>
+    </div>
+  </div>`;
+}
+
 function buildTimelineHtml(o) {
   const tl = o.timeline || {};
   const steps = STATUS_ORDER.filter(s => tl[s]);
@@ -2790,9 +3209,11 @@ function handleProductPhotoSelect(input) {
   const file = input.files[0];
   if(!file) return;
   if(file.size > 3*1024*1024) { showToast('Fotoğraf max 3MB olmalı.','error'); return; }
+  // Spinner göster
+  const spinner = document.getElementById('product-photo-spinner');
+  if(spinner) spinner.style.display = 'flex';
   const reader = new FileReader();
   reader.onload = function(e) {
-    // Resmi canvas ile sıkıştır (~200KB hedef)
     const img = new Image();
     img.onload = function() {
       const canvas = document.createElement('canvas');
@@ -2809,7 +3230,9 @@ function handleProductPhotoSelect(input) {
       const ph   = document.getElementById('product-photo-placeholder');
       prev.src = b64; prev.style.display = 'block';
       ph.style.display = 'none';
+      if(spinner) spinner.style.display = 'none';
       document.getElementById('product-photo-area').classList.add('has-photo');
+      showToast('Fotoğraf yüklendi ✓','success');
     };
     img.src = e.target.result;
   };
@@ -2821,17 +3244,32 @@ function openAddProduct() {
   pendingProductPhotoFile = null;
   pendingProductPhotoUrl  = '';
   document.getElementById('product-modal-title').textContent = 'Ürün Ekle';
-  document.getElementById('edit-product-id').value = '';
+  document.getElementById('edit-product-id').value  = '';
   document.getElementById('product-code').value     = '';
   document.getElementById('product-name').value     = '';
   document.getElementById('product-desc').value     = '';
   document.getElementById('product-category').value = '';
   document.getElementById('product-thickness').value= '';
+  document.getElementById('product-iscil-maliyet').value = '';
+  document.getElementById('product-iscil-satis').value   = '';
+  document.getElementById('product-22-ekstra').value     = '';
+  // Ayar checkbox reset
+  ['ayar-14','ayar-22','ayar-gumus','ic-dolu','ic-bos'].forEach(id => {
+    document.getElementById(id).checked = false;
+  });
+  // Gramaj tabloları temizle
+  document.getElementById('gramaj-dolu-rows').innerHTML = '';
+  document.getElementById('gramaj-bos-rows').innerHTML  = '';
+  gramajRowCountDolu = 0; gramajRowCountBos = 0;
+  updateGramajVisibility();
   const prev = document.getElementById('product-photo-preview');
   prev.style.display = 'none'; prev.src = '';
   document.getElementById('product-photo-placeholder').style.display = '';
+  document.getElementById('product-photo-spinner').style.display = 'none';
   document.getElementById('product-photo-area').classList.remove('has-photo');
   document.getElementById('product-photo-input').value = '';
+  setProductActive(true);
+  initGramajHandlers();
   openModal('modal-add-product');
 }
 
@@ -2858,6 +3296,7 @@ function openEditProduct(id) {
     document.getElementById('product-photo-area').classList.remove('has-photo');
   }
   document.getElementById('product-photo-input').value = '';
+  setProductActive(true);
   openModal('modal-add-product');
 }
 
@@ -2867,14 +3306,23 @@ function saveProduct() {
   const name = document.getElementById('product-name').value.trim();
   if(!code || !name) { showToast('Kod ve ad zorunlu.','error'); return; }
 
+  const ayarlar = ['14','22','gumus'].filter(a => document.getElementById('ayar-'+a).checked);
+  const icYapi  = ['dolu','bos'].filter(t => document.getElementById('ic-'+t).checked);
   const data = {
     code,
     name,
-    desc:      document.getElementById('product-desc').value.trim(),
-    category:  document.getElementById('product-category').value.trim(),
-    thickness: document.getElementById('product-thickness').value.trim(),
-    active:    true,
-    updatedAt: Date.now()
+    desc:         document.getElementById('product-desc').value.trim(),
+    category:     document.getElementById('product-category').value.trim(),
+    thickness:    document.getElementById('product-thickness').value.trim(),
+    ayarlar,
+    icYapi,
+    iscilMaliyet: parseFloat(document.getElementById('product-iscil-maliyet').value)||0,
+    iscilSatis:   parseFloat(document.getElementById('product-iscil-satis').value)||0,
+    ekstra22:     parseFloat(document.getElementById('product-22-ekstra').value)||0,
+    gramajDolu:   icYapi.includes('dolu') ? getGramajTable('dolu') : [],
+    gramajBos:    icYapi.includes('bos')  ? getGramajTable('bos')  : [],
+    active:       document.getElementById('product-active').value === 'true',
+    updatedAt:    Date.now()
   };
 
   const btn = document.getElementById('btn-save-product');
@@ -3182,17 +3630,20 @@ async function exportCatalogPDF() {
 function resetAllOrders() {
   showConfirm(
     'Tüm Siparişleri Sıfırla',
-    'Tüm siparişler kalıcı olarak silinecek. Bu işlem geri alınamaz!',
+    'Tüm siparişler ve sipariş numarası sayacı sıfırlanacak. Bu işlem geri alınamaz!',
     function() {
       showLoading();
-      db.ref('orders').remove()
+      Promise.all([
+        db.ref('orders').remove(),
+        db.ref('orderCounter').remove()
+      ])
         .then(function() {
           hideLoading();
-          showToast('Tüm siparişler silindi.', 'warn');
+          showToast('Tüm siparişler silindi, sayaç sıfırlandı.', 'warn');
         })
         .catch(function(e) { hideLoading(); showToast('Hata: '+e.message,'error'); });
     },
-    'Evet, Sil',
+    'Evet, Sıfırla',
     'warning'
   );
 }
@@ -3252,6 +3703,14 @@ function clearDemoProducts() {
     .catch(function(e) { hideLoading(); showToast('Hata: '+e.message,'error'); });
 }
 
+function toggleProductActive(id, currentlyActive) {
+  const newVal = !currentlyActive;
+  db.ref('products/'+id+'/active').set(newVal)
+    .then(function() {
+      showToast(newVal ? 'Ürün aktif edildi ✓' : 'Ürün pasife alındı.', newVal ? 'success' : 'warn');
+    });
+}
+
 function deleteProduct(id) {
   const p = allProducts[id];
   showConfirm(
@@ -3276,13 +3735,22 @@ function renderAdminProducts() {
     </div>`;
     return;
   }
+  // Aktifler önce, pasifler sona
+  prods.sort((a,b) => {
+    if(a[1].active===false && b[1].active!==false) return 1;
+    if(b[1].active===false && a[1].active!==false) return -1;
+    return (a[1].code||'').localeCompare(b[1].code||'');
+  });
   list.innerHTML = prods.map(([id,p]) => `
-    <div class="admin-product-item">
+    <div class="admin-product-item" style="${p.active===false?'opacity:.5;':''}">
       <div class="admin-product-img">
         ${p.photoUrl ? `<img src="${escHtml(p.photoUrl)}" alt="">` : `<i class="ph ph-diamond"></i>`}
       </div>
       <div class="admin-product-body">
-        <div class="admin-product-code">${escHtml(p.code||'')}</div>
+        <div class="admin-product-code">
+          ${escHtml(p.code||'')}
+          ${p.active===false ? '<span style="background:#e8e4ec;color:#9090a0;font-size:9px;font-weight:800;padding:2px 8px;border-radius:100px;margin-left:6px;">PASİF</span>' : ''}
+        </div>
         <div class="admin-product-name">${escHtml(p.name||'')}</div>
         <div class="admin-product-desc">${escHtml(p.desc||'')}${p.thickness ? ' · '+escHtml(p.thickness)+' mm' : ''}</div>
       </div>
@@ -3298,8 +3766,10 @@ function renderAdminProducts() {
 let allGroups = {};
 
 function openEditGroup(id, name) {
+  const g = allGroups[id] || {};
   document.getElementById('edit-group-id').value = id;
   document.getElementById('edit-group-name').value = name;
+  document.getElementById('edit-group-code').value = g.code || '';
   openModal('modal-edit-group');
 }
 
@@ -3315,9 +3785,13 @@ function saveGroupEdit() {
 
   showLoading();
   // Önce grup adını güncelle
-  db.ref('groups/'+id+'/name').set(newName)
+  const newCode = document.getElementById('edit-group-code').value.trim().toUpperCase();
+  if(!newCode) { showToast('Kısa kodu gir.','warn'); return; }
+  const codeExists = Object.entries(allGroups).some(([gid,g]) => g.code === newCode && gid !== id);
+  if(codeExists) { showToast('Bu kod başka grupta kullanılıyor.','warn'); return; }
+
+  db.ref('groups/'+id).update({ name: newName, code: newCode })
     .then(function() {
-      // Bu gruba bağlı tüm ürünleri de güncelle
       const updates = {};
       Object.entries(allProducts).forEach(([pid,p]) => {
         if(p.category === oldName) updates['products/'+pid+'/category'] = newName;
@@ -3334,16 +3808,112 @@ function saveGroupEdit() {
     .catch(function(e) { hideLoading(); showToast('Hata: '+e.message,'error'); });
 }
 
+// ── GRAMAJ TABLO ─────────────────────────────────
+let gramajRowCountDolu = 0;
+let gramajRowCountBos  = 0;
+
+function initGramajHandlers() {
+  // ic-dolu ve ic-bos checkbox'larını dinle
+  document.getElementById('ic-dolu').onchange = updateGramajVisibility;
+  document.getElementById('ic-bos').onchange  = updateGramajVisibility;
+}
+
+function updateGramajVisibility() {
+  const dolu = document.getElementById('ic-dolu').checked;
+  const bos  = document.getElementById('ic-bos').checked;
+  document.getElementById('gramaj-dolu-wrap').style.display = dolu ? '' : 'none';
+  document.getElementById('gramaj-bos-wrap').style.display  = bos  ? '' : 'none';
+  document.getElementById('gramaj-empty-note').style.display = (!dolu && !bos) ? '' : 'none';
+}
+
+function addGramajRow(tip, olcuMin, olcuMax, gram) {
+  const container = document.getElementById('gramaj-'+tip+'-rows');
+  const idx = tip === 'dolu' ? ++gramajRowCountDolu : ++gramajRowCountBos;
+  const row = document.createElement('div');
+  row.className = 'gramaj-row';
+  row.id = 'gramaj-row-'+tip+'-'+idx;
+  row.innerHTML = `
+    <input type="number" class="text-field" placeholder="Min ölçü" value="${olcuMin||''}" id="gr-${tip}-min-${idx}" step="0.5" style="font-size:12px;padding:8px 10px;">
+    <input type="number" class="text-field" placeholder="Max ölçü" value="${olcuMax||''}" id="gr-${tip}-max-${idx}" step="0.5" style="font-size:12px;padding:8px 10px;">
+    <input type="number" class="text-field" placeholder="Gramaj" value="${gram||''}" id="gr-${tip}-gram-${idx}" step="0.01" style="font-size:12px;padding:8px 10px;">
+    <button class="btn-danger" onclick="this.parentElement.remove()" style="padding:8px;width:36px;height:36px;justify-content:center;display:flex;align-items:center;flex-shrink:0;">
+      <i class="ph ph-trash"></i>
+    </button>`;
+  // Header ekle (sadece ilk satırda)
+  if(container.children.length === 0) {
+    const header = document.createElement('div');
+    header.className = 'gramaj-header';
+    header.innerHTML = '<span>Min Ölçü</span><span>Max Ölçü</span><span>Gramaj (gr)</span><span></span>';
+    container.appendChild(header);
+  }
+  container.appendChild(row);
+}
+
+function getGramajTable(tip) {
+  const rows = document.querySelectorAll(`[id^="gramaj-row-${tip}-"]`);
+  const table = [];
+  rows.forEach(function(row) {
+    const id = row.id.split('-').pop();
+    const min  = parseFloat(document.getElementById(`gr-${tip}-min-${id}`)?.value);
+    const max  = parseFloat(document.getElementById(`gr-${tip}-max-${id}`)?.value);
+    const gram = parseFloat(document.getElementById(`gr-${tip}-gram-${id}`)?.value);
+    if(!isNaN(min) && !isNaN(max) && !isNaN(gram)) table.push({min,max,gram});
+  });
+  return table;
+}
+
+function loadGramajTable(tip, table) {
+  const container = document.getElementById('gramaj-'+tip+'-rows');
+  container.innerHTML = '';
+  if(tip === 'dolu') gramajRowCountDolu = 0;
+  else gramajRowCountBos = 0;
+  (table||[]).forEach(function(row) { addGramajRow(tip, row.min, row.max, row.gram); });
+}
+
+function findGramaj(table, olcu) {
+  if(!table || !table.length) return null;
+  olcu = parseFloat(olcu);
+  if(isNaN(olcu)) return null;
+  // 27 üzeri: max gramajı bul + 0.50
+  const maxRow = table.reduce((a,b) => a.max > b.max ? a : b, table[0]);
+  if(olcu > 27) return maxRow.gram + 0.50;
+  for(const row of table) {
+    if(olcu >= row.min && olcu <= row.max) return row.gram;
+  }
+  return maxRow.gram; // en yakın
+}
+
+function setProductActive(val) {
+  document.getElementById('product-active').value = val;
+  document.getElementById('product-active-btn').classList.toggle('active', val);
+  document.getElementById('product-passive-btn').classList.toggle('active', !val);
+}
+
+function autoGroupCode() {
+  const name = document.getElementById('new-group-input').value.trim();
+  const codeEl = document.getElementById('new-group-code');
+  if(!codeEl.value) {
+    // İlk 3 harften otomatik öner (Türkçe karakterleri dönüştür)
+    const tr = {'ç':'C','ğ':'G','ı':'I','ö':'O','ş':'S','ü':'U','Ç':'C','Ğ':'G','İ':'I','Ö':'O','Ş':'S','Ü':'U'};
+    const clean = name.split('').map(ch => tr[ch]||ch).join('').replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+    codeEl.value = clean.substring(0,3);
+  }
+}
+
 function addGroup() {
-  const input = document.getElementById('new-group-input');
-  const name = input.value.trim();
+  const name = document.getElementById('new-group-input').value.trim();
+  const code = document.getElementById('new-group-code').value.trim().toUpperCase();
   if(!name) { showToast('Grup adı gir.','warn'); return; }
-  // Aynı isim var mı kontrol et
+  if(!code) { showToast('Kısa kodu gir (ör: KLS).','warn'); return; }
+  // Aynı isim veya kod var mı
   const exists = Object.values(allGroups).some(g => g.name === name);
-  if(exists) { showToast('Bu grup zaten var.','warn'); return; }
-  db.ref('groups').push({ name, createdAt: Date.now() })
+  if(exists) { showToast('Bu isimde grup zaten var.','warn'); return; }
+  const codeExists = Object.values(allGroups).some(g => g.code === code);
+  if(codeExists) { showToast('Bu kod başka grupta kullanılıyor.','warn'); return; }
+  db.ref('groups').push({ name, code, order: Date.now(), createdAt: Date.now() })
     .then(function() {
-      input.value = '';
+      document.getElementById('new-group-input').value = '';
+      document.getElementById('new-group-code').value = '';
       showToast('Grup eklendi ✓','success');
     })
     .catch(function(e) { showToast('Hata: '+e.message,'error'); });
@@ -3389,7 +3959,10 @@ function renderAdminGroups(groups) {
       </div>
       <div class="admin-product-body">
         <div class="admin-product-name">${escHtml(g.name||'')}</div>
-        <div class="admin-product-desc">${count} ürün</div>
+        <div class="admin-product-desc">
+          <span style="font-size:10px;font-weight:800;color:var(--rose);background:var(--rose-pale);padding:2px 8px;border-radius:100px;margin-right:6px;">${escHtml(g.code||'—')}</span>
+          ${count} ürün
+        </div>
       </div>
       <div class="admin-product-actions">
         <button class="btn-edit" onclick="openEditGroup('${id}','${escHtml(g.name||'')}')" style="font-size:11px;padding:8px 14px;">
@@ -3407,9 +3980,24 @@ function updateCategoryDropdown(groups) {
   const sel = document.getElementById('product-category');
   if(!sel) return;
   const current = sel.value;
-  const entries = Object.entries(groups).sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+  // Grup sırası: order alanına göre
+  const entries = Object.entries(groups).sort((a,b) => (a[1].order||0)-(b[1].order||0));
   sel.innerHTML = '<option value="">— Grup seç —</option>'
-    + entries.map(([id,g]) => `<option value="${escHtml(g.name||'')}" ${current===g.name?'selected':''}>${escHtml(g.name||'')}</option>`).join('');
+    + entries.map(([id,g]) => `<option value="${escHtml(g.name||'')}" data-code="${escHtml(g.code||'')}" ${current===g.name?'selected':''}>${escHtml(g.name||'')}${g.code?' ('+g.code+')':''}</option>`).join('');
+  // Grup seçince ürün kodunu otomatik öner
+  sel.onchange = function() {
+    const opt = sel.options[sel.selectedIndex];
+    const code = opt ? opt.getAttribute('data-code') : '';
+    if(code) suggestProductCode(code);
+  };
+}
+
+function suggestProductCode(groupCode) {
+  const codeEl = document.getElementById('product-code');
+  if(!codeEl || codeEl.value) return; // Zaten dolu ise dokunma
+  // Bu gruptaki ürün sayısını say
+  const count = Object.values(allProducts).filter(p => (p.code||'').startsWith(groupCode+'-')).length;
+  codeEl.value = groupCode + '-' + String(count+1).padStart(3,'0');
 }
 
 // ── ADMIN: STORES ─────────────────────────────────
@@ -3476,9 +4064,13 @@ function renderAdminStores(stores) {
 }
 
 function deleteStore(uid, name) {
+  const sipCount = Object.values(allOrders).filter(o => o.storeId === uid).length;
+  const msg = sipCount > 0
+    ? '"' + name + '" mağazası silinecek. Bu mağazaya ait ' + sipCount + ' sipariş kayıtlarda kalacak ama mağaza artık giriş yapamayacak. Firebase Auth kaydı silinmez.'
+    : '"' + name + '" mağazası silinecek. Firebase Auth kaydı silinmez, sadece erişim kaldırılır.';
   showConfirm(
     'Mağazayı Sil',
-    '"' + name + '" mağazası silinecek. Firebase Auth kaydı silinmez, sadece erişim kaldırılır.',
+    msg,
     function() {
       db.ref('stores/'+uid).remove()
         .then(function() { showToast('Mağaza silindi.','warn'); })
@@ -3873,6 +4465,70 @@ self.addEventListener('fetch', e => {
     navigator.serviceWorker.register(swUrl).catch(function(){});
   }
 })();
+
+// ── HATIRLATICI ──────────────────────────────────
+let reminderInterval = null;
+let reminderCount = 0;
+
+function startReminder() {
+  stopReminder();
+  reminderCount = 0;
+  // Her 3 dakikada bir hatırlat, max 5 kez
+  reminderInterval = setInterval(function() {
+    const bekleyen = Object.values(allOrders).filter(o => o.status === 'beklemede').length;
+    if(!bekleyen) { stopReminder(); return; }
+    reminderCount++;
+    if(reminderCount > 5) { stopReminder(); return; }
+    const kalan = 5 - reminderCount;
+    const infoEl = document.getElementById('ysb-reminder-info');
+    if(infoEl) infoEl.textContent = kalan > 0 ? kalan + ' hatırlatma daha yapılacak · 🔔 susturmak için zil ikonuna bas' : '';
+    showYeniSiparisBanner(bekleyen, true);
+    if(notifSound) notifSound();
+    if(navigator.vibrate) navigator.vibrate([200,100,200]);
+    document.title = '🔔 ' + bekleyen + ' Bekleyen Sipariş! · Sina Alyans';
+    setTimeout(function() { document.title = 'Sina Alyans · Admin'; }, 8000);
+  }, 3 * 60 * 1000); // 3 dakika
+}
+
+function stopReminder() {
+  if(reminderInterval) { clearInterval(reminderInterval); reminderInterval = null; }
+}
+
+// Yeni sipariş banner
+let ysbTimer = null;
+function showYeniSiparisBanner(sayi, isReminder) {
+  const banner = document.getElementById('yeni-siparis-banner');
+  const bar    = document.getElementById('ysb-bar');
+  document.getElementById('ysb-title').textContent = isReminder
+    ? (sayi + ' Bekleyen Sipariş Var!')
+    : (sayi > 1 ? sayi + ' Yeni Sipariş Geldi!' : 'Yeni Sipariş Geldi!');
+  document.getElementById('ysb-sub').textContent = isReminder
+    ? 'Hâlâ bekleyen siparişlerin var'
+    : 'Siparişler sekmesini kontrol et';
+  banner.classList.add('show');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  // Progress bar animasyonu
+  setTimeout(function() {
+    bar.style.transition = 'width 8s linear';
+    bar.style.width = '0%';
+  }, 50);
+  // 8 saniye sonra kapat
+  if(ysbTimer) clearTimeout(ysbTimer);
+  ysbTimer = setTimeout(closeYeniSiparisBanner, 8000);
+}
+function closeYeniSiparisBanner() {
+  document.getElementById('yeni-siparis-banner').classList.remove('show');
+  if(ysbTimer) { clearTimeout(ysbTimer); ysbTimer = null; }
+}
+function goToYeniSiparis() {
+  closeYeniSiparisBanner();
+  stopReminder();
+  const tab = document.querySelector('#screen-admin .nav-tab:first-child');
+  if(tab) tab.click();
+  const bekleBtn = document.querySelector('#page-admin-siparisler .filter-chip:nth-child(2)');
+  if(bekleBtn) bekleBtn.click();
+}
 
 window.dismissInstallBanner = function() {
   document.getElementById('pwa-install-banner').classList.remove('show');
