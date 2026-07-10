@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -787,6 +786,43 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   <div style="font-size:12px; font-weight:600; color:var(--ink-dim);">Yükleniyor…</div>
 </div>
 
+<!-- ÜRÜN DETAY MODAL -->
+<div class="modal-overlay" id="modal-product-detail">
+  <div class="modal-box modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="pd-name">Ürün Detayı</div>
+        <div style="font-size:11px;color:var(--rose);font-weight:700;margin-top:2px;" id="pd-code"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-product-detail')"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+        <!-- Fotoğraf -->
+        <div id="pd-photo-wrap" style="flex-shrink:0;width:200px;">
+          <img id="pd-photo" src="" style="width:200px;height:200px;object-fit:cover;border-radius:var(--r-md);cursor:zoom-in;" onclick="openZoom(this.src)">
+          <div id="pd-photo-placeholder" style="width:200px;height:200px;background:var(--bg);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--ink-dim);">
+            <i class="ph ph-diamond"></i>
+          </div>
+        </div>
+        <!-- Bilgiler -->
+        <div style="flex:1;min-width:200px;">
+          <div class="form-group">
+            <div style="font-size:12px;color:var(--ink-dim);margin-bottom:8px;line-height:1.7;" id="pd-desc"></div>
+          </div>
+          <div id="pd-details" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-product-detail')">Kapat</button>
+      <button class="btn-primary" id="pd-siparis-btn" onclick="">
+        <i class="ph ph-paper-plane-tilt"></i>&nbsp; Sipariş Ver
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ZOOM -->
 <div id="zoom-overlay" onclick="closeZoom()">
   <img id="zoom-img" src="" alt="">
@@ -985,22 +1021,23 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <i class="ph ph-squares-four"></i> Katalog — Sipariş Verme
         </div>
         <div style="font-size:12px; color:var(--ink-mid); line-height:1.8;">
-          <b>1.</b> Katalog sekmesinden ürünlere bak. Fotoğrafa tıklarsan büyür.<br>
-          <b>2.</b> Sipariş vermek istediğin ürünün <b>adına veya açıklamasına tıkla</b>.<br>
+          <b>1.</b> Katalog sekmesinden ürünlere bak. Fotoğrafa tıklarsan büyür, zoom açılır.<br>
+          <b>2.</b> Sipariş vermek istediğin ürünün altındaki <b>"Sipariş Ver"</b> butonuna bas.<br>
           <b>3.</b> Açılan formda şunları doldur:<br>
           &nbsp;&nbsp;• <b>Müşteri adı soyadı</b> — zorunlu<br>
-          &nbsp;&nbsp;• <b>Telefon</b> — isteğe bağlı, müşteri numarası<br>
-          &nbsp;&nbsp;• <b>Cinsiyet</b> — Kadın / Erkek / Çift seç<br>
-          &nbsp;&nbsp;• <b>Ölçü</b> — + ve − tuşlarıyla ya da direkt yazarak gir (12, 12.5, 13…)<br>
-          &nbsp;&nbsp;• <b>Kalınlık</b> — ürünün standart kalınlığı gelir, müşteri farklı isterse değiştir<br>
-          &nbsp;&nbsp;• <b>Ayar</b> — modele göre 14 Ayar / 22 Ayar / Gümüş seçenekleri çıkar, birini seç<br>
-          &nbsp;&nbsp;• <b>İçi Dolu / Boş</b> — model destekliyorsa seç<br>
-          &nbsp;&nbsp;• <b>Altın rengi</b> — Sarı / Beyaz / Rose / Mix<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;Mix seçersen açıklama kutusuna detay yaz (ör: dış sarı iç rose)<br>
-          &nbsp;&nbsp;• <b>İç yazı</b> — Çift seçtiysen kadın ve erkek için ayrı ayrı doldurabilirsin<br>
-          &nbsp;&nbsp;• <b>Semboller</b> — ♥ ∞ ★ ☽ butonlarına her basışta yazıya eklenir<br>
-          &nbsp;&nbsp;• <b>Not</b> — eklemek istediğin başka bir şey varsa buraya yaz<br>
-          <b>4.</b> "Sipariş Gönder"e bas. Sipariş anında admin paneline düşer.
+          &nbsp;&nbsp;• <b>Telefon</b> — isteğe bağlı<br>
+          &nbsp;&nbsp;• <b>Cinsiyet</b> — Kadın / Erkek / Çift seç. Çift seçince kadın ve erkek için ayrı ayrı tüm seçimler yapılır.<br>
+          &nbsp;&nbsp;• <b>Ölçü</b> — + ve − tuşlarıyla gir. Yarım ölçü de girebilirsin (12, 12.5, 13…). Çift seçtiysen her ikisi için ayrı gir.<br>
+          &nbsp;&nbsp;• <b>Kalınlık</b> — ürünün standart kalınlığı otomatik gelir, müşteri farklı isterse değiştir.<br>
+          &nbsp;&nbsp;• <b>Ayar</b> — 14 Ayar / 22 Ayar / Gümüş. Modele göre seçenekler çıkar.<br>
+          &nbsp;&nbsp;• <b>İçi Dolu / Boş</b> — model destekliyorsa görünür, seç.<br>
+          &nbsp;&nbsp;• <b>Gramaj tahmini</b> — ölçü ve ayar seçince otomatik çıkar. ≈ Min / ≈ Maks / ≈ Ortalama olarak gösterilir.<br>
+          &nbsp;&nbsp;• <b>Altın rengi</b> — Sarı / Beyaz / Rose / Mix. Mix seçersen detay yaz (ör: dış sarı iç rose).<br>
+          &nbsp;&nbsp;• <b>İç yazı</b> — Çift seçtiysen kadın ve erkek için ayrı ayrı.<br>
+          &nbsp;&nbsp;• <b>Semboller</b> — (Kalp) (Sonsuzluk) (Yildiz) (Ay) butonlarına basınca iç yazıya eklenir.<br>
+          &nbsp;&nbsp;• <b>Not</b> — eklemek istediğin başka bir şey varsa buraya yaz.<br>
+          <b>4.</b> "Sipariş Gönder"e bas. Sipariş numaranı gösteren popup açılır, not al.<br>
+          <b>5.</b> "Siparişlerim" sekmesinden siparişinin durumunu takip edebilirsin.
         </div>
       </div>
 
@@ -1039,10 +1076,13 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <i class="ph ph-lightbulb"></i> Dikkat Edilecekler
         </div>
         <div style="font-size:12px; color:var(--ink-mid); line-height:1.8;">
-          ✓ Müşteri adını tam ve doğru yaz, karışıklık olmasın.<br>
+          ✓ Müşteri adını tam ve doğru yaz — sipariş numarasını müşteriye söyle.<br>
           ✓ Ölçüyü müşteriyle birlikte ölçerek gir, tahmini girme.<br>
-          ✓ Çift siparişte kadın ve erkek ölçülerini ayrı ayrı doldur.<br>
-          ✓ Mix renk seçtiysen mutlaka açıklama yaz.<br>
+          ✓ Çift siparişte kadın ve erkek ölçülerini, ayarlarını ve renklerini ayrı ayrı doldur.<br>
+          ✓ Mix renk seçtiysen mutlaka detay yaz (ör: dış sarı iç rose).<br>
+          ✓ Ayar seçimini müşteriye sor — 14 ayar / 22 ayar / gümüş fark önemli.<br>
+          ✓ Gramaj tahmini çıkınca müşteriye yaklaşık ağırlığı söyleyebilirsin.<br>
+          ✓ Sipariş "İşleme Alındı" olduktan sonra düzenleyemezsin, dikkatli doldur.<br>
           ✓ Sipariş verdikten sonra "Siparişlerim"den durumunu takip et.<br>
           ✓ Sorun yaşarsan adminle iletişime geç.
         </div>
@@ -1515,8 +1555,16 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <div class="hesap-box">
           <div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;"><i class="ph ph-calculator"></i> Gramaj Tahmini</div>
           <div class="hesap-row">
-            <span class="hesap-label">≈ Tahmini Gramaj</span>
-            <span class="hesap-value" id="hesap-gramaj">–</span>
+            <span class="hesap-label">≈ Minimum Gramaj</span>
+            <span class="hesap-value" id="hesap-gramaj-min">–</span>
+          </div>
+          <div class="hesap-row">
+            <span class="hesap-label">≈ Maksimum Gramaj</span>
+            <span class="hesap-value" id="hesap-gramaj-max">–</span>
+          </div>
+          <div class="hesap-row" style="border-top:1.5px solid var(--rose-soft);margin-top:4px;padding-top:8px;">
+            <span class="hesap-label" style="font-weight:800;">≈ Ortalama Gramaj</span>
+            <span class="hesap-value rose" id="hesap-gramaj">–</span>
           </div>
         </div>
       </div>
@@ -2122,7 +2170,7 @@ function renderProductGrid() {
   }
   container.innerHTML = prods.map(([id, p]) => `
     <div class="product-card">
-      <div class="product-card-img" onclick="${p.photoUrl ? `openZoom('`+escHtml(p.photoUrl)+`')` : `openOrderModal('`+id+`')`}" style="cursor:${p.photoUrl?'zoom-in':'pointer'};">
+      <div class="product-card-img" onclick="openProductDetail('${id}')" style="cursor:pointer;">
         ${p.photoUrl
           ? `<img src="${escHtml(p.photoUrl)}" alt="${escHtml(p.name)}" loading="lazy">`
           : `<i class="ph ph-diamond"></i>`}
@@ -2345,6 +2393,19 @@ function selectAyarFor(containerId, hiddenId, ayar) {
   document.querySelectorAll(`#${containerId} .seg-btn`).forEach(b => b.classList.remove('active'));
   const btn = document.getElementById(containerId+'-btn-'+ayar);
   if(btn) btn.classList.add('active');
+  // Gümüşte içi boş/dolu gösterme
+  const cins = hiddenId.includes('kadin') ? 'kadin' : hiddenId.includes('erkek') ? 'erkek' : null;
+  if(cins) {
+    const icWrap = document.getElementById('ord-ic-wrap-'+cins);
+    if(icWrap && ayar === 'gumus') {
+      icWrap.style.display = 'none';
+      document.getElementById('ord-ic-yapi-'+cins).value = '';
+    } else if(icWrap) {
+      const p = currentOrderProductId ? allProducts[currentOrderProductId] : null;
+      const icYapi = p ? (p.icYapi || []) : [];
+      icWrap.style.display = icYapi.length ? '' : 'none';
+    }
+  }
   updateHesap();
 }
 
@@ -2365,6 +2426,16 @@ function selectAyar(ayar) {
   document.querySelectorAll('[id^="ord-ayar-btn-"]').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('ord-ayar-btn-'+ayar);
   if(btn) btn.classList.add('active');
+  // Gümüşte içi boş/dolu gösterme
+  const icWrap = document.getElementById('ord-ic-wrap');
+  if(icWrap && ayar === 'gumus') {
+    icWrap.style.display = 'none';
+    document.getElementById('ord-ic-yapi').value = '';
+  } else if(icWrap) {
+    const p = currentOrderProductId ? allProducts[currentOrderProductId] : null;
+    const icYapi = p ? (p.icYapi || []) : [];
+    icWrap.style.display = icYapi.length ? '' : 'none';
+  }
   updateHesap();
 }
 
@@ -2406,9 +2477,33 @@ function updateHesap() {
   const iscilSat = p.iscilSatis || 0;
   const safSatis = (gramaj + iscilSat) * milyem;
 
+  // Min/maks bul
+  const tablo2 = icYapi === 'dolu' ? p.gramajDolu : p.gramajBos;
+  let gramajMin = gramaj, gramajMax = gramaj;
+  if(tablo2) {
+    let row2 = null;
+    if(parseFloat(olcu) > 27) {
+      row2 = tablo2.reduce((a,b) => a.max > b.max ? a : b, tablo2[0]);
+      gramajMin = (row2.gramMin || row2.gram || 0) + 0.50;
+      gramajMax = (row2.gramMax || row2.gramMin || row2.gram || 0) + 0.50;
+    } else {
+      for(const r of tablo2) {
+        if(parseFloat(olcu) >= r.min && parseFloat(olcu) <= r.max) { row2 = r; break; }
+      }
+      if(row2) {
+        gramajMin = row2.gramMin || row2.gram || 0;
+        gramajMax = row2.gramMax || gramajMin;
+        if(ayar === '22' && p.ekstra22) { gramajMin += p.ekstra22; gramajMax += p.ekstra22; }
+      }
+    }
+  }
+
   // Göster
-  document.getElementById('hesap-gramaj').textContent   = gramaj.toFixed(2) + ' gr';
-  document.getElementById('hesap-saf-satis').textContent = safSatis.toFixed(3) + ' gr saf';
+  const minEl = document.getElementById('hesap-gramaj-min');
+  const maxEl = document.getElementById('hesap-gramaj-max');
+  if(minEl) minEl.textContent = '≈ ' + gramajMin.toFixed(2) + ' gr';
+  if(maxEl) maxEl.textContent = '≈ ' + gramajMax.toFixed(2) + ' gr';
+  document.getElementById('hesap-gramaj').textContent = '≈ ' + gramaj.toFixed(2) + ' gr';
 
   if(hesapWrap) hesapWrap.style.display = '';
 }
@@ -3263,34 +3358,58 @@ function buildAdminIscillikHtml(o) {
   if(o.type === 'ozel') return '';
   const p = o.productId ? allProducts[o.productId] : null;
   const hedefIscil = p ? (p.iscilSatis || '') : '';
-  const mevcutIscil = o.iscilSatis || '';
+  const mevcutIscil  = o.iscilSatis  || '';
+  const mevcutGramaj = o.gercekGramaj || '';
   return `<div style="background:var(--gold-pale);border:1.5px solid #e8d5b0;border-radius:var(--r-md);padding:14px;margin-bottom:12px;">
     <div style="font-size:10px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">
-      <i class="ph ph-scales"></i> Satış İşçiliği Belirle
+      <i class="ph ph-scales"></i> Maliyet & Karlılık Girişi
     </div>
-    <div style="font-size:11px;color:var(--ink-dim);margin-bottom:8px;">
-      Bu mağazaya vereceğin işçilik gramını gir. Hedef: <b>${hedefIscil} gr</b>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--ink-dim);margin-bottom:5px;">Satış İşçiliği (gr) — Hedef: <b>${hedefIscil} gr</b></div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="number" step="0.01" class="text-field" id="admin-iscil-input"
+            value="${mevcutIscil}"
+            placeholder="${hedefIscil}"
+            style="flex:1;font-size:15px;font-weight:800;padding:10px 12px;">
+          <span style="font-size:11px;color:var(--ink-dim);white-space:nowrap;">gr</span>
+        </div>
+        ${mevcutIscil
+          ? `<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600;">✓ ${mevcutIscil} gr kaydedildi</div>`
+          : `<div style="font-size:10px;color:var(--warn);margin-top:4px;">⚠ Henüz girilmemiş</div>`}
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--ink-dim);margin-bottom:5px;">Gerçek Gramaj (ürün tartıldıktan sonra)</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="number" step="0.01" class="text-field" id="admin-gramaj-input"
+            value="${mevcutGramaj}"
+            placeholder="ör: 2.85"
+            style="flex:1;font-size:15px;font-weight:800;padding:10px 12px;">
+          <span style="font-size:11px;color:var(--ink-dim);white-space:nowrap;">gr</span>
+        </div>
+        ${mevcutGramaj
+          ? `<div style="font-size:10px;color:var(--success);margin-top:4px;font-weight:600;">✓ ${mevcutGramaj} gr kaydedildi</div>`
+          : `<div style="font-size:10px;color:var(--ink-dim);margin-top:4px;">İsteğe bağlı — girilince karlılık netleşir</div>`}
+      </div>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <input type="number" step="0.01" class="text-field" id="admin-iscil-input"
-        value="${mevcutIscil}"
-        placeholder="${hedefIscil}"
-        style="flex:1;font-size:16px;font-weight:800;padding:12px 14px;">
-      <span style="font-size:12px;color:var(--ink-dim);font-weight:600;white-space:nowrap;">gr işçilik</span>
-      <button class="btn-primary" onclick="saveIscilSatis('${o._id||currentDetailOrderId}')" style="padding:12px 16px;white-space:nowrap;">
-        <i class="ph ph-floppy-disk"></i> Kaydet
-      </button>
-    </div>
-    ${mevcutIscil ? `<div style="font-size:10px;color:var(--success);margin-top:6px;font-weight:600;"><i class="ph ph-check-circle"></i> Kaydedilmiş işçilik: ${mevcutIscil} gr</div>` : '<div style="font-size:10px;color:var(--warn);margin-top:6px;"><i class="ph ph-warning"></i> Henüz işçilik girilmemiş</div>'}
+
+    <button class="btn-primary" onclick="saveIscilVeGramaj('${currentDetailOrderId}')" style="width:100%;justify-content:center;display:flex;padding:11px;">
+      <i class="ph ph-floppy-disk"></i>&nbsp; Kaydet
+    </button>
   </div>`;
 }
 
-function saveIscilSatis(orderId) {
-  const val = parseFloat(document.getElementById('admin-iscil-input').value);
-  if(!val || val <= 0) { showToast('Geçerli bir işçilik gramı gir.','warn'); return; }
-  db.ref('orders/'+orderId+'/iscilSatis').set(val)
+function saveIscilVeGramaj(orderId) {
+  const iscil  = parseFloat(document.getElementById('admin-iscil-input').value);
+  const gramaj = parseFloat(document.getElementById('admin-gramaj-input').value);
+  if(!iscil || iscil <= 0) { showToast('Geçerli bir işçilik gramı gir.','warn'); return; }
+  const updates = {};
+  updates['orders/'+orderId+'/iscilSatis'] = iscil;
+  if(!isNaN(gramaj) && gramaj > 0) updates['orders/'+orderId+'/gercekGramaj'] = gramaj;
+  db.ref().update(updates)
     .then(function() {
-      showToast('İşçilik kaydedildi ✓','success');
+      showToast('Kaydedildi ✓','success');
       openOrderDetail(orderId);
     });
 }
@@ -3320,10 +3439,11 @@ function buildAdminHesapHtml(o) {
   <div class="hesap-box" style="background:linear-gradient(135deg,#f9f5ef,#fff);border-color:var(--gold);">
     <div style="font-size:10px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">
       <i class="ph ph-calculator"></i> Maliyet & Kar Hesabı — ${ayarLabel}
+      <span style="font-size:9px;background:${gramajKaynagi==='Gerçek'?'var(--success-bg)':'var(--warn-bg)'};color:${gramajKaynagi==='Gerçek'?'var(--success)':'var(--warn)'};padding:2px 8px;border-radius:100px;margin-left:6px;">${gramajKaynagi} Gramaj</span>
     </div>
     ${!o.iscilSatis ? '<div style="font-size:10px;color:var(--warn);margin-bottom:8px;"><i class="ph ph-warning"></i> İşçilik girilmemiş — yukarıdan gir</div>' : ''}
     <div class="hesap-row">
-      <span class="hesap-label">Gramaj</span>
+      <span class="hesap-label">Gramaj (${gramajKaynagi})</span>
       <span class="hesap-value">${gramaj.toFixed(2)} gr</span>
     </div>
     <div class="hesap-row">
@@ -4777,6 +4897,54 @@ function escHtml(str) {
 }
 function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
 
+function openProductDetail(productId) {
+  const p = allProducts[productId];
+  if(!p) return;
+
+  document.getElementById('pd-name').textContent = p.name || '';
+  document.getElementById('pd-code').textContent = p.code || '';
+  document.getElementById('pd-desc').textContent = p.desc || '';
+
+  // Fotoğraf
+  const photoEl = document.getElementById('pd-photo');
+  const photoPlaceholder = document.getElementById('pd-photo-placeholder');
+  if(p.photoUrl) {
+    photoEl.src = p.photoUrl;
+    photoEl.style.display = 'block';
+    photoPlaceholder.style.display = 'none';
+  } else {
+    photoEl.style.display = 'none';
+    photoPlaceholder.style.display = 'flex';
+  }
+
+  // Detaylar
+  const details = [];
+  if(p.thickness) details.push({ label: 'Kalınlık', value: p.thickness + ' mm' });
+  if(p.category)  details.push({ label: 'Grup', value: p.category });
+  if(p.ayarlar && p.ayarlar.length) {
+    details.push({ label: 'Ayar', value: p.ayarlar.map(a => AYAR_LABEL[a]||a).join(' / ') });
+  }
+  if(p.icYapi && p.icYapi.length) {
+    details.push({ label: 'İç Yapı', value: p.icYapi.map(t => t==='dolu'?'İçi Dolu':'İçi Boş').join(' / ') });
+  }
+  if(p.iscilSatis) details.push({ label: 'Hedef İşçilik', value: p.iscilSatis + ' gr' });
+
+  document.getElementById('pd-details').innerHTML = details.map(d => `
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:10px;font-weight:700;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.06em;min-width:90px;">${escHtml(d.label)}</span>
+      <span style="font-size:13px;font-weight:700;color:var(--ink);">${escHtml(d.value)}</span>
+    </div>`).join('');
+
+  // Sipariş Ver butonu
+  const btn = document.getElementById('pd-siparis-btn');
+  btn.onclick = function() {
+    closeModal('modal-product-detail');
+    openOrderModal(productId);
+  };
+
+  openModal('modal-product-detail');
+}
+
 function openZoom(src) {
   document.getElementById('zoom-img').src = src;
   document.getElementById('zoom-overlay').classList.add('open');
@@ -4994,7 +5162,7 @@ function cleanSymbols(txt) {
 
 function buildTelegramMsg(order) {
   var parts = [];
-  parts.push("*SINA PIRLANTA*");
+  parts.push("*SİNA PIRLANTA*");
   parts.push("*" + (order.storeName || "") + "*");
   parts.push("——————————————");
   parts.push("YENI SIPARIS — " + (order.orderNo || ""));
