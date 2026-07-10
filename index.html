@@ -1783,16 +1783,14 @@ function toggleSymbol(emoji, label, btn) {
 function submitOrder() {
   const musteri = document.getElementById('ord-musteri').value.trim();
   if(!musteri) { showToast('Müşteri adı zorunlu.','error'); return; }
-  const cinsiyet = document.getElementById('ord-cinsiyet').value;
+  const cinsiyet  = document.getElementById('ord-cinsiyet').value;
+  const adet      = document.getElementById('ord-adet').value;
   const olcuK = document.getElementById('ord-olcu-kadin').value.trim();
   const olcuE = document.getElementById('ord-olcu-erkek').value.trim();
   if(cinsiyet !== 'erkek' && !olcuK) { showToast('Kadın ölçüsü zorunlu.','error'); return; }
   if(cinsiyet !== 'kadin' && !olcuE) { showToast('Erkek ölçüsü zorunlu.','error'); return; }
-
-  const cinsiyet  = document.getElementById('ord-cinsiyet').value;
-  const adet      = document.getElementById('ord-adet').value;
-  const olcuKadin = document.getElementById('ord-olcu-kadin').value.trim();
-  const olcuErkek = document.getElementById('ord-olcu-erkek').value.trim();
+  const olcuKadin = olcuK;
+  const olcuErkek = olcuE;
   const kalinlik  = document.getElementById('ord-kalinlik').value.trim();
   const icYaziKadin = document.getElementById('ord-ic-yazi-kadin').value.trim();
   const icYaziErkek = document.getElementById('ord-ic-yazi-erkek').value.trim();
