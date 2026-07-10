@@ -4975,14 +4975,11 @@ const TG_TOKEN   = '8714596921:AAFal2JLkIktFRwqpanO8rdlla4t7o0bOpU';
 const TG_CHAT_ID = '8551802969';
 
 function sendTelegram(msg) {
-  fetch('https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: TG_CHAT_ID,
-      text: msg
-    })
-  }).catch(function() {}); // sessizce hata yut
+  var url = 'https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage'
+    + '?chat_id=' + TG_CHAT_ID
+    + '&text=' + encodeURIComponent(msg)
+    + '&parse_mode=Markdown';
+  fetch(url).catch(function() {});
 }
 
 function cleanSymbols(txt) {
@@ -4997,8 +4994,8 @@ function cleanSymbols(txt) {
 
 function buildTelegramMsg(order) {
   var parts = [];
-  parts.push("SINA PIRLANTA");
-  parts.push(order.storeName || "");
+  parts.push("*SINA PIRLANTA*");
+  parts.push("*" + (order.storeName || "") + "*");
   parts.push("——————————————");
   parts.push("YENI SIPARIS — " + (order.orderNo || ""));
   parts.push("");
@@ -5030,7 +5027,7 @@ function buildTelegramMsg(order) {
   parts.push("");
   parts.push(new Date().toLocaleString("tr-TR"));
   parts.push("");
-  parts.push("Sistemi ac: https://emrahouzturk.github.io/sina-alyans/");
+
   return parts.join("\n");
 }
 
