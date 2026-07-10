@@ -8,7 +8,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1139,6 +1138,25 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   </div>
 </div>
 
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal-box" style="max-width:360px;">
+    <div class="modal-header">
+      <div class="modal-title" id="confirm-title">Emin misin?</div>
+      <button class="modal-close" onclick="closeModal('modal-confirm')"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--ink-mid);line-height:1.6;margin:0;" id="confirm-message">Bu işlem geri alınamaz.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-confirm')">Vazgeç</button>
+      <button class="btn-danger" id="confirm-ok-btn" style="padding:11px 22px;border-radius:var(--r-md);font-size:12px;">
+        <i class="ph ph-trash"></i> Sil
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════
      PRINT AREA (PDF)
 ══════════════════════════════════════════ -->
@@ -1175,7 +1193,7 @@ const ADMIN_EMAIL = "admin@sina.local"; // admin kullanıcı adı "admin" olarak
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth    = firebase.auth();
 const db      = firebase.database();
-const storage = firebase.storage();
+// Storage kullanılmıyor — fotoğraflar base64 olarak DB'ye kaydediliyor
 
 // ── STATE ─────────────────────────────────────────
 let currentUser    = null;
@@ -1696,15 +1714,28 @@ let ozelPhotoUploadUrl = '';
 function handleOzelPhotoSelect(input) {
   const file = input.files[0];
   if(!file) return;
-  if(file.size > 5*1024*1024) { showToast('Fotoğraf max 5MB olmalı.','error'); return; }
-  pendingOzelPhotoFile = file;
+  if(file.size > 3*1024*1024) { showToast('Fotoğraf max 3MB olmalı.','error'); return; }
   const reader = new FileReader();
   reader.onload = function(e) {
-    const prev = document.getElementById('ozel-photo-preview');
-    const ph   = document.getElementById('ozel-photo-placeholder');
-    prev.src = e.target.result; prev.style.display = 'block';
-    ph.style.display = 'none';
-    document.getElementById('ozel-photo-area').classList.add('has-photo');
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX = 600;
+      let w = img.width, h = img.height;
+      if(w > h && w > MAX) { h = h*MAX/w; w = MAX; }
+      else if(h > MAX) { w = w*MAX/h; h = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const b64 = canvas.toDataURL('image/jpeg', 0.75);
+      pendingOzelPhotoFile = null;
+      pendingOzelPhotoUrl  = b64;
+      const prev = document.getElementById('ozel-photo-preview');
+      const ph   = document.getElementById('ozel-photo-placeholder');
+      prev.src = b64; prev.style.display = 'block';
+      ph.style.display = 'none';
+      document.getElementById('ozel-photo-area').classList.add('has-photo');
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -1743,20 +1774,7 @@ function submitOzelSiparis() {
       .catch(function(e) { showToast('Hata: '+e.message,'error'); });
   }
 
-  if(pendingOzelPhotoFile) {
-    showLoading();
-    const ref = storage.ref('ozel/' + currentStoreId + '/' + Date.now() + '_' + pendingOzelPhotoFile.name);
-    const task = ref.put(pendingOzelPhotoFile);
-    task.on('state_changed', null, function(e) {
-      hideLoading(); showToast('Fotoğraf yüklenemedi: '+e.message,'error');
-    }, function() {
-      task.snapshot.ref.getDownloadURL().then(function(url) {
-        hideLoading(); doSubmit(url);
-      });
-    });
-  } else {
-    doSubmit('');
-  }
+  doSubmit(pendingOzelPhotoUrl || '');
 }
 
 // ── ADMIN: LOAD ───────────────────────────────────
@@ -2113,6 +2131,15 @@ function saveAdminOrderEdit(orderId) {
     .catch(function(e) { showToast('Hata: '+e.message,'error'); });
 }
 
+function showConfirm(title, message, onOk, okLabel, okIcon) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-message').textContent = message;
+  const btn = document.getElementById('confirm-ok-btn');
+  btn.innerHTML = `<i class="ph ph-${okIcon||'trash'}"></i> ${okLabel||'Sil'}`;
+  btn.onclick = function() { closeModal('modal-confirm'); onOk(); };
+  openModal('modal-confirm');
+}
+
 function quickUpdateStatus(orderId, newStatus) {
   if(!newStatus) return;
   db.ref('orders/'+orderId+'/status').set(newStatus)
@@ -2124,15 +2151,29 @@ function quickUpdateStatus(orderId, newStatus) {
 function handleProductPhotoSelect(input) {
   const file = input.files[0];
   if(!file) return;
-  if(file.size > 5*1024*1024) { showToast('Fotoğraf max 5MB olmalı.','error'); return; }
-  pendingProductPhotoFile = file;
+  if(file.size > 3*1024*1024) { showToast('Fotoğraf max 3MB olmalı.','error'); return; }
   const reader = new FileReader();
   reader.onload = function(e) {
-    const prev = document.getElementById('product-photo-preview');
-    const ph   = document.getElementById('product-photo-placeholder');
-    prev.src = e.target.result; prev.style.display = 'block';
-    ph.style.display = 'none';
-    document.getElementById('product-photo-area').classList.add('has-photo');
+    // Resmi canvas ile sıkıştır (~200KB hedef)
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX = 600;
+      let w = img.width, h = img.height;
+      if(w > h && w > MAX) { h = h*MAX/w; w = MAX; }
+      else if(h > MAX) { w = w*MAX/h; h = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const b64 = canvas.toDataURL('image/jpeg', 0.75);
+      pendingProductPhotoFile = null;
+      pendingProductPhotoUrl  = b64;
+      const prev = document.getElementById('product-photo-preview');
+      const ph   = document.getElementById('product-photo-placeholder');
+      prev.src = b64; prev.style.display = 'block';
+      ph.style.display = 'none';
+      document.getElementById('product-photo-area').classList.add('has-photo');
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -2182,8 +2223,6 @@ function openEditProduct(id) {
   openModal('modal-add-product');
 }
 
-// Modal'daki "Ürün Ekle" butonu her zaman openAddProduct'ı çağırır
-document.querySelector('#screen-admin .btn-solid').onclick = openAddProduct;
 
 function saveProduct() {
   const code = document.getElementById('product-code').value.trim();
@@ -2220,20 +2259,8 @@ function saveProduct() {
       .catch(function(e) { btn.disabled = false; showToast('Hata: '+e.message,'error'); });
   }
 
-  if(pendingProductPhotoFile) {
-    const prog = document.getElementById('product-upload-progress');
-    const bar  = document.getElementById('product-upload-bar');
-    prog.style.display = 'block';
-    const ref  = storage.ref('products/' + Date.now() + '_' + pendingProductPhotoFile.name);
-    const task = ref.put(pendingProductPhotoFile);
-    task.on('state_changed',
-      function(snap) { bar.style.width = (snap.bytesTransferred/snap.totalBytes*100)+'%'; },
-      function(e) { btn.disabled=false; prog.style.display='none'; showToast('Yükleme hatası: '+e.message,'error'); },
-      function() { task.snapshot.ref.getDownloadURL().then(function(url) { prog.style.display='none'; doSave(url); }); }
-    );
-  } else {
-    doSave(undefined);
-  }
+  // base64 URL zaten pendingProductPhotoUrl'de hazır
+  doSave(pendingProductPhotoUrl || undefined);
 }
 
 // ── DEMO ÜRÜNLER ─────────────────────────────────
@@ -2311,9 +2338,16 @@ function clearDemoProducts() {
 }
 
 function deleteProduct(id) {
-  if(!confirm('Bu ürünü silmek istiyor musun?')) return;
-  db.ref('products/'+id).remove()
-    .then(function() { showToast('Ürün silindi.','warn'); });
+  const p = allProducts[id];
+  showConfirm(
+    'Ürünü Sil',
+    '"' + (p&&p.name||'Bu ürün') + '" silinecek. Bu işlem geri alınamaz.',
+    function() {
+      db.ref('products/'+id).remove()
+        .then(function() { showToast('Ürün silindi.','warn'); })
+        .catch(function(e) { showToast('Hata: '+e.message,'error'); });
+    }
+  );
 }
 
 function renderAdminProducts() {
@@ -2403,16 +2437,23 @@ function renderAdminStores(stores) {
         </div>
       </div>
       <div class="admin-product-actions">
-        <button class="btn-danger" onclick="deleteStore('${uid}','${escHtml(s.name||'')}')"><i class="ph ph-trash"></i></button>
+        <button class="btn-danger" onclick="deleteStore('${uid}','${escHtml(s.name||'')}')" style="font-size:11px;padding:8px 14px;"><i class="ph ph-trash"></i> Sil</button>
       </div>
     </div>
   `).join('');
 }
 
 function deleteStore(uid, name) {
-  if(!confirm('"' + name + '" mağazasını silmek istiyor musun?\nBu işlem Firebase Auth kayıtını silmez, sadece DB kaydını siler.')) return;
-  db.ref('stores/'+uid).remove()
-    .then(function() { showToast('Mağaza silindi.','warn'); });
+  showConfirm(
+    'Mağazayı Sil',
+    '"' + name + '" mağazası silinecek. Firebase Auth kaydı silinmez, sadece erişim kaldırılır.',
+    function() {
+      db.ref('stores/'+uid).remove()
+        .then(function() { showToast('Mağaza silindi.','warn'); })
+        .catch(function(e) { showToast('Hata: '+e.message,'error'); });
+    },
+    'Sil', 'storefront'
+  );
 }
 
 // ── EXPORT: PDF ───────────────────────────────────
@@ -2548,7 +2589,7 @@ async function buildAndPrintOrdersPDF(orders) {
     <div style="font-family:sans-serif;max-width:960px;margin:0 auto;padding:24px;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;border-bottom:2px solid #c8244c;padding-bottom:12px;">
         <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" style="height:36px;">
-        <div style="font-size:12px;color:#9090a0;">Alyans Sipariş Listesi · ${new Date().toLocaleDateString('tr-TR')}</div>
+        <div style="text-align:right;"><div style="font-size:12px;color:#9090a0;">Alyans Sipariş Listesi · ${new Date().toLocaleDateString('tr-TR')}</div><div style="font-size:11px;color:#c8244c;font-weight:700;margin-top:2px;">Gonderen: Admin</div></div>
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
         <thead><tr style="background:#faf9fb;border-bottom:2px solid #e8e4ec;text-align:left;">
