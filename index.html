@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -861,9 +860,41 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   </div>
 </div>
 
-<!-- ZOOM -->
-<div id="zoom-overlay" onclick="closeZoom()">
-  <img id="zoom-img" src="" alt="">
+<!-- TAM EKRAN FLIP VIEWER -->
+<div id="zoom-overlay" onclick="closeZoom()" style="flex-direction:column;gap:0;">
+  <!-- Flip container -->
+  <div class="flip-card" id="zoom-flip" style="width:min(90vw,480px);height:min(90vw,480px);border-radius:16px;" onclick="event.stopPropagation();flipZoom()">
+    <div class="flip-card-inner">
+      <!-- Ön: fotoğraf -->
+      <div class="flip-card-front" style="background:#111;border-radius:16px;">
+        <img id="zoom-img" src="" style="width:100%;height:100%;object-fit:contain;border-radius:16px;">
+        <div style="position:absolute;bottom:12px;left:0;right:0;text-align:center;">
+          <span style="background:rgba(0,0,0,.55);color:#fff;font-size:11px;padding:5px 14px;border-radius:100px;backdrop-filter:blur(4px);">Bilgileri gör için dokun</span>
+        </div>
+      </div>
+      <!-- Arka: bilgiler -->
+      <div class="flip-card-back" style="background:#1a1a24;border-radius:16px;padding:20px;justify-content:space-between;">
+        <div style="overflow-y:auto;">
+          <div style="font-size:10px;font-weight:800;color:var(--rose);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;" id="zf-code"></div>
+          <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:8px;line-height:1.3;" id="zf-name"></div>
+          <div style="font-size:12px;color:#9090b0;line-height:1.6;margin-bottom:12px;" id="zf-desc"></div>
+          <div id="zf-details" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+          <button id="zf-siparis-btn" style="width:100%;background:var(--rose);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <i class="ph ph-paper-plane-tilt"></i> Sipariş Ver
+          </button>
+          <button onclick="flipZoom()" style="width:100%;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;padding:10px;font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;cursor:pointer;">
+            ← Fotoğrafa Dön
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Kapat -->
+  <button onclick="closeZoom()" style="margin-top:16px;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:100px;padding:10px 28px;font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;cursor:pointer;backdrop-filter:blur(4px);">
+    Kapat
+  </button>
 </div>
 
 <!-- TOAST -->
@@ -937,6 +968,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <div class="section-title">Ürün Kataloğu</div>
           <div class="section-sub">Ürüne tıklayarak sipariş ver</div>
         </div>
+        <button class="btn-ghost" onclick="exportCatalogPDF()" style="font-size:11px;">
+          <i class="ph ph-file-pdf"></i> Katalog PDF
+        </button>
       </div>
       <div style="margin-bottom:12px;">
         <div style="font-size:10px;font-weight:700;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Ürün Grubu</div>
@@ -1059,7 +1093,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <i class="ph ph-squares-four"></i> Katalog — Sipariş Verme
         </div>
         <div style="font-size:12px; color:var(--ink-mid); line-height:1.8;">
-          <b>1.</b> Katalog sekmesinden ürünlere bak. Fotoğrafa tıklarsan büyür, zoom açılır.<br>
+          <b>1.</b> Katalog sekmesinden ürünlere bak.<br>
+          &nbsp;&nbsp;• Fotoğrafa tıklayınca <b>tam ekran</b> açılır — büyük fotoğrafı görebilirsin.<br>
+          &nbsp;&nbsp;• Tam ekranda fotoğrafa tekrar tıklayınca <b>ürün bilgileri</b> gelir (kalınlık, ayar, iç yapı). Oradan da sipariş verebilirsin.<br>
+          &nbsp;&nbsp;• Sağ üstteki <b>Katalog PDF</b> butonuyla tüm katalogu PDF olarak alabilirsin.<br>
           <b>2.</b> Sipariş vermek istediğin ürünün altındaki <b>"Sipariş Ver"</b> butonuna bas.<br>
           <b>3.</b> Açılan formda şunları doldur:<br>
           &nbsp;&nbsp;• <b>Müşteri adı soyadı</b> — zorunlu<br>
@@ -2214,10 +2251,10 @@ function renderProductGrid() {
           <!-- Ön: fotoğraf -->
           <div class="flip-card-front" style="background:var(--bg);">
             ${p.photoUrl
-              ? `<img src="${escHtml(p.photoUrl)}" alt="${escHtml(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;" onclick="flipCard('${id}',event)">`
-              : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--ink-dim);" onclick="flipCard('${id}',event)"><i class="ph ph-diamond"></i></div>`}
+              ? `<img src="${escHtml(p.photoUrl)}" alt="${escHtml(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in;" onclick="event.stopPropagation();openZoom('${escHtml(p.photoUrl)}','${id}')">`
+              : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--ink-dim);cursor:pointer;" onclick="event.stopPropagation();openZoom('','${id}')"><i class="ph ph-diamond"></i></div>`}
             ${p.photoUrl
-              ? `<button class="flip-zoom-btn" onclick="event.stopPropagation();openZoom('${escHtml(p.photoUrl)}')" title="Tam ekran">
+              ? `<button class="flip-zoom-btn" onclick="event.stopPropagation();openZoom('${escHtml(p.photoUrl)}','${id}')" title="Tam ekran">
                   <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66,34.34a8,8,0,0,0-11.32,0L160,84.69V56a8,8,0,0,0-16,0v48a8,8,0,0,0,8,8h48a8,8,0,0,0,0-16H171.31l50.35-50.34A8,8,0,0,0,221.66,34.34ZM104,136H56a8,8,0,0,0,0,16H84.69L34.34,201.66a8,8,0,0,0,11.32,11.32L96,162.63V192a8,8,0,0,0,16,0V144A8,8,0,0,0,104,136Z"/></svg>
                 </button>`
               : ''}
@@ -5019,14 +5056,42 @@ function openProductDetail(productId) {
   openModal('modal-product-detail');
 }
 
-function openZoom(src) {
-  document.getElementById('zoom-img').src = src;
+function openZoom(src, productId) {
+  // Fotoğrafı set et
+  document.getElementById('zoom-img').src = src || '';
+  // Flip sıfırla
+  document.getElementById('zoom-flip').classList.remove('flipped');
+  // Ürün bilgilerini doldur
+  const p = productId ? allProducts[productId] : null;
+  document.getElementById('zf-code').textContent = p ? (p.code||'') : '';
+  document.getElementById('zf-name').textContent = p ? (p.name||'') : '';
+  document.getElementById('zf-desc').textContent = p ? (p.desc||'') : '';
+  const details = [];
+  if(p) {
+    if(p.thickness) details.push({ l:'Kalınlık', v:p.thickness+' mm' });
+    if(p.category)  details.push({ l:'Grup', v:p.category });
+    if(p.ayarlar&&p.ayarlar.length) details.push({ l:'Ayar', v:p.ayarlar.map(a=>AYAR_LABEL[a]||a).join(' / ') });
+    if(p.icYapi&&p.icYapi.length)   details.push({ l:'İç Yapı', v:p.icYapi.map(t=>t==='dolu'?'İçi Dolu':'İçi Boş').join(' / ') });
+  }
+  document.getElementById('zf-details').innerHTML = details.map(d =>
+    `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08);">
+      <span style="font-size:10px;font-weight:700;color:#6060a0;min-width:70px;text-transform:uppercase;">${escHtml(d.l)}</span>
+      <span style="font-size:12px;font-weight:700;color:#fff;">${escHtml(d.v)}</span>
+    </div>`).join('');
+  // Sipariş butonu
+  const sipBtn = document.getElementById('zf-siparis-btn');
+  sipBtn.style.display = p ? '' : 'none';
+  if(p) sipBtn.onclick = function() { closeZoom(); openOrderModal(productId); };
   document.getElementById('zoom-overlay').classList.add('open');
   document.addEventListener('keydown', _zoomKey);
+}
+function flipZoom() {
+  document.getElementById('zoom-flip').classList.toggle('flipped');
 }
 function closeZoom() {
   document.getElementById('zoom-overlay').classList.remove('open');
   document.getElementById('zoom-img').src = '';
+  document.getElementById('zoom-flip').classList.remove('flipped');
   document.removeEventListener('keydown', _zoomKey);
 }
 function _zoomKey(e) { if(e.key === 'Escape') closeZoom(); }
