@@ -684,6 +684,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     </button>
     <button class="nav-tab" onclick="switchTab('magaza','siparislerim',this)">
       <i class="ph ph-clipboard-text"></i> Siparişlerim
+      <span id="bekleyen-rozet" style="display:none;background:var(--rose);color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:100px;margin-left:2px;"></span>
     </button>
     <button class="nav-tab" onclick="switchTab('magaza','ozel',this)">
       <i class="ph ph-star"></i> Özel Sipariş
@@ -714,6 +715,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <div class="filter-row" id="katalog-kalinlik-filter">
           <button class="filter-chip active" onclick="setKatalogFilter('kalinlik','all',this)">Tümü</button>
         </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <input type="search" class="text-field" id="katalog-search" placeholder="🔍  Ürün ara…" oninput="renderProductGrid()" style="font-size:13px;padding:10px 16px;">
       </div>
       <div id="product-grid-container" class="product-grid">
         <div class="empty-state" style="grid-column:1/-1">
@@ -908,6 +912,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     <button class="nav-tab" onclick="switchTab('admin','magazalar',this)">
       <i class="ph ph-storefront"></i> Mağazalar
     </button>
+    <button class="nav-tab" onclick="switchTab('admin','gruplar',this)">
+      <i class="ph ph-tag"></i> Gruplar
+    </button>
   </div>
   <!-- Pages -->
   <div class="page-content">
@@ -935,6 +942,16 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <div class="stat-value" id="stat-ready" style="color:var(--success)">0</div>
           <div class="stat-sub">Teslim aşamasında</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-label">Ort. İşleme Süresi</div>
+          <div class="stat-value" id="stat-avg-isleme" style="font-size:16px;color:var(--gold)">–</div>
+          <div class="stat-sub">Beklemede → İşleme</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ort. Teslimat Süresi</div>
+          <div class="stat-value" id="stat-avg-kargo" style="font-size:16px;color:#6a1ab0">–</div>
+          <div class="stat-sub">Sipariş → Kargo</div>
+        </div>
       </div>
       <div class="section-header">
         <div class="section-title">Tüm Siparişler</div>
@@ -946,6 +963,12 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
             <i class="ph ph-trash"></i> Sıfırla
           </button>
         </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+        <input type="search" class="text-field" id="admin-search" placeholder="🔍  Müşteri, mağaza, ürün ara…" oninput="renderAdminOrders()" style="font-size:12px;padding:8px 14px;flex:1;min-width:200px;">
+        <select class="select-field" id="admin-magaza-filter" onchange="renderAdminOrders()" style="font-size:12px;padding:8px 14px;flex:0 0 auto;min-width:140px;">
+          <option value="">Tüm Mağazalar</option>
+        </select>
       </div>
       <div class="filter-row">
         <button class="filter-chip active" onclick="filterAdminOrders('all',this)">Tümü</button>
@@ -1005,6 +1028,32 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <div class="empty-state-icon"><i class="ph ph-storefront"></i></div>
           <div class="empty-state-title">Mağaza eklenmemiş</div>
           <div class="empty-state-sub">Mağaza ekleyerek erişim tanımlayabilirsin.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRUPLAR -->
+    <div class="page" id="page-admin-gruplar">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Ürün Grupları</div>
+          <div class="section-sub">Ürün eklerken seçilebilecek grupları buradan yönet</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <label class="field-label">Yeni Grup Ekle</label>
+        <div style="display:flex;gap:10px;margin-top:6px;">
+          <input type="text" class="text-field" id="new-group-input" placeholder="ör: Klasik, Taşlı, Örgü…" style="flex:1;" onkeydown="if(event.key==='Enter')addGroup()">
+          <button class="btn-primary" onclick="addGroup()" style="white-space:nowrap;padding:10px 18px;">
+            <i class="ph ph-plus"></i> Ekle
+          </button>
+        </div>
+      </div>
+      <div id="admin-group-list" class="admin-product-list">
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="ph ph-tag"></i></div>
+          <div class="empty-state-title">Grup eklenmemiş</div>
+          <div class="empty-state-sub">Yukarıdan grup ekleyerek ürünleri kategorilere ayırabilirsin.</div>
         </div>
       </div>
     </div>
@@ -1202,8 +1251,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="field-label">Ürün Grubu / Kategori</label>
-          <input type="text" class="text-field" id="product-category" placeholder="ör: Klasik, Taşlı, Örgü…">
+          <label class="field-label">Ürün Grubu</label>
+          <select class="select-field" id="product-category">
+            <option value="">— Grup seç —</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="field-label">Varsayılan Kalınlık (mm)</label>
@@ -1277,6 +1328,54 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       </button>
       <button class="btn-primary" id="btn-update-status" onclick="updateOrderStatus()">
         <i class="ph ph-arrow-right"></i>&nbsp; Durumu İlerlet
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Grup Düzenle Modal -->
+<div class="modal-overlay" id="modal-edit-group">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-header">
+      <div class="modal-title">Grubu Düzenle</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-group')"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-group-id">
+      <div class="form-group">
+        <label class="field-label">Grup Adı</label>
+        <input type="text" class="text-field" id="edit-group-name" placeholder="Grup adı…" onkeydown="if(event.key==='Enter')saveGroupEdit()">
+      </div>
+      <div style="background:var(--warn-bg);border:1px solid #f0d99a;border-radius:var(--r-sm);padding:10px 14px;font-size:11px;color:var(--warn);line-height:1.6;">
+        <i class="ph ph-warning"></i> Grup adını değiştirince bu gruba bağlı tüm ürünlerin grubu da otomatik güncellenir.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-edit-group')">İptal</button>
+      <button class="btn-primary" onclick="saveGroupEdit()">
+        <i class="ph ph-floppy-disk"></i>&nbsp; Kaydet
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sipariş Başarı Modal -->
+<div class="modal-overlay" id="modal-siparis-basari">
+  <div class="modal-box" style="max-width:340px;text-align:center;">
+    <div class="modal-body" style="padding:32px 28px;">
+      <div style="width:64px;height:64px;background:var(--success-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;color:var(--success);">
+        <i class="ph ph-check-circle"></i>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;">Sipariş Alındı</div>
+      <div style="font-size:36px;font-weight:800;color:var(--rose);letter-spacing:.06em;margin-bottom:8px;" id="basari-order-no">S-001</div>
+      <div style="font-size:12px;color:var(--ink-dim);line-height:1.6;" id="basari-musteri-info"></div>
+      <div style="margin-top:16px;background:var(--bg);border-radius:var(--r-sm);padding:10px 14px;font-size:11px;color:var(--ink-dim);">
+        Bu numarayı not al. Siparişini <b>Siparişlerim</b> sekmesinden takip edebilirsin.
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:center;padding-top:0;">
+      <button class="btn-primary" onclick="closeModal('modal-siparis-basari');switchTab('magaza','siparislerim',document.querySelector('#screen-magaza .nav-tab:nth-child(2)'))" style="width:100%;justify-content:center;">
+        <i class="ph ph-clipboard-text"></i>&nbsp; Siparişlerimi Gör
       </button>
     </div>
   </div>
@@ -1484,6 +1583,9 @@ function renderProductGrid() {
 
   // Filtrele
   let prods = allActive;
+  const searchEl = document.getElementById('katalog-search');
+  const searchQ = searchEl ? searchEl.value.trim().toLowerCase() : '';
+  if(searchQ) prods = prods.filter(([,p]) => (p.name||'').toLowerCase().includes(searchQ) || (p.code||'').toLowerCase().includes(searchQ) || (p.category||'').toLowerCase().includes(searchQ));
   if(katalogFilterKategori !== 'all') prods = prods.filter(([,p]) => (p.category||'') === katalogFilterKategori);
   if(katalogFilterKalinlik !== 'all') prods = prods.filter(([,p]) => (p.thickness||'') === katalogFilterKalinlik);
 
@@ -1681,6 +1783,11 @@ function toggleSymbol(emoji, label, btn) {
 function submitOrder() {
   const musteri = document.getElementById('ord-musteri').value.trim();
   if(!musteri) { showToast('Müşteri adı zorunlu.','error'); return; }
+  const cinsiyet = document.getElementById('ord-cinsiyet').value;
+  const olcuK = document.getElementById('ord-olcu-kadin').value.trim();
+  const olcuE = document.getElementById('ord-olcu-erkek').value.trim();
+  if(cinsiyet !== 'erkek' && !olcuK) { showToast('Kadın ölçüsü zorunlu.','error'); return; }
+  if(cinsiyet !== 'kadin' && !olcuE) { showToast('Erkek ölçüsü zorunlu.','error'); return; }
 
   const cinsiyet  = document.getElementById('ord-cinsiyet').value;
   const adet      = document.getElementById('ord-adet').value;
@@ -1719,13 +1826,20 @@ function submitOrder() {
 
   const btn = document.getElementById('btn-submit-order');
   btn.disabled = true;
-  db.ref('orders').push(order)
+  // Sipariş numarası oluştur
+  db.ref('orderCounter').transaction(function(cur) { return (cur||0)+1; })
+    .then(function(res) {
+      order.orderNo = 'S-' + String(res.snapshot.val()).padStart(3,'0');
+      order.timeline = { beklemede: Date.now() };
+      return db.ref('orders').push(order);
+    })
     .then(function() {
       btn.disabled = false;
+      btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i>&nbsp; Sipariş Gönder';
       closeModal('modal-order');
-      showToast('Sipariş gönderildi ✓','success');
-      switchTab('magaza','siparislerim',
-        document.querySelector('#screen-magaza .nav-tab:nth-child(2)'));
+      // Başarı popup
+      const musteri = document.getElementById('ord-musteri') ? document.getElementById('ord-musteri').value.trim() : '';
+      showSiparisBasari(order.orderNo, musteri, allProducts[currentOrderProductId]);
     })
     .catch(function(e) {
       btn.disabled = false;
@@ -1826,7 +1940,24 @@ function updateOrder(orderId) {
 }
 
 // ── MAĞAZA ORDERS ────────────────────────────────
+function showSiparisBasari(orderNo, musteri, urun) {
+  document.getElementById('basari-order-no').textContent = orderNo || '–';
+  let info = musteri ? '<b>' + escHtml(musteri) + '</b> adına' : '';
+  if(urun && urun.name) info += (info ? '<br>' : '') + escHtml(urun.name);
+  document.getElementById('basari-musteri-info').innerHTML = info;
+  openModal('modal-siparis-basari');
+}
+
+function updateBekleyenRozet() {
+  const bekleyen = Object.values(allOrders).filter(o => o.status === 'beklemede').length;
+  const el = document.getElementById('bekleyen-rozet');
+  if(!el) return;
+  if(bekleyen > 0) { el.textContent = bekleyen; el.style.display = 'inline'; }
+  else { el.style.display = 'none'; }
+}
+
 function renderMagazaOrders() {
+  updateBekleyenRozet();
   const list = document.getElementById('magaza-orders-list');
   let orders = Object.entries(allOrders)
     .sort((a,b) => b[1].createdAt - a[1].createdAt);
@@ -1844,6 +1975,7 @@ function renderMagazaOrders() {
     return;
   }
   list.innerHTML = orders.map(([id,o]) => buildOrderCard(id,o,false)).join('');
+  startOrderTimers();
 }
 
 function filterOrders(filter, btn) {
@@ -1902,9 +2034,16 @@ function submitOzelSiparis() {
       status:    'beklemede',
       createdAt: Date.now()
     };
-    db.ref('orders').push(order)
+    db.ref('orderCounter').transaction(function(cur) { return (cur||0)+1; })
+      .then(function(res) {
+        order.orderNo = 'S-' + String(res.snapshot.val()).padStart(3,'0');
+        order.timeline = { beklemede: Date.now() };
+        return db.ref('orders').push(order);
+      })
       .then(function() {
-        showToast('Özel sipariş gönderildi ✓','success');
+        const ozelNo = order.orderNo;
+        const ozelMusteri = document.getElementById('ozel-musteri').value.trim();
+        showSiparisBasari(ozelNo, ozelMusteri, null);
         document.getElementById('ozel-musteri').value = '';
         document.getElementById('ozel-detay').value   = '';
         document.getElementById('ozel-not').value     = '';
@@ -1923,7 +2062,34 @@ function submitOzelSiparis() {
 }
 
 // ── ADMIN: LOAD ───────────────────────────────────
+let prevOrderCount = -1;
+let notifSound = null;
+
+function initNotifSound() {
+  // Web Audio API ile kısa bip sesi
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    notifSound = function() {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.4);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime+0.4);
+    };
+  } catch(e) {}
+}
+
 function loadAdminData() {
+  initNotifSound();
+  db.ref('groups').on('value', function(snap) {
+    const groups = snap.val() || {};
+    renderAdminGroups(groups);
+    updateCategoryDropdown(groups);
+  });
   db.ref('products').on('value', function(snap) {
     allProducts = snap.val() || {};
     renderAdminProducts();
@@ -1931,6 +2097,20 @@ function loadAdminData() {
   });
   db.ref('orders').on('value', function(snap) {
     allOrders = snap.val() || {};
+    const count = Object.keys(allOrders).length;
+    if(prevOrderCount >= 0 && count > prevOrderCount) {
+      // Yeni sipariş geldi
+      const yeni = count - prevOrderCount;
+      showToast(yeni + ' yeni sipariş geldi!', 'warn');
+      if(notifSound) notifSound();
+      // Siparişler sekmesine geç
+      const siparisTab = document.querySelector('#screen-admin .nav-tab:first-child');
+      if(siparisTab && !siparisTab.classList.contains('active')) {
+        document.title = '🔔 Yeni Sipariş! · Sina Alyans';
+        setTimeout(function() { document.title = 'Sina Alyans · Admin'; }, 5000);
+      }
+    }
+    prevOrderCount = count;
     renderAdminOrders();
     updateAdminStats();
   });
@@ -1945,10 +2125,34 @@ function updateAdminStats() {
   document.getElementById('stat-waiting').textContent    = orders.filter(o=>o.status==='beklemede').length;
   document.getElementById('stat-processing').textContent = orders.filter(o=>o.status==='isleme').length;
   document.getElementById('stat-ready').textContent      = orders.filter(o=>o.status==='hazir'||o.status==='kargo').length;
+
+  // Ortalama süreler
+  const islemeSureler = orders.filter(o=>o.timeline&&o.timeline.isleme&&o.timeline.beklemede)
+    .map(o => o.timeline.isleme - o.timeline.beklemede);
+  const kargoSureler = orders.filter(o=>o.timeline&&o.timeline.kargo&&o.timeline.beklemede)
+    .map(o => o.timeline.kargo - o.timeline.beklemede);
+
+  const avgIsleme = islemeSureler.length ? islemeSureler.reduce((a,b)=>a+b,0)/islemeSureler.length : null;
+  const avgKargo  = kargoSureler.length  ? kargoSureler.reduce((a,b)=>a+b,0)/kargoSureler.length   : null;
+
+  const statIsEl = document.getElementById('stat-avg-isleme');
+  const statKaEl = document.getElementById('stat-avg-kargo');
+  if(statIsEl) statIsEl.textContent = avgIsleme ? fmtDuration(avgIsleme) : '–';
+  if(statKaEl) statKaEl.textContent = avgKargo  ? fmtDuration(avgKargo)  : '–';
 }
 
 // ── ADMIN ORDERS ──────────────────────────────────
+function updateMagazaFilterDropdown() {
+  const sel = document.getElementById('admin-magaza-filter');
+  if(!sel) return;
+  const cur = sel.value;
+  const stores = [...new Set(Object.values(allOrders).map(o=>o.storeName||'').filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Tüm Mağazalar</option>'
+    + stores.map(s => `<option value="${escHtml(s)}" ${cur===s?'selected':''}>${escHtml(s)}</option>`).join('');
+}
+
 function renderAdminOrders() {
+  updateMagazaFilterDropdown();
   const list = document.getElementById('admin-orders-list');
   let orders = Object.entries(allOrders)
     .sort((a,b) => b[1].createdAt - a[1].createdAt);
@@ -1957,6 +2161,23 @@ function renderAdminOrders() {
     orders = orders.filter(([,o]) => o.type === 'ozel');
   } else if(currentAdminOrderFilter !== 'all') {
     orders = orders.filter(([,o]) => o.status === currentAdminOrderFilter);
+  }
+  // Mağaza filtresi
+  const magSel = document.getElementById('admin-magaza-filter');
+  if(magSel && magSel.value) {
+    orders = orders.filter(([,o]) => (o.storeName||'') === magSel.value);
+  }
+  // Arama
+  const searchEl = document.getElementById('admin-search');
+  const q = searchEl ? searchEl.value.trim().toLowerCase() : '';
+  if(q) {
+    orders = orders.filter(([,o]) =>
+      (o.musteri||'').toLowerCase().includes(q) ||
+      (o.storeName||'').toLowerCase().includes(q) ||
+      (o.productName||'').toLowerCase().includes(q) ||
+      (o.productCode||'').toLowerCase().includes(q) ||
+      (o.orderNo||'').toLowerCase().includes(q)
+    );
   }
 
   if(!orders.length) {
@@ -2011,6 +2232,9 @@ function buildOrderCard(id, o, isAdminView) {
     <div class="order-item-body">
       <div class="order-item-top">
         <div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
+            ${o.orderNo ? `<span style="font-size:10px;font-weight:800;color:var(--rose);background:var(--rose-pale);padding:2px 8px;border-radius:100px;">${escHtml(o.orderNo)}</span>` : ''}
+          </div>
           ${o.type === 'ozel'
             ? `<div class="order-item-name"><span class="ozel-badge">Özel</span></div>`
             : `<div class="order-item-code">${escHtml(o.productCode||'')}</div>
@@ -2022,10 +2246,17 @@ function buildOrderCard(id, o, isAdminView) {
       ${isAdminView ? `<div style="font-size:11px;color:var(--ink-dim);margin-top:2px;"><i class="ph ph-storefront"></i> ${escHtml(o.storeName||'')}</div>` : ''}
       <div class="order-item-meta">${metaLines.join(' · ')}</div>
       ${o.not ? `<div class="order-item-note">${escHtml(o.not)}</div>` : ''}
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
-        <div style="font-size:10px;color:var(--ink-dim);">${dateStr}</div>
-        ${editable ? `<button class="btn-edit" style="font-size:10px;padding:5px 10px;" onclick="openEditOrder('${id}')"><i class="ph ph-pencil-simple"></i> Düzenle</button>` : ''}
-        ${!isAdminView && o.status !== 'beklemede' ? `<div style="font-size:10px;color:var(--ink-dim);"><i class="ph ph-lock-simple"></i> Düzenlenemez</div>` : ''}
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          ${o.orderNo ? `<span style="font-size:10px;font-weight:800;color:var(--rose);background:var(--rose-pale);padding:2px 8px;border-radius:100px;">${escHtml(o.orderNo)}</span>` : ''}
+          <span style="font-size:10px;color:var(--ink-dim);">${dateStr}</span>
+          ${!isAdminView && o.status !== 'kargo' && o.status !== 'iptal' ? `<span style="font-size:10px;color:var(--ink-dim);" id="timer-${id}"></span>` : ''}
+          ${!isAdminView && o.status === 'kargo' ? `<span style="font-size:10px;color:var(--success);font-weight:600;"><i class="ph ph-check-circle"></i> Teslim edildi</span>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;">
+          ${editable ? `<button class="btn-edit" style="font-size:10px;padding:5px 10px;" onclick="openEditOrder('${id}')"><i class="ph ph-pencil-simple"></i> Düzenle</button>` : ''}
+          ${!isAdminView && o.status !== 'beklemede' ? `<div style="font-size:10px;color:var(--ink-dim);align-self:center;"><i class="ph ph-lock-simple"></i> Kilitli</div>` : ''}
+        </div>
       </div>
     </div>
   </div>`;
@@ -2113,6 +2344,7 @@ function openOrderDetail(orderId) {
       </div>
     </div>
     <div class="stepper">${stepperHtml}</div>
+    ${buildTimelineHtml(o)}
     <hr class="divider">
     <div class="detail-grid">${detailRows}</div>
     ${o.not ? `<hr class="divider"><div><div class="detail-item-label" style="margin-bottom:4px;">Not</div><div style="font-size:13px;color:var(--ink-mid);line-height:1.6;">${escHtml(o.not)}</div></div>` : ''}
@@ -2135,7 +2367,10 @@ function updateOrderStatus() {
   const idx = STATUS_ORDER.indexOf(o.status);
   const next = STATUS_ORDER[idx+1];
   if(!next) return;
-  db.ref('orders/'+currentDetailOrderId+'/status').set(next)
+  const updates = {};
+  updates['orders/'+currentDetailOrderId+'/status'] = next;
+  updates['orders/'+currentDetailOrderId+'/timeline/'+next] = Date.now();
+  db.ref().update(updates)
     .then(function() {
       showToast('Durum: ' + STATUS_LABELS[next],'success');
       openOrderDetail(currentDetailOrderId);
@@ -2244,12 +2479,17 @@ function saveAdminOrderEdit(orderId) {
   const o = allOrders[orderId];
   if(!o) return;
 
+  const newStatus = document.getElementById('admin-edit-status').value;
   const updates = {
-    status:  document.getElementById('admin-edit-status').value,
+    status: newStatus,
     musteri: document.getElementById('admin-edit-musteri').value.trim(),
     not:     document.getElementById('admin-edit-not').value.trim(),
     updatedAt: Date.now()
   };
+  // Timeline güncelle — durum değiştiyse
+  if(newStatus !== o.status) {
+    updates['timeline'] = Object.assign({}, o.timeline||{}, { [newStatus]: Date.now() });
+  }
 
   if(o.type === 'katalog') {
     updates.cinsiyet   = document.getElementById('admin-edit-cinsiyet').value;
@@ -2285,9 +2525,53 @@ function showConfirm(title, message, onOk, okLabel, okIcon) {
   openModal('modal-confirm');
 }
 
+function buildTimelineHtml(o) {
+  const tl = o.timeline || {};
+  const steps = STATUS_ORDER.filter(s => tl[s]);
+  if(steps.length < 2) return '';
+
+  let rows = '';
+  for(let i = 1; i < steps.length; i++) {
+    const from = steps[i-1];
+    const to   = steps[i];
+    const ms   = tl[to] - tl[from];
+    const dur  = fmtDuration(ms);
+    rows += `<div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-mid);padding:4px 0;">
+      <span style="color:var(--ink-dim);min-width:120px;">${STATUS_LABELS[from]} → ${STATUS_LABELS[to]}</span>
+      <span style="font-weight:700;color:var(--ink);">${dur}</span>
+    </div>`;
+  }
+  // Toplam (beklemede'den son duruma)
+  const firstTs = tl[steps[0]];
+  const lastTs  = tl[steps[steps.length-1]];
+  const totalMs = lastTs - firstTs;
+  rows += `<div style="display:flex;align-items:center;gap:8px;font-size:11px;padding:6px 0 0;border-top:1px solid var(--border);margin-top:4px;">
+    <span style="color:var(--ink-dim);min-width:120px;font-weight:700;">Toplam süre</span>
+    <span style="font-weight:800;color:var(--rose);">${fmtDuration(totalMs)}</span>
+  </div>`;
+
+  return `<div style="background:var(--bg);border-radius:var(--r-sm);padding:12px 14px;margin:8px 0;">
+    <div style="font-size:10px;font-weight:800;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;"><i class="ph ph-timer"></i> Süre Takibi</div>
+    ${rows}
+  </div>`;
+}
+
+function fmtDuration(ms) {
+  if(!ms || ms < 0) return '–';
+  const mins = Math.floor(ms / 60000);
+  const hours = Math.floor(mins / 60);
+  const days  = Math.floor(hours / 24);
+  if(days > 0) return days + ' gün ' + (hours%24) + ' saat';
+  if(hours > 0) return hours + ' saat ' + (mins%60) + ' dk';
+  return mins + ' dk';
+}
+
 function quickUpdateStatus(orderId, newStatus) {
   if(!newStatus) return;
-  db.ref('orders/'+orderId+'/status').set(newStatus)
+  const updates = {};
+  updates['orders/'+orderId+'/status'] = newStatus;
+  updates['orders/'+orderId+'/timeline/'+newStatus] = Date.now();
+  db.ref().update(updates)
     .then(function() { showToast('Durum: ' + STATUS_LABELS[newStatus],'success'); })
     .catch(function(e) { showToast('Hata: '+e.message,'error'); });
 }
@@ -2657,6 +2941,124 @@ function renderAdminProducts() {
   `).join('');
 }
 
+// ── ADMIN: GRUPLAR ──────────────────────────────────
+let allGroups = {};
+
+function openEditGroup(id, name) {
+  document.getElementById('edit-group-id').value = id;
+  document.getElementById('edit-group-name').value = name;
+  openModal('modal-edit-group');
+}
+
+function saveGroupEdit() {
+  const id      = document.getElementById('edit-group-id').value;
+  const newName = document.getElementById('edit-group-name').value.trim();
+  const oldName = allGroups[id] ? allGroups[id].name : '';
+  if(!newName) { showToast('Grup adı boş olamaz.','warn'); return; }
+  if(newName === oldName) { closeModal('modal-edit-group'); return; }
+  // Aynı isim başka grupta var mı
+  const exists = Object.entries(allGroups).some(([gid,g]) => g.name === newName && gid !== id);
+  if(exists) { showToast('Bu isimde başka bir grup zaten var.','warn'); return; }
+
+  showLoading();
+  // Önce grup adını güncelle
+  db.ref('groups/'+id+'/name').set(newName)
+    .then(function() {
+      // Bu gruba bağlı tüm ürünleri de güncelle
+      const updates = {};
+      Object.entries(allProducts).forEach(([pid,p]) => {
+        if(p.category === oldName) updates['products/'+pid+'/category'] = newName;
+      });
+      if(Object.keys(updates).length) {
+        return db.ref().update(updates);
+      }
+    })
+    .then(function() {
+      hideLoading();
+      closeModal('modal-edit-group');
+      showToast('Grup güncellendi ✓','success');
+    })
+    .catch(function(e) { hideLoading(); showToast('Hata: '+e.message,'error'); });
+}
+
+function addGroup() {
+  const input = document.getElementById('new-group-input');
+  const name = input.value.trim();
+  if(!name) { showToast('Grup adı gir.','warn'); return; }
+  // Aynı isim var mı kontrol et
+  const exists = Object.values(allGroups).some(g => g.name === name);
+  if(exists) { showToast('Bu grup zaten var.','warn'); return; }
+  db.ref('groups').push({ name, createdAt: Date.now() })
+    .then(function() {
+      input.value = '';
+      showToast('Grup eklendi ✓','success');
+    })
+    .catch(function(e) { showToast('Hata: '+e.message,'error'); });
+}
+
+function deleteGroup(id, name) {
+  // Kullanımda mı kontrol et
+  const inUse = Object.values(allProducts).some(p => p.category === name);
+  if(inUse) {
+    showConfirm(
+      'Grup Kullanımda',
+      '"' + name + '" grubunda ürünler var. Yine de silmek istiyor musun? Ürünlerin grubu boş kalır.',
+      function() { db.ref('groups/'+id).remove().then(function() { showToast('Grup silindi.','warn'); }); },
+      'Yine de Sil', 'warning'
+    );
+    return;
+  }
+  showConfirm(
+    'Grubu Sil',
+    '"' + name + '" grubu silinecek.',
+    function() { db.ref('groups/'+id).remove().then(function() { showToast('Grup silindi.','warn'); }); }
+  );
+}
+
+function renderAdminGroups(groups) {
+  allGroups = groups;
+  const list = document.getElementById('admin-group-list');
+  if(!list) return;
+  const entries = Object.entries(groups).sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+  if(!entries.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon"><i class="ph ph-tag"></i></div>
+      <div class="empty-state-title">Grup eklenmemiş</div>
+      <div class="empty-state-sub">Yukarıdan grup ekleyerek ürünleri kategorilere ayırabilirsin.</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = entries.map(([id,g]) => {
+    const count = Object.values(allProducts).filter(p => p.category === g.name).length;
+    return `<div class="admin-product-item">
+      <div style="width:40px;height:40px;border-radius:var(--r-sm);background:var(--rose-pale);display:flex;align-items:center;justify-content:center;color:var(--rose);font-size:18px;flex-shrink:0;">
+        <i class="ph ph-tag"></i>
+      </div>
+      <div class="admin-product-body">
+        <div class="admin-product-name">${escHtml(g.name||'')}</div>
+        <div class="admin-product-desc">${count} ürün</div>
+      </div>
+      <div class="admin-product-actions">
+        <button class="btn-edit" onclick="openEditGroup('${id}','${escHtml(g.name||'')}')" style="font-size:11px;padding:8px 14px;">
+          <i class="ph ph-pencil"></i> Düzenle
+        </button>
+        <button class="btn-danger" onclick="deleteGroup('${id}','${escHtml(g.name||'')}')" style="font-size:11px;padding:8px 14px;">
+          <i class="ph ph-trash"></i> Sil
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateCategoryDropdown(groups) {
+  const sel = document.getElementById('product-category');
+  if(!sel) return;
+  const current = sel.value;
+  const entries = Object.entries(groups).sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+  sel.innerHTML = '<option value="">— Grup seç —</option>'
+    + entries.map(([id,g]) => `<option value="${escHtml(g.name||'')}" ${current===g.name?'selected':''}>${escHtml(g.name||'')}</option>`).join('');
+}
+
 // ── ADMIN: STORES ─────────────────────────────────
 function createStore() {
   const name     = document.getElementById('store-name-input').value.trim();
@@ -2976,6 +3378,31 @@ function togglePassVis(inputId, btn) {
 }
 
 
+
+// ── MAĞAZA SAYAÇ ──────────────────────────────────
+let timerInterval = null;
+
+function startOrderTimers() {
+  if(timerInterval) clearInterval(timerInterval);
+  updateOrderTimers();
+  timerInterval = setInterval(updateOrderTimers, 60000); // her dakika güncelle
+}
+
+function updateOrderTimers() {
+  Object.entries(allOrders).forEach(([id, o]) => {
+    if(o.status === 'kargo' || o.status === 'iptal') return;
+    const el = document.getElementById('timer-'+id);
+    if(!el) return;
+    const start = (o.timeline && o.timeline.beklemede) || o.createdAt;
+    if(!start) return;
+    const ms   = Date.now() - start;
+    const days = Math.floor(ms / 86400000);
+    const hrs  = Math.floor((ms % 86400000) / 3600000);
+    if(days > 0) el.textContent = '⏱ ' + days + ' gün ' + hrs + ' saat';
+    else if(hrs > 0) el.textContent = '⏱ ' + hrs + ' saat';
+    else el.textContent = '⏱ Az önce';
+  });
+}
 
 // Başlangıçta loading göster
 showLoading();
