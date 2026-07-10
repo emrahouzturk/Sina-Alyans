@@ -560,6 +560,23 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 .step.active::before { background:var(--rose); border-color:var(--rose); box-shadow:0 0 0 3px rgba(200,36,76,.2); }
 .step.active { color:var(--rose); font-weight:700; }
 
+/* ── RAPOR BARS ── */
+.rapor-bar-wrap { margin-bottom:10px; }
+.rapor-bar-label { display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px; }
+.rapor-bar-label span:first-child { font-weight:600; color:var(--ink); max-width:65%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rapor-bar-label span:last-child  { font-weight:800; color:var(--rose); }
+.rapor-bar-track { height:8px; background:var(--bg); border-radius:100px; overflow:hidden; }
+.rapor-bar-fill  { height:100%; background:linear-gradient(90deg,var(--rose),#e05080); border-radius:100px; transition:width .5s ease; }
+.rapor-bar-fill.gold { background:linear-gradient(90deg,var(--gold),#d4b070); }
+.rapor-bar-fill.blue { background:linear-gradient(90deg,#3060c0,#6090e0); }
+.rapor-bar-fill.green { background:linear-gradient(90deg,var(--success),#40c080); }
+.rapor-bar-fill.purple { background:linear-gradient(90deg,#7030c0,#a060e0); }
+
+@media(max-width:600px) {
+  #rapor-grid { grid-template-columns:1fr !important; }
+  #rapor-grid .card[style*="grid-column"] { grid-column:1 !important; }
+}
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px) {
   .top-bar { padding:0 12px; gap:6px; height:56px; }
@@ -916,6 +933,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     <button class="nav-tab" onclick="switchTab('admin','gruplar',this)">
       <i class="ph ph-tag"></i> Gruplar
     </button>
+    <button class="nav-tab" onclick="switchTab('admin','raporlar',this);renderRaporlar()">
+      <i class="ph ph-chart-bar"></i> Raporlar
+    </button>
   </div>
   <!-- Pages -->
   <div class="page-content">
@@ -1055,6 +1075,72 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <div class="empty-state-icon"><i class="ph ph-tag"></i></div>
           <div class="empty-state-title">Grup eklenmemiş</div>
           <div class="empty-state-sub">Yukarıdan grup ekleyerek ürünleri kategorilere ayırabilirsin.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAPORLAR -->
+    <div class="page" id="page-admin-raporlar">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Raporlar</div>
+          <div class="section-sub">Sipariş analizleri ve istatistikler</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <select class="select-field" id="rapor-period" onchange="renderRaporlar()" style="font-size:11px;padding:7px 28px 7px 10px;">
+            <option value="all">Tüm Zamanlar</option>
+            <option value="month">Bu Ay</option>
+            <option value="week">Bu Hafta</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Özet satırı -->
+      <div class="stats-grid" id="rapor-ozet-grid" style="margin-bottom:20px;"></div>
+
+      <!-- Grid: 2 kolon -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="rapor-grid">
+        <!-- Mağaza sıralaması -->
+        <div class="card" style="grid-column:1/-1;">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+            <i class="ph ph-storefront" style="color:var(--rose);"></i> Mağaza Bazlı Sipariş
+          </div>
+          <div id="rapor-magaza-list"></div>
+        </div>
+        <!-- Model sıralaması -->
+        <div class="card">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+            <i class="ph ph-diamond" style="color:var(--rose);"></i> En Çok Giden Modeller
+          </div>
+          <div id="rapor-model-list"></div>
+        </div>
+        <!-- Renk dağılımı -->
+        <div class="card">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+            <i class="ph ph-palette" style="color:var(--rose);"></i> Renk Dağılımı
+          </div>
+          <div id="rapor-renk-list"></div>
+        </div>
+        <!-- Kalınlık dağılımı -->
+        <div class="card">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+            <i class="ph ph-ruler" style="color:var(--rose);"></i> Kalınlık Dağılımı (mm)
+          </div>
+          <div id="rapor-kalinlik-list"></div>
+        </div>
+        <!-- Cinsiyet dağılımı -->
+        <div class="card">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+            <i class="ph ph-users" style="color:var(--rose);"></i> Cinsiyet Dağılımı
+          </div>
+          <div id="rapor-cinsiyet-list"></div>
+        </div>
+        <!-- Durum dağılımı -->
+        <div class="card">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+            <i class="ph ph-flag" style="color:var(--rose);"></i> Durum Dağılımı
+          </div>
+          <div id="rapor-durum-list"></div>
         </div>
       </div>
     </div>
@@ -2695,6 +2781,150 @@ function saveProduct() {
 
   // base64 URL zaten pendingProductPhotoUrl'de hazır
   doSave(pendingProductPhotoUrl || undefined);
+}
+
+// ── RAPORLAR ─────────────────────────────────────────
+function renderRaporlar() {
+  const period = document.getElementById('rapor-period') ? document.getElementById('rapor-period').value : 'all';
+  const now = Date.now();
+  const weekMs  = 7 * 86400000;
+  const monthMs = 30 * 86400000;
+
+  let orders = Object.values(allOrders).filter(o => o.status !== 'iptal');
+  if(period === 'week')  orders = orders.filter(o => (now - o.createdAt) <= weekMs);
+  if(period === 'month') orders = orders.filter(o => (now - o.createdAt) <= monthMs);
+
+  const total    = orders.length;
+  const katalog  = orders.filter(o => o.type !== 'ozel').length;
+  const ozel     = orders.filter(o => o.type === 'ozel').length;
+  const bekleyen = orders.filter(o => o.status === 'beklemede').length;
+
+  // Özet kartlar
+  document.getElementById('rapor-ozet-grid').innerHTML = [
+    ['Toplam Sipariş', total, 'var(--ink)'],
+    ['Katalog', katalog, '#1a4a9c'],
+    ['Özel', ozel, 'var(--gold)'],
+    ['Beklemede', bekleyen, 'var(--warn)'],
+  ].map(([l,v,col]) => `
+    <div class="stat-card">
+      <div class="stat-label">${l}</div>
+      <div class="stat-value" style="color:${col};">${v}</div>
+    </div>`).join('');
+
+  // ── MAĞAZA SIRALAMASI ──
+  const magMap = {};
+  orders.forEach(o => {
+    const k = o.storeName || 'Bilinmiyor';
+    if(!magMap[k]) magMap[k] = { count:0, bekleyen:0, isleme:0, hazir:0, kargo:0 };
+    magMap[k].count++;
+    if(magMap[k][o.status] !== undefined) magMap[k][o.status]++;
+  });
+  const magSorted = Object.entries(magMap).sort((a,b)=>b[1].count-a[1].count);
+  const magMax = magSorted[0] ? magSorted[0][1].count : 1;
+  document.getElementById('rapor-magaza-list').innerHTML = magSorted.length
+    ? magSorted.map(([name,d]) => `
+      <div class="rapor-bar-wrap">
+        <div class="rapor-bar-label">
+          <span>${escHtml(name)}</span>
+          <span>${d.count} sipariş</span>
+        </div>
+        <div class="rapor-bar-track"><div class="rapor-bar-fill" style="width:${Math.round(d.count/magMax*100)}%"></div></div>
+        <div style="font-size:10px;color:var(--ink-dim);margin-top:3px;">
+          Bekleyen: ${d.beklemede} · İşlemde: ${d.isleme} · Hazır: ${d.hazir} · Kargo: ${d.kargo}
+        </div>
+      </div>`).join('')
+    : '<div class="empty-state" style="padding:24px;"><div class="empty-state-title">Veri yok</div></div>';
+
+  // ── MODEL SIRALAMASI ──
+  const modelMap = {};
+  orders.filter(o=>o.type!=='ozel').forEach(o => {
+    const k = (o.productCode||'') + (o.productName ? ' – '+o.productName : '');
+    modelMap[k] = (modelMap[k]||0) + 1;
+  });
+  const modelSorted = Object.entries(modelMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const modelMax = modelSorted[0] ? modelSorted[0][1] : 1;
+  document.getElementById('rapor-model-list').innerHTML = modelSorted.length
+    ? modelSorted.map(([name,cnt],i) => `
+      <div class="rapor-bar-wrap">
+        <div class="rapor-bar-label"><span>${escHtml(name)}</span><span>${cnt}</span></div>
+        <div class="rapor-bar-track"><div class="rapor-bar-fill blue" style="width:${Math.round(cnt/modelMax*100)}%"></div></div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
+
+  // ── RENK DAĞILIMI ──
+  const renkMap = {};
+  orders.filter(o=>o.renk).forEach(o => {
+    const k = renkLabel(o.renk);
+    renkMap[k] = (renkMap[k]||0) + 1;
+  });
+  const renkColors = { 'Sarı':'#f5c842', 'Beyaz':'#b0b0c0', 'Rose':'#e8a0b0', 'Mix':'linear-gradient(135deg,#f5c842,#e8a0b0)' };
+  const renkSorted = Object.entries(renkMap).sort((a,b)=>b[1]-a[1]);
+  const renkMax = renkSorted[0] ? renkSorted[0][1] : 1;
+  document.getElementById('rapor-renk-list').innerHTML = renkSorted.length
+    ? renkSorted.map(([name,cnt]) => `
+      <div class="rapor-bar-wrap">
+        <div class="rapor-bar-label">
+          <span style="display:flex;align-items:center;gap:6px;">
+            <span style="width:10px;height:10px;border-radius:50%;background:${renkColors[name]||'#ccc'};flex-shrink:0;border:1px solid rgba(0,0,0,.08);"></span>
+            ${escHtml(name)}
+          </span>
+          <span>${cnt}</span>
+        </div>
+        <div class="rapor-bar-track"><div class="rapor-bar-fill gold" style="width:${Math.round(cnt/renkMax*100)}%"></div></div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
+
+  // ── KALINLIK DAĞILIMI ──
+  const kalinMap = {};
+  orders.filter(o=>o.kalinlik).forEach(o => {
+    const k = o.kalinlik + ' mm';
+    kalinMap[k] = (kalinMap[k]||0) + 1;
+  });
+  const kalinSorted = Object.entries(kalinMap).sort((a,b) => parseFloat(a[0])-parseFloat(b[0]));
+  const kalinMax = kalinSorted.length ? Math.max(...kalinSorted.map(([,v])=>v)) : 1;
+  document.getElementById('rapor-kalinlik-list').innerHTML = kalinSorted.length
+    ? kalinSorted.map(([name,cnt]) => `
+      <div class="rapor-bar-wrap">
+        <div class="rapor-bar-label"><span>${escHtml(name)}</span><span>${cnt}</span></div>
+        <div class="rapor-bar-track"><div class="rapor-bar-fill green" style="width:${Math.round(cnt/kalinMax*100)}%"></div></div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
+
+  // ── CİNSİYET DAĞILIMI ──
+  const cinsMap = {};
+  orders.filter(o=>o.cinsiyet).forEach(o => {
+    const k = cinsiyetLabel(o.cinsiyet);
+    cinsMap[k] = (cinsMap[k]||0) + 1;
+  });
+  const cinsSorted = Object.entries(cinsMap).sort((a,b)=>b[1]-a[1]);
+  const cinsMax = cinsSorted[0] ? cinsSorted[0][1] : 1;
+  document.getElementById('rapor-cinsiyet-list').innerHTML = cinsSorted.length
+    ? cinsSorted.map(([name,cnt]) => `
+      <div class="rapor-bar-wrap">
+        <div class="rapor-bar-label"><span>${escHtml(name)}</span><span>${cnt}</span></div>
+        <div class="rapor-bar-track"><div class="rapor-bar-fill purple" style="width:${Math.round(cnt/cinsMax*100)}%"></div></div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
+
+  // ── DURUM DAĞILIMI ──
+  const durumMap = {};
+  Object.values(allOrders).forEach(o => {
+    const k = STATUS_LABELS[o.status] || o.status;
+    durumMap[k] = (durumMap[k]||0) + 1;
+  });
+  const durumColors = { 'Beklemede':'status-beklemede','İşleme Alındı':'status-isleme','Hazır':'status-hazir','Kargoya Verildi':'status-kargo','İptal':'status-iptal' };
+  const durumSorted = Object.entries(durumMap).sort((a,b)=>b[1]-a[1]);
+  const durumMax = durumSorted[0] ? durumSorted[0][1] : 1;
+  document.getElementById('rapor-durum-list').innerHTML = durumSorted.length
+    ? durumSorted.map(([name,cnt]) => `
+      <div class="rapor-bar-wrap">
+        <div class="rapor-bar-label">
+          <span><span class="status-badge ${durumColors[name]||''}" style="font-size:9px;padding:2px 8px;">${escHtml(name)}</span></span>
+          <span style="font-weight:800;color:var(--ink);">${cnt}</span>
+        </div>
+        <div class="rapor-bar-track"><div class="rapor-bar-fill" style="width:${Math.round(cnt/durumMax*100)}%"></div></div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
 }
 
 // ── DEMO ÜRÜNLER ─────────────────────────────────
