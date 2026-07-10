@@ -562,13 +562,40 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 
 /* ── RESPONSIVE ── */
 @media(max-width:768px) {
-  .top-bar { padding:0 14px; }
-  .page-content { padding:16px 14px; }
-  .product-grid { grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
-  .stats-grid { grid-template-columns:1fr 1fr; }
+  .top-bar { padding:0 12px; gap:6px; height:56px; }
+  .top-bar-title { display:none; }
+  .top-bar-sep { display:none; }
+  .page-content { padding:14px 12px; }
+  .product-grid { grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px; }
+  .stats-grid { grid-template-columns:1fr 1fr; gap:8px; }
   .detail-grid { grid-template-columns:1fr; }
-  .modal-footer { flex-direction:column-reverse; }
-  .modal-footer .btn-primary, .modal-footer .btn-secondary { width:100%; text-align:center; justify-content:center; }
+  .modal-footer { flex-direction:column-reverse; gap:8px; }
+  .modal-footer .btn-primary, .modal-footer .btn-secondary, .modal-footer .btn-edit { width:100%; text-align:center; justify-content:center; }
+  .modal-box { border-radius:var(--r-md); }
+  .modal-body { padding:16px; }
+  .modal-header { padding:16px; }
+  .section-title { font-size:16px; }
+  .nav-tab { padding:12px 10px; font-size:11px; gap:4px; }
+  .filter-row { gap:6px; }
+  .filter-chip { padding:6px 10px; font-size:10px; }
+  .order-item { gap:10px; padding:14px; }
+  .order-item-img { width:52px; height:52px; font-size:20px; }
+  .admin-product-img { width:56px; height:56px; }
+  .admin-product-actions { flex-direction:column; gap:4px; }
+  .color-picker { gap:6px; }
+  .color-btn { padding:8px 8px; font-size:11px; }
+  .seg-btn { padding:10px 6px; font-size:11px; }
+  .stepper-btn { width:44px; height:44px; font-size:20px; }
+  .stepper-field { font-size:17px !important; }
+  .stat-card { padding:12px 14px; }
+  .stat-value { font-size:22px; }
+  .btn-ghost, .btn-solid { padding:7px 10px; font-size:10px; }
+}
+@media(max-width:400px) {
+  .product-grid { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .nav-tab { padding:11px 6px; font-size:10px; }
+  .nav-tab i { display:none; }
+  .top-store-badge { max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; }
 }
 
 /* ── ZOOM MODAL ── */
@@ -660,6 +687,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     </button>
     <button class="nav-tab" onclick="switchTab('magaza','ozel',this)">
       <i class="ph ph-star"></i> Özel Sipariş
+    </button>
+    <button class="nav-tab" onclick="switchTab('magaza','yardim',this)">
+      <i class="ph ph-question"></i> Yardım
     </button>
   </div>
   <!-- Pages -->
@@ -760,6 +790,93 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       </div>
     </div>
 
+    <!-- YARDIM -->
+    <div class="page" id="page-magaza-yardim">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Kullanım Kılavuzu</div>
+          <div class="section-sub">Sistemi nasıl kullanacağını adım adım anlatan rehber</div>
+        </div>
+      </div>
+
+      <!-- Giriş -->
+      <div class="card" style="margin-bottom:14px; border-left:4px solid var(--rose);">
+        <div style="font-size:13px; font-weight:800; color:var(--rose); margin-bottom:8px;">
+          <i class="ph ph-sign-in"></i> Sisteme Giriş
+        </div>
+        <p style="font-size:12px; color:var(--ink-mid); line-height:1.8; margin:0;">
+          Sana verilen <b>kullanıcı adı</b> ve <b>şifre</b> ile giriş yapıyorsun. Kullanıcı adın genellikle mağaza adın olur. Şifreni kimseyle paylaşma.
+        </p>
+      </div>
+
+      <!-- Katalog -->
+      <div class="card" style="margin-bottom:14px; border-left:4px solid var(--gold);">
+        <div style="font-size:13px; font-weight:800; color:var(--gold); margin-bottom:8px;">
+          <i class="ph ph-squares-four"></i> Katalog — Sipariş Verme
+        </div>
+        <div style="font-size:12px; color:var(--ink-mid); line-height:1.8;">
+          <b>1.</b> Katalog sekmesinden ürünlere bak. Fotoğrafa tıklarsan büyür.<br>
+          <b>2.</b> Sipariş vermek istediğin ürünün <b>adına veya açıklamasına tıkla</b>.<br>
+          <b>3.</b> Açılan formda şunları doldur:<br>
+          &nbsp;&nbsp;• <b>Müşteri adı soyadı</b> — zorunlu<br>
+          &nbsp;&nbsp;• <b>Cinsiyet</b> — Kadın / Erkek / Çift seç<br>
+          &nbsp;&nbsp;• <b>Ölçü</b> — + ve − tuşlarıyla ya da direkt yazarak gir (12, 12.5, 13…)<br>
+          &nbsp;&nbsp;• <b>Kalınlık</b> — ürünün standart kalınlığı gelir, müşteri farklı isterse değiştir<br>
+          &nbsp;&nbsp;• <b>Altın rengi</b> — Sarı / Beyaz / Rose / Mix<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;Mix seçersen açıklama kutusuna detay yaz (ör: dış sarı iç rose)<br>
+          &nbsp;&nbsp;• <b>İç yazı</b> — Çift seçtiysen kadın ve erkek için ayrı ayrı doldurabilirsin<br>
+          &nbsp;&nbsp;• <b>Semboller</b> — ♥ ∞ ★ ☽ butonlarına her basışta yazıya eklenir<br>
+          &nbsp;&nbsp;• <b>Not</b> — eklemek istediğin başka bir şey varsa buraya yaz<br>
+          <b>4.</b> "Sipariş Gönder"e bas. Sipariş anında admin paneline düşer.
+        </div>
+      </div>
+
+      <!-- Sipariş Takip -->
+      <div class="card" style="margin-bottom:14px; border-left:4px solid #1a4a9c;">
+        <div style="font-size:13px; font-weight:800; color:#1a4a9c; margin-bottom:8px;">
+          <i class="ph ph-clipboard-text"></i> Siparişlerim — Takip
+        </div>
+        <div style="font-size:12px; color:var(--ink-mid); line-height:1.8;">
+          Verdiğin tüm siparişleri bu sekmede görebilirsin. Her siparişin bir durumu vardır:<br><br>
+          <span class="status-badge status-beklemede" style="font-size:10px;">Beklemede</span>
+          &nbsp;Admin henüz görmedi veya işleme almadı.<br><br>
+          <span class="status-badge status-isleme" style="font-size:10px;">İşleme Alındı</span>
+          &nbsp;Admin onayladı, üretim başladı. Artık düzenleyemezsin.<br><br>
+          <span class="status-badge status-hazir" style="font-size:10px;">Hazır</span>
+          &nbsp;Ürün tamamlandı, teslim için hazır.<br><br>
+          <span class="status-badge status-kargo" style="font-size:10px;">Kargoya Verildi</span>
+          &nbsp;Ürün kargoya teslim edildi.<br><br>
+          <b>Önemli:</b> Sipariş "İşleme Alındı" durumuna geçtikten sonra düzenleme yapılamazsın. Hata yaptıysan hemen admin ile iletişime geç.
+        </div>
+      </div>
+
+      <!-- Özel Sipariş -->
+      <div class="card" style="margin-bottom:14px; border-left:4px solid var(--rose-dim);">
+        <div style="font-size:13px; font-weight:800; color:var(--rose-dim); margin-bottom:8px;">
+          <i class="ph ph-star"></i> Özel Sipariş
+        </div>
+        <p style="font-size:12px; color:var(--ink-mid); line-height:1.8; margin:0;">
+          Katalogda olmayan bir model istiyorsan <b>Özel Sipariş</b> sekmesini kullan. Müşterinin fotoğrafını yükle, tüm detayları açıklama kutusuna yaz. Admin tarafından değerlendirilir.
+        </p>
+      </div>
+
+      <!-- İpuçları -->
+      <div class="card" style="border-left:4px solid var(--success);">
+        <div style="font-size:13px; font-weight:800; color:var(--success); margin-bottom:8px;">
+          <i class="ph ph-lightbulb"></i> Dikkat Edilecekler
+        </div>
+        <div style="font-size:12px; color:var(--ink-mid); line-height:1.8;">
+          ✓ Müşteri adını tam ve doğru yaz, karışıklık olmasın.<br>
+          ✓ Ölçüyü müşteriyle birlikte ölçerek gir, tahmini girme.<br>
+          ✓ Çift siparişte kadın ve erkek ölçülerini ayrı ayrı doldur.<br>
+          ✓ Mix renk seçtiysen mutlaka açıklama yaz.<br>
+          ✓ Sipariş verdikten sonra "Siparişlerim"den durumunu takip et.<br>
+          ✓ Sorun yaşarsan adminle iletişime geç.
+        </div>
+      </div>
+
+    </div><!-- /yardim -->
+
   </div><!-- /page-content -->
 </div><!-- /screen-magaza -->
 
@@ -825,7 +942,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <button class="btn-ghost" onclick="exportOrdersPDF()" style="font-size:11px;">
             <i class="ph ph-file-pdf"></i> PDF
           </button>
-
+          <button class="btn-danger" onclick="resetAllOrders()" style="font-size:11px;">
+            <i class="ph ph-trash"></i> Sıfırla
+          </button>
         </div>
       </div>
       <div class="filter-row">
@@ -850,11 +969,17 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       <div class="section-header">
         <div class="section-title">Ürün Kataloğu</div>
         <div style="display:flex;gap:8px;">
+          <button class="btn-ghost" onclick="exportCatalogPDF()" style="font-size:11px;">
+            <i class="ph ph-file-pdf"></i> Katalog PDF
+          </button>
           <button class="btn-ghost" onclick="loadDemoProducts()" style="font-size:11px;">
             <i class="ph ph-sparkle"></i> Demo Yükle
           </button>
           <button class="btn-danger" onclick="clearDemoProducts()" style="font-size:11px;">
             <i class="ph ph-trash"></i> Demoyu Temizle
+          </button>
+          <button class="btn-danger" onclick="resetAllProducts()" style="font-size:11px;background:#fff0f3;border-color:#c8244c;color:#c8244c;font-weight:800;">
+            <i class="ph ph-warning"></i> Tümünü Sil
           </button>
         </div>
       </div>
@@ -1479,19 +1604,12 @@ function stepVal(id, delta) {
 // Sembol alanına ekle/çıkar
 function toggleSymbolField(inputId, emoji, btn) {
   const el = document.getElementById(inputId);
-  const siblings = btn.closest('.symbol-picker').querySelectorAll('.symbol-btn');
-  // Sadece bu butonu toggle et
-  const isActive = btn.classList.contains('active');
-  siblings.forEach(b => b.classList.remove('active'));
-  if(!isActive) {
-    btn.classList.add('active');
-    // Yazının sonuna ekle (varsa boşluk bırak)
-    const cur = el.value;
-    el.value = cur ? cur + ' ' + emoji : emoji;
-  } else {
-    // Çıkar
-    el.value = el.value.replace(' ' + emoji, '').replace(emoji + ' ', '').replace(emoji, '').trim();
-  }
+  // Her tıklamada yazının sonuna ekle — birden fazla kullanılabilir
+  const cur = el.value;
+  el.value = cur ? cur + ' ' + emoji : emoji;
+  // Kısa süreli aktif görünüm
+  btn.classList.add('active');
+  setTimeout(function() { btn.classList.remove('active'); }, 250);
 }
 
 function selectSeg(group, value, btn) {
@@ -2335,6 +2453,139 @@ const DEMO_PRODUCTS = [
     _isDemo: true
   }
 ];
+
+// ── KATALOG PDF ──────────────────────────────────
+async function exportCatalogPDF() {
+  const prods = Object.entries(allProducts).filter(([,p]) => p && p.active !== false);
+  if(!prods.length) { showToast('Katalogda ürün yok.','warn'); return; }
+  showLoading();
+
+  // Kategorilere göre grupla
+  const groups = {};
+  prods.forEach(([id,p]) => {
+    const cat = p.category || 'Diğer';
+    if(!groups[cat]) groups[cat] = [];
+    groups[cat].push([id,p]);
+  });
+
+  // Her ürün için base64 fotoğraf hazırla
+  const photoMap = {};
+  await Promise.all(prods.map(async ([id,p]) => {
+    if(p.photoUrl) {
+      photoMap[id] = p.photoUrl.startsWith('data:') ? p.photoUrl : await imgToBase64(p.photoUrl);
+    }
+  }));
+
+  let groupsHtml = '';
+  for(const [cat, items] of Object.entries(groups)) {
+    const itemsHtml = items.map(([id,p]) => {
+      const photo = photoMap[id]
+        ? `<img src="${photoMap[id]}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;display:block;">`
+        : `<div style="width:100%;height:100%;background:#f5f3f7;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;">💍</div>`;
+      return `
+        <div style="break-inside:avoid;background:#fff;border:1px solid #e8e4ec;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="width:100%;aspect-ratio:1/1;overflow:hidden;">${photo}</div>
+          <div style="padding:12px;">
+            <div style="font-size:9px;font-weight:800;color:#c8244c;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">${escHtml(p.code||'')}</div>
+            <div style="font-size:13px;font-weight:800;color:#1a1a24;margin-bottom:4px;line-height:1.3;">${escHtml(p.name||'')}</div>
+            ${p.desc ? `<div style="font-size:10px;color:#9090a0;line-height:1.5;margin-bottom:6px;">${escHtml(p.desc)}</div>` : ''}
+            ${p.thickness ? `<div style="display:inline-block;background:#fdf0f3;color:#c8244c;font-size:9px;font-weight:800;padding:3px 8px;border-radius:100px;">${escHtml(p.thickness)} mm</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    groupsHtml += `
+      <div style="margin-bottom:28px;break-inside:avoid;">
+        <div style="font-size:14px;font-weight:800;color:#1a1a24;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #c8244c;display:flex;align-items:center;gap:8px;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#c8244c;"></span>
+          ${escHtml(cat)}
+          <span style="font-size:11px;color:#9090a0;font-weight:400;">(${items.length} model)</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          ${itemsHtml}
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('print-content').innerHTML = `
+    <style>
+      @page { size:A4; margin:18mm 14mm; }
+      @media print { body>*:not(#print-area){display:none!important;} #print-area{display:block!important;} }
+    </style>
+    <div style="font-family:'Segoe UI',Arial,sans-serif;color:#1a1a24;">
+      <!-- KAPAK BAŞLIĞI -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:3px solid #c8244c;margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" style="height:44px;" crossorigin="anonymous">
+          <div>
+            <div style="font-size:18px;font-weight:800;color:#1a1a24;letter-spacing:.02em;">ALYANS KATALOĞu</div>
+            <div style="font-size:11px;color:#9090a0;margin-top:2px;">${new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:10px;color:#9090a0;">Toplam</div>
+          <div style="font-size:22px;font-weight:800;color:#c8244c;">${prods.length}</div>
+          <div style="font-size:10px;color:#9090a0;">Model</div>
+        </div>
+      </div>
+      <!-- GRUPLAR -->
+      ${groupsHtml}
+      <!-- ALT BİLGİ -->
+      <div style="margin-top:24px;padding-top:12px;border-top:1px solid #e8e4ec;display:flex;justify-content:space-between;font-size:9px;color:#b0b0c0;">
+        <span>Sina Pırlanta · Alyans Sipariş Sistemi</span>
+        <span>Bu katalog ${new Date().toLocaleDateString('tr-TR')} tarihinde oluşturulmuştur.</span>
+      </div>
+    </div>`;
+
+  hideLoading();
+  window.print();
+}
+
+// ── SIFIRLAMA ────────────────────────────────────
+function resetAllOrders() {
+  showConfirm(
+    'Tüm Siparişleri Sıfırla',
+    'Tüm siparişler kalıcı olarak silinecek. Bu işlem geri alınamaz!',
+    function() {
+      showLoading();
+      db.ref('orders').remove()
+        .then(function() {
+          hideLoading();
+          showToast('Tüm siparişler silindi.', 'warn');
+        })
+        .catch(function(e) { hideLoading(); showToast('Hata: '+e.message,'error'); });
+    },
+    'Evet, Sil',
+    'warning'
+  );
+}
+
+function resetAllProducts() {
+  showConfirm(
+    'Tüm Ürünleri Sil',
+    'Katalogdaki TÜM ürünler silinecek. Bu işlem geri alınamaz!',
+    function() {
+      // İkinci onay — kritik işlem
+      showConfirm(
+        'Emin misin?',
+        'Bu işlemi geri alamazsın. Tüm ürünler silinecek.',
+        function() {
+          showLoading();
+          db.ref('products').remove()
+            .then(function() {
+              hideLoading();
+              showToast('Tüm ürünler silindi.', 'warn');
+            })
+            .catch(function(e) { hideLoading(); showToast('Hata: '+e.message,'error'); });
+        },
+        'Evet, Sil',
+        'warning'
+      );
+    },
+    'Devam Et',
+    'warning'
+  );
+}
 
 function loadDemoProducts() {
   if(!confirm('6 demo ürün eklenecek. Devam et?')) return;
