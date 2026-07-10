@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -4995,44 +4996,44 @@ function cleanSymbols(txt) {
 }
 
 function buildTelegramMsg(order) {
-  var nl = "\n";
-  var msg = "";
-  msg += "SİNA PIRLANTA" + nl;
-  msg += (order.storeName||"") + nl;
-  msg += "——————————————" + nl;
-  msg += "YENİ SİPARİŞ — " + (order.orderNo||"") + nl;
-  msg += nl;
-  msg += "Musteri: " + (order.musteri||"") + nl;
-  if(order.telefon) msg += "Tel: " + order.telefon + nl;
+  var parts = [];
+  parts.push("SINA PIRLANTA");
+  parts.push(order.storeName || "");
+  parts.push("——————————————");
+  parts.push("YENI SIPARIS — " + (order.orderNo || ""));
+  parts.push("");
+  parts.push("Musteri: " + (order.musteri || ""));
+  if(order.telefon) parts.push("Tel: " + order.telefon);
   if(order.type === "ozel") {
-    msg += "Tip: Ozel Siparis" + nl;
-    msg += (order.detay||"").substring(0,200) + nl;
+    parts.push("Tip: Ozel Siparis");
+    parts.push((order.detay || "").substring(0, 200));
   } else {
-    msg += "Urun: " + (order.productCode||"") + " " + (order.productName||"") + nl;
-    if(order.cinsiyet) msg += "Cinsiyet: " + cinsiyetLabel(order.cinsiyet) + nl;
-    if(order.olcuKadin) msg += "Kadin olcusu: " + order.olcuKadin + nl;
-    if(order.olcuErkek) msg += "Erkek olcusu: " + order.olcuErkek + nl;
-    if(order.kalinlik)  msg += "Kalinlik: " + order.kalinlik + " mm" + nl;
+    parts.push("Urun: " + (order.productCode || "") + " " + (order.productName || ""));
+    if(order.cinsiyet) parts.push("Cinsiyet: " + cinsiyetLabel(order.cinsiyet));
+    if(order.olcuKadin) parts.push("Kadin olcusu: " + order.olcuKadin);
+    if(order.olcuErkek) parts.push("Erkek olcusu: " + order.olcuErkek);
+    if(order.kalinlik) parts.push("Kalinlik: " + order.kalinlik + " mm");
     if(order.cinsiyet === "cift") {
-      if(order.ayarKadin) msg += "Kadin ayar: " + (AYAR_LABEL[order.ayarKadin]||order.ayarKadin) + nl;
-      if(order.ayarErkek) msg += "Erkek ayar: " + (AYAR_LABEL[order.ayarErkek]||order.ayarErkek) + nl;
-      if(order.renkKadin) msg += "Kadin renk: " + renkLabel(order.renkKadin) + (order.mixKadin?" ("+order.mixKadin+")":"") + nl;
-      if(order.renkErkek) msg += "Erkek renk: " + renkLabel(order.renkErkek) + (order.mixErkek?" ("+order.mixErkek+")":"") + nl;
+      if(order.ayarKadin) parts.push("Kadin ayar: " + (AYAR_LABEL[order.ayarKadin] || order.ayarKadin));
+      if(order.ayarErkek) parts.push("Erkek ayar: " + (AYAR_LABEL[order.ayarErkek] || order.ayarErkek));
+      if(order.renkKadin) parts.push("Kadin renk: " + renkLabel(order.renkKadin) + (order.mixKadin ? " (" + order.mixKadin + ")" : ""));
+      if(order.renkErkek) parts.push("Erkek renk: " + renkLabel(order.renkErkek) + (order.mixErkek ? " (" + order.mixErkek + ")" : ""));
     } else {
-      if(order.ayar) msg += "Ayar: " + (AYAR_LABEL[order.ayar]||order.ayar) + nl;
-      if(order.renk) msg += "Renk: " + renkLabel(order.renk) + (order.mixAciklama?" ("+order.mixAciklama+")":"") + nl;
+      if(order.ayar) parts.push("Ayar: " + (AYAR_LABEL[order.ayar] || order.ayar));
+      if(order.renk) parts.push("Renk: " + renkLabel(order.renk) + (order.mixAciklama ? " (" + order.mixAciklama + ")" : ""));
     }
-    if(order.icYaziKadin) msg += "Kadin ic yazi: " + cleanSymbols(order.icYaziKadin) + nl;
-    if(order.icYaziErkek) msg += "Erkek ic yazi: " + cleanSymbols(order.icYaziErkek) + nl;
-    if(order.icYapi)  msg += "Ic yapi: " + (order.icYapi==="dolu"?"Ici Dolu":"Ici Bos") + nl;
+    if(order.icYaziKadin) parts.push("Kadin ic yazi: " + (order.icYaziKadin || ""));
+    if(order.icYaziErkek) parts.push("Erkek ic yazi: " + (order.icYaziErkek || ""));
+    if(order.icYapi) parts.push("Ic yapi: " + (order.icYapi === "dolu" ? "Ici Dolu" : "Ici Bos"));
   }
-  if(order.not) msg += "Not: " + order.not + nl;
-  msg += nl;
-  msg += new Date().toLocaleString("tr-TR");
-  msg += nl + nl;
-  msg += "Sistemi ac: https://emrahouzturk.github.io/sina-alyans/";
-  return msg;
+  if(order.not) parts.push("Not: " + order.not);
+  parts.push("");
+  parts.push(new Date().toLocaleString("tr-TR"));
+  parts.push("");
+  parts.push("Sistemi ac: https://emrahouzturk.github.io/sina-alyans/");
+  return parts.join("\n");
 }
+
 
 // Başlangıçta loading göster
 showLoading();
