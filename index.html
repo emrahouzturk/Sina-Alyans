@@ -863,7 +863,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 <!-- TAM EKRAN FLIP VIEWER -->
 <div id="zoom-overlay" onclick="closeZoom()" style="flex-direction:column;gap:0;">
   <!-- Flip container -->
-  <div class="flip-card" id="zoom-flip" style="width:min(90vw,480px);height:min(90vw,480px);border-radius:16px;" onclick="event.stopPropagation();flipZoom()">
+  <div class="flip-card" id="zoom-flip" style="width:min(90vw,480px);height:min(90vh,600px);border-radius:16px;" onclick="event.stopPropagation();flipZoom()">
     <div class="flip-card-inner">
       <!-- Ön: fotoğraf -->
       <div class="flip-card-front" style="background:#111;border-radius:16px;">
@@ -884,7 +884,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
           <button id="zf-siparis-btn" style="width:100%;background:var(--rose);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Poppins',sans-serif;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
             <i class="ph ph-paper-plane-tilt"></i> Sipariş Ver
           </button>
-          <button onclick="flipZoom()" style="width:100%;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;padding:10px;font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;cursor:pointer;">
+          <button onclick="event.stopPropagation();flipZoom()" style="width:100%;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;padding:10px;font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;cursor:pointer;">
             ← Fotoğrafa Dön
           </button>
         </div>
