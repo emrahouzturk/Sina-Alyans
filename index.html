@@ -3269,30 +3269,33 @@ async function buildAndPrintOrdersPDF(orders) {
     </tr>`;
   }));
 
-  document.getElementById('print-content').innerHTML = `
-    <div style="font-family:sans-serif;max-width:960px;margin:0 auto;padding:24px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;border-bottom:2px solid #c8244c;padding-bottom:12px;">
-        <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" style="height:36px;">
-        <div style="text-align:right;"><div style="font-size:12px;color:#9090a0;">Alyans Sipariş Listesi · ${new Date().toLocaleDateString('tr-TR')}</div><div style="font-size:11px;color:#c8244c;font-weight:700;margin-top:2px;">Gonderen: Admin</div></div>
+  const listHtml = `
+    <div style="font-family:'Poppins',sans-serif;max-width:960px;margin:0 auto;padding:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;border-bottom:2px solid #c8244c;padding-bottom:12px;">
+        <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" style="height:34px;">
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:#9090a0;">Alyans Sipariş Listesi · ${new Date().toLocaleDateString('tr-TR')}</div>
+          <div style="font-size:10px;color:#c8244c;font-weight:700;margin-top:2px;">Gönderen: Admin</div>
+        </div>
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
         <thead><tr style="background:#faf9fb;border-bottom:2px solid #e8e4ec;text-align:left;">
-          <th style="padding:9px 8px;">Foto</th>
-          <th style="padding:9px 8px;">Müşteri / Mağaza</th>
-          <th style="padding:9px 8px;">Ürün</th>
-          <th style="padding:9px 8px;">Detay</th>
-          <th style="padding:9px 8px;">Durum</th>
-          <th style="padding:9px 8px;">Tarih</th>
+          <th style="padding:8px;">Foto</th>
+          <th style="padding:8px;">Müşteri / Mağaza</th>
+          <th style="padding:8px;">Ürün</th>
+          <th style="padding:8px;">Detay</th>
+          <th style="padding:8px;">Durum</th>
+          <th style="padding:8px;">Tarih</th>
         </tr></thead>
         <tbody>${rowsHtml.join('')}</tbody>
       </table>
-      <div style="margin-top:16px;font-size:10px;color:#9090a0;">Toplam: ${orders.length} sipariş</div>
-      <div style="margin-top:20px;padding-top:12px;border-top:1px solid #e8e4ec;text-align:center;">
-        <div style="font-size:10px;color:#b8b0c0;letter-spacing:.08em;">www.sinapirlanta.com</div>
+      <div style="margin-top:14px;font-size:10px;color:#9090a0;">Toplam: ${orders.length} sipariş</div>
+      <div style="margin-top:16px;padding-top:10px;border-top:1px solid #e8e4ec;text-align:center;">
+        <div style="font-size:10px;color:#c0b8cc;letter-spacing:.1em;font-weight:600;">www.sinapirlanta.com</div>
       </div>
     </div>`;
   hideLoading();
-  window.print();
+  printHtml(listHtml);
 }
 
 function exportSingleOrderWhatsapp(orderId) {
@@ -3328,6 +3331,39 @@ function buildWhatsappText(orders) {
   return lines.join('\n');
 }
 
+
+// ── PRINT HELPER ────────────────────────────────────
+function printHtml(html) {
+  const win = window.open('', '_blank', 'width=900,height=700');
+  if(!win) { showToast('Popup engelleyici açık. Lütfen izin ver.','error'); return; }
+  win.document.write(`<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Poppins',sans-serif; background:#fff; color:#1a1a24; }
+  @page { size:A4; margin:14mm 12mm; }
+  @media print {
+    html,body { height:auto !important; }
+    .no-print { display:none !important; }
+  }
+  .print-btn {
+    position:fixed; top:16px; right:16px; z-index:999;
+    background:#c8244c; color:#fff; border:none; border-radius:8px;
+    padding:10px 20px; font-family:'Poppins',sans-serif;
+    font-size:13px; font-weight:700; cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<button class="print-btn no-print" onclick="window.print();setTimeout(()=>window.close(),500)">Yazdır / PDF Kaydet</button>
+${html}
+</body></html>`);
+  win.document.close();
+}
 
 // ── MODAL HELPERS ─────────────────────────────────
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
