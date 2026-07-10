@@ -558,7 +558,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 <div class="screen" id="screen-login">
   <div class="login-card">
     <div class="login-logo">
-      <div class="login-logo-text">Sina Pırlanta</div>
+      <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:48px;">
     </div>
     <div class="login-sub">Alyans Sipariş Sistemi</div>
     <div class="login-field">
@@ -580,7 +580,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 <div class="screen" id="screen-magaza">
   <!-- Top Bar -->
   <div class="top-bar">
-    <div class="top-bar-logo">Sina</div>
+    <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:30px; flex-shrink:0;">
     <div class="top-bar-sep">|</div>
     <div class="top-bar-title">Alyans Siparişleri</div>
     <div class="top-bar-spacer"></div>
@@ -610,6 +610,18 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <div>
           <div class="section-title">Ürün Kataloğu</div>
           <div class="section-sub">Ürüne tıklayarak sipariş ver</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:10px;font-weight:700;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Ürün Grubu</div>
+        <div class="filter-row" id="katalog-kategori-filter">
+          <button class="filter-chip active" onclick="setKatalogFilter('kategori','all',this)">Tümü</button>
+        </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-size:10px;font-weight:700;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;">Kalınlık</div>
+        <div class="filter-row" id="katalog-kalinlik-filter">
+          <button class="filter-chip active" onclick="setKatalogFilter('kalinlik','all',this)">Tümü</button>
         </div>
       </div>
       <div id="product-grid-container" class="product-grid">
@@ -696,11 +708,11 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 <div class="screen" id="screen-admin">
   <!-- Top Bar -->
   <div class="top-bar">
-    <div class="top-bar-logo">Sina</div>
+    <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:30px; flex-shrink:0;">
     <div class="top-bar-sep">|</div>
     <div class="top-bar-title">Admin Paneli</div>
     <div class="top-bar-spacer"></div>
-    <button class="btn-solid" onclick="openModal('modal-add-product')">
+    <button class="btn-solid" onclick="openAddProduct()">
       <i class="ph ph-plus"></i> Ürün Ekle
     </button>
     <button class="btn-ghost" onclick="doLogout()">
@@ -969,9 +981,15 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <label class="field-label">Açıklama</label>
         <textarea class="text-field" id="product-desc" placeholder="Ürün hakkında kısa açıklama…" rows="3"></textarea>
       </div>
-      <div class="form-group">
-        <label class="field-label">Varsayılan Kalınlık (mm)</label>
-        <input type="text" class="text-field" id="product-thickness" placeholder="ör: 5">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="field-label">Ürün Grubu / Kategori</label>
+          <input type="text" class="text-field" id="product-category" placeholder="ör: Klasik, Taşlı, Örgü…">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Varsayılan Kalınlık (mm)</label>
+          <input type="text" class="text-field" id="product-thickness" placeholder="ör: 5">
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1086,6 +1104,8 @@ let allProducts    = {};
 let allOrders      = {};
 let currentOrderFilter = 'all';
 let currentAdminOrderFilter = 'all';
+let katalogFilterKategori = 'all';
+let katalogFilterKalinlik = 'all';
 let selectedColor  = 'sari';
 let selectedSymbols = [];
 let pendingProductPhotoFile = null;
@@ -1200,12 +1220,21 @@ function loadStoreData() {
 
 function renderProductGrid() {
   const container = document.getElementById('product-grid-container');
-  const prods = Object.entries(allProducts).filter(([,p]) => p && p.active !== false);
+  const allActive = Object.entries(allProducts).filter(([,p]) => p && p.active !== false);
+
+  // Dinamik filtre butonları
+  buildKatalogFilters(allActive);
+
+  // Filtrele
+  let prods = allActive;
+  if(katalogFilterKategori !== 'all') prods = prods.filter(([,p]) => (p.category||'') === katalogFilterKategori);
+  if(katalogFilterKalinlik !== 'all') prods = prods.filter(([,p]) => (p.thickness||'') === katalogFilterKalinlik);
+
   if(!prods.length) {
     container.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
       <div class="empty-state-icon"><i class="ph ph-diamond"></i></div>
       <div class="empty-state-title">Ürün bulunamadı</div>
-      <div class="empty-state-sub">Admin henüz ürün eklememiş.</div>
+      <div class="empty-state-sub">${allActive.length ? 'Bu filtreyle eşleşen ürün yok.' : 'Admin henüz ürün eklememiş.'}</div>
     </div>`;
     return;
   }
@@ -1217,13 +1246,42 @@ function renderProductGrid() {
           : `<i class="ph ph-diamond"></i>`}
       </div>
       <div class="product-card-body">
-        <div class="product-card-code">${escHtml(p.code||'')}</div>
+        <div class="product-card-code">${escHtml(p.code||'')}${p.category ? ' · '+escHtml(p.category) : ''}</div>
         <div class="product-card-name">${escHtml(p.name||'')}</div>
         ${p.desc ? `<div class="product-card-desc">${escHtml(p.desc)}</div>` : ''}
         ${p.thickness ? `<div style="margin-top:6px;font-size:10px;color:var(--ink-dim);font-weight:600;">${escHtml(p.thickness)} mm</div>` : ''}
       </div>
     </div>
   `).join('');
+}
+
+function buildKatalogFilters(prods) {
+  // Kategori filtresi
+  const cats = [...new Set(prods.map(([,p]) => p.category||'').filter(Boolean))].sort();
+  const catWrap = document.getElementById('katalog-kategori-filter');
+  if(catWrap) {
+    catWrap.innerHTML = `<button class="filter-chip ${katalogFilterKategori==='all'?'active':''}" onclick="setKatalogFilter('kategori','all',this)">Tümü</button>`
+      + cats.map(c => `<button class="filter-chip ${katalogFilterKategori===c?'active':''}" onclick="setKatalogFilter('kategori','${escHtml(c)}',this)">${escHtml(c)}</button>`).join('');
+  }
+  // Kalınlık filtresi
+  const thicknesses = [...new Set(prods.map(([,p]) => p.thickness||'').filter(Boolean))].sort((a,b) => parseFloat(a)-parseFloat(b));
+  const thickWrap = document.getElementById('katalog-kalinlik-filter');
+  if(thickWrap) {
+    thickWrap.innerHTML = `<button class="filter-chip ${katalogFilterKalinlik==='all'?'active':''}" onclick="setKatalogFilter('kalinlik','all',this)">Tümü</button>`
+      + thicknesses.map(t => `<button class="filter-chip ${katalogFilterKalinlik===t?'active':''}" onclick="setKatalogFilter('kalinlik','${escHtml(t)}',this)">${escHtml(t)} mm</button>`).join('');
+  }
+}
+
+function setKatalogFilter(type, value, btn) {
+  if(type === 'kategori') {
+    katalogFilterKategori = value;
+    document.querySelectorAll('#katalog-kategori-filter .filter-chip').forEach(c=>c.classList.remove('active'));
+  } else {
+    katalogFilterKalinlik = value;
+    document.querySelectorAll('#katalog-kalinlik-filter .filter-chip').forEach(c=>c.classList.remove('active'));
+  }
+  btn.classList.add('active');
+  renderProductGrid();
 }
 
 // ── ORDER MODAL ────────────────────────────────────
@@ -1350,6 +1408,96 @@ function submitOrder() {
       btn.disabled = false;
       showToast('Hata: ' + e.message,'error');
     });
+}
+
+// ── MAĞAZA: SİPARİŞ DÜZENLE ──────────────────────
+function openEditOrder(orderId) {
+  const o = allOrders[orderId];
+  if(!o || o.status !== 'beklemede') { showToast('Bu sipariş artık düzenlenemez.','error'); return; }
+  // Sipariş modalını düzenleme modunda aç
+  if(o.type === 'katalog') {
+    currentOrderProductId = o.productId;
+    selectedColor   = o.renk || 'sari';
+    selectedSymbols = o.semboller ? o.semboller.split(' ').filter(Boolean) : [];
+
+    const p = allProducts[o.productId] || {};
+    document.getElementById('order-modal-title').textContent = 'Siparişi Düzenle';
+    document.getElementById('order-modal-code').textContent  = p.code || o.productCode || '';
+    document.getElementById('order-modal-name').textContent  = p.name || o.productName || '';
+    document.getElementById('order-modal-desc').textContent  = p.desc || '';
+
+    const img = document.getElementById('order-modal-img');
+    const ph  = document.getElementById('order-modal-img-placeholder');
+    if(p.photoUrl || o.productPhoto) {
+      img.src = p.photoUrl||o.productPhoto; img.style.display='block'; ph.style.display='none';
+    } else { img.style.display='none'; ph.style.display=''; }
+
+    document.getElementById('ord-musteri').value   = o.musteri||'';
+    document.getElementById('ord-cinsiyet').value  = o.cinsiyet||'kadin';
+    document.getElementById('ord-adet').value      = o.adet||'tek';
+    document.getElementById('ord-olcu-kadin').value= o.olcuKadin||'';
+    document.getElementById('ord-olcu-erkek').value= o.olcuErkek||'';
+    document.getElementById('ord-kalinlik').value  = o.kalinlik||'';
+    document.getElementById('ord-ic-yazi').value   = o.icYazi||'';
+    document.getElementById('ord-not').value       = o.not||'';
+    document.getElementById('ord-mix-aciklama').value = o.mixAciklama||'';
+    document.getElementById('mix-aciklama-wrap').style.display = selectedColor==='mix' ? '' : 'none';
+
+    // Renk butonları
+    document.querySelectorAll('.color-btn').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('onclick').includes("'"+selectedColor+"'"));
+    });
+    // Sembol butonları
+    document.querySelectorAll('.symbol-btn').forEach(b => {
+      const emoji = b.querySelector('.symbol-label') ? b.textContent.trim().split(' ')[0] : '';
+      b.classList.toggle('active', selectedSymbols.includes(emoji));
+    });
+
+    document.getElementById('ord-cinsiyet').onchange = updateOlcuFields;
+    updateOlcuFields();
+
+    // Submit butonunu güncelle modu yap
+    const btn = document.getElementById('btn-submit-order');
+    btn.innerHTML = '<i class="ph ph-floppy-disk"></i>&nbsp; Güncelle';
+    btn.onclick = function() { updateOrder(orderId); };
+
+    openModal('modal-order');
+  }
+}
+
+function updateOrder(orderId) {
+  const o = allOrders[orderId];
+  if(!o || o.status !== 'beklemede') { showToast('Bu sipariş artık düzenlenemez.','error'); closeModal('modal-order'); return; }
+
+  const musteri = document.getElementById('ord-musteri').value.trim();
+  if(!musteri) { showToast('Müşteri adı zorunlu.','error'); return; }
+
+  const updates = {
+    musteri,
+    cinsiyet:    document.getElementById('ord-cinsiyet').value,
+    adet:        document.getElementById('ord-adet').value,
+    olcuKadin:   document.getElementById('ord-olcu-kadin').value.trim(),
+    olcuErkek:   document.getElementById('ord-olcu-erkek').value.trim(),
+    kalinlik:    document.getElementById('ord-kalinlik').value.trim(),
+    renk:        selectedColor,
+    mixAciklama: selectedColor==='mix' ? document.getElementById('ord-mix-aciklama').value.trim() : '',
+    icYazi:      document.getElementById('ord-ic-yazi').value.trim(),
+    semboller:   selectedSymbols.join(' '),
+    not:         document.getElementById('ord-not').value.trim(),
+    updatedAt:   Date.now()
+  };
+
+  const btn = document.getElementById('btn-submit-order');
+  btn.disabled = true;
+  db.ref('orders/'+orderId).update(updates)
+    .then(function() {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i>&nbsp; Sipariş Gönder';
+      btn.onclick = submitOrder;
+      closeModal('modal-order');
+      showToast('Sipariş güncellendi ✓','success');
+    })
+    .catch(function(e) { btn.disabled=false; showToast('Hata: '+e.message,'error'); });
 }
 
 // ── MAĞAZA ORDERS ────────────────────────────────
@@ -1531,6 +1679,7 @@ function buildOrderCard(id, o, isAdminView) {
   }
 
   const clickAttr = isAdminView ? `onclick="openOrderDetail('${id}')" style="cursor:pointer;"` : '';
+  const editable  = !isAdminView && o.status === 'beklemede';
 
   return `<div class="order-item" ${clickAttr}>
     <div class="order-item-img">${imgHtml}</div>
@@ -1548,7 +1697,11 @@ function buildOrderCard(id, o, isAdminView) {
       ${isAdminView ? `<div style="font-size:11px;color:var(--ink-dim);margin-top:2px;"><i class="ph ph-storefront"></i> ${escHtml(o.storeName||'')}</div>` : ''}
       <div class="order-item-meta">${metaLines.join(' · ')}</div>
       ${o.not ? `<div class="order-item-note">${escHtml(o.not)}</div>` : ''}
-      <div style="font-size:10px;color:var(--ink-dim);margin-top:6px;">${dateStr}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+        <div style="font-size:10px;color:var(--ink-dim);">${dateStr}</div>
+        ${editable ? `<button class="btn-edit" style="font-size:10px;padding:5px 10px;" onclick="openEditOrder('${id}')"><i class="ph ph-pencil-simple"></i> Düzenle</button>` : ''}
+        ${!isAdminView && o.status !== 'beklemede' ? `<div style="font-size:10px;color:var(--ink-dim);"><i class="ph ph-lock-simple"></i> Düzenlenemez</div>` : ''}
+      </div>
     </div>
   </div>`;
 }
@@ -1684,10 +1837,11 @@ function openAddProduct() {
   pendingProductPhotoUrl  = '';
   document.getElementById('product-modal-title').textContent = 'Ürün Ekle';
   document.getElementById('edit-product-id').value = '';
-  document.getElementById('product-code').value    = '';
-  document.getElementById('product-name').value    = '';
-  document.getElementById('product-desc').value    = '';
-  document.getElementById('product-thickness').value = '';
+  document.getElementById('product-code').value     = '';
+  document.getElementById('product-name').value     = '';
+  document.getElementById('product-desc').value     = '';
+  document.getElementById('product-category').value = '';
+  document.getElementById('product-thickness').value= '';
   const prev = document.getElementById('product-photo-preview');
   prev.style.display = 'none'; prev.src = '';
   document.getElementById('product-photo-placeholder').style.display = '';
@@ -1707,6 +1861,7 @@ function openEditProduct(id) {
   document.getElementById('product-code').value     = p.code || '';
   document.getElementById('product-name').value     = p.name || '';
   document.getElementById('product-desc').value     = p.desc || '';
+  document.getElementById('product-category').value = p.category || '';
   document.getElementById('product-thickness').value= p.thickness || '';
   const prev = document.getElementById('product-photo-preview');
   const ph   = document.getElementById('product-photo-placeholder');
@@ -1733,6 +1888,7 @@ function saveProduct() {
     code,
     name,
     desc:      document.getElementById('product-desc').value.trim(),
+    category:  document.getElementById('product-category').value.trim(),
     thickness: document.getElementById('product-thickness').value.trim(),
     active:    true,
     updatedAt: Date.now()
