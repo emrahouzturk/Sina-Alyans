@@ -9,6 +9,37 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sina Alyans">
+<meta name="application-name" content="Sina Alyans">
+<meta name="theme-color" content="#c8244c">
+<link rel="apple-touch-icon" href="https://www.sinapirlanta.com/themes/custom/sina/logo.svg">
+<link rel="manifest" id="pwa-manifest">
+<style>
+  #pwa-install-banner {
+    display:none;
+    position:fixed; bottom:80px; left:16px; right:16px; z-index:8000;
+    background:var(--surface); border:1.5px solid var(--border);
+    border-radius:var(--r-lg); box-shadow:var(--shadow-lg);
+    padding:16px 18px; align-items:center; gap:14px;
+  }
+  #pwa-install-banner.show { display:flex; }
+  #pwa-install-banner img { width:48px; height:48px; border-radius:10px; flex-shrink:0; }
+  .pwa-install-text { flex:1; }
+  .pwa-install-title { font-size:13px; font-weight:800; color:var(--ink); }
+  .pwa-install-sub { font-size:11px; color:var(--ink-dim); margin-top:2px; }
+  .pwa-install-btn {
+    background:var(--rose); color:#fff; border:none; border-radius:var(--r-sm);
+    padding:9px 16px; font-family:'Poppins',sans-serif; font-weight:700;
+    font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0;
+  }
+  .pwa-install-close {
+    background:none; border:none; color:var(--ink-dim); cursor:pointer;
+    font-size:18px; padding:4px; display:flex; align-items:center; flex-shrink:0;
+  }
+</style>
 <style>
 :root {
   --rose:       #c8244c;
@@ -638,6 +669,19 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 </style>
 </head>
 <body>
+
+<!-- PWA INSTALL BANNER -->
+<div id="pwa-install-banner">
+  <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Alyans">
+  <div class="pwa-install-text">
+    <div class="pwa-install-title">Ana Ekrana Ekle</div>
+    <div class="pwa-install-sub">Uygulama gibi kullan, hızlı aç</div>
+  </div>
+  <button class="pwa-install-btn" id="pwa-install-btn">Ekle</button>
+  <button class="pwa-install-close" onclick="dismissInstallBanner()">
+    <i class="ph ph-x"></i>
+  </button>
+</div>
 
 <!-- LOADING -->
 <div class="loading-overlay" id="loading-overlay">
@@ -3753,6 +3797,87 @@ function updateOrderTimers() {
     else el.textContent = '⏱ Az önce';
   });
 }
+
+// ── PWA ──────────────────────────────────────────────
+(function() {
+  // Manifest dinamik oluştur
+  const manifest = {
+    name: 'Sina Pırlanta Alyans',
+    short_name: 'Sina Alyans',
+    description: 'Alyans Sipariş Sistemi',
+    start_url: window.location.href,
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#ffffff',
+    theme_color: '#c8244c',
+    icons: [
+      {
+        src: 'https://www.sinapirlanta.com/themes/custom/sina/logo.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+        purpose: 'any maskable'
+      }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  document.getElementById('pwa-manifest').href = url;
+
+  // Install prompt yakala
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Daha önce kapatmadıysa banner'ı göster
+    if(!localStorage.getItem('pwa-dismissed')) {
+      setTimeout(function() {
+        document.getElementById('pwa-install-banner').classList.add('show');
+      }, 2000);
+    }
+  });
+
+  document.getElementById('pwa-install-btn').addEventListener('click', function() {
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(result) {
+      if(result.outcome === 'accepted') {
+        showToast('Uygulama ana ekrana eklendi ✓','success');
+      }
+      deferredPrompt = null;
+      document.getElementById('pwa-install-banner').classList.remove('show');
+    });
+  });
+
+  window.addEventListener('appinstalled', function() {
+    showToast('Sina Alyans yüklendi ✓','success');
+    document.getElementById('pwa-install-banner').classList.remove('show');
+  });
+
+  // Service Worker kaydet
+  if('serviceWorker' in navigator) {
+    const swCode = `
+const CACHE = 'sina-alyans-v1';
+const OFFLINE = [
+  '${window.location.href}',
+];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(OFFLINE)));
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    fetch(e.request).catch(() => caches.match(e.request))
+  );
+});`;
+    const swBlob = new Blob([swCode], {type:'application/javascript'});
+    const swUrl  = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).catch(function(){});
+  }
+})();
+
+window.dismissInstallBanner = function() {
+  document.getElementById('pwa-install-banner').classList.remove('show');
+  localStorage.setItem('pwa-dismissed', '1');
+};
 
 // Başlangıçta loading göster
 showLoading();
