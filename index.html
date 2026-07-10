@@ -911,10 +911,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <label class="field-label">Cinsiyet</label>
         <div style="display:flex;gap:8px;margin-top:6px;">
           <button class="seg-btn active" onclick="selectSeg('cinsiyet','kadin',this)" id="seg-kadin" style="flex:1;">
-            <span style="font-size:18px;">👩</span><br>Kadın
+            <span style="font-size:18px;"></span><br>Kadın
           </button>
           <button class="seg-btn" onclick="selectSeg('cinsiyet','erkek',this)" id="seg-erkek" style="flex:1;">
-            <span style="font-size:18px;">👨</span><br>Erkek
+            <span style="font-size:18px;"></span><br>Erkek
           </button>
           <button class="seg-btn" onclick="selectSeg('cinsiyet','cift',this)" id="seg-cift" style="flex:1;">
             <span style="font-size:18px;">💑</span><br>Çift
@@ -978,28 +978,28 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 
       <!-- İç Yazı + Semboller -->
       <div class="form-group" id="ic-yazi-kadin-wrap">
-        <label class="field-label">👩 Kadın İç Yazısı <span style="color:var(--ink-dim);font-weight:400;">(isteğe bağlı)</span></label>
+        <label class="field-label"> Kadın İç Yazısı <span style="color:var(--ink-dim);font-weight:400;">(isteğe bağlı)</span></label>
         <input type="text" class="text-field" id="ord-ic-yazi-kadin" placeholder="Yazılacak metin…" style="padding:13px 16px;">
         <div style="margin-top:8px;">
           <div class="field-label" style="margin-bottom:6px;">Sembol Ekle</div>
           <div class="symbol-picker" style="gap:8px;">
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','❤️',this)" style="padding:9px 12px;">❤️ <span class="symbol-label">Kalp</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','♾️',this)" style="padding:9px 12px;">♾️ <span class="symbol-label">Sonsuzluk</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','⭐',this)" style="padding:9px 12px;">⭐ <span class="symbol-label">Yıldız</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','🌙',this)" style="padding:9px 12px;">🌙 <span class="symbol-label">Ay</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','♥',this)" style="padding:9px 12px;">♥ <span class="symbol-label">Kalp</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','∞',this)" style="padding:9px 12px;">∞ <span class="symbol-label">Sonsuzluk</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','★',this)" style="padding:9px 12px;">★ <span class="symbol-label">Yıldız</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-kadin','☽',this)" style="padding:9px 12px;">☽ <span class="symbol-label">Ay</span></button>
           </div>
         </div>
       </div>
       <div class="form-group" id="ic-yazi-erkek-wrap" style="display:none;">
-        <label class="field-label">👨 Erkek İç Yazısı <span style="color:var(--ink-dim);font-weight:400;">(isteğe bağlı)</span></label>
+        <label class="field-label"> Erkek İç Yazısı <span style="color:var(--ink-dim);font-weight:400;">(isteğe bağlı)</span></label>
         <input type="text" class="text-field" id="ord-ic-yazi-erkek" placeholder="Yazılacak metin…" style="padding:13px 16px;">
         <div style="margin-top:8px;">
           <div class="field-label" style="margin-bottom:6px;">Sembol Ekle</div>
           <div class="symbol-picker" style="gap:8px;">
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','❤️',this)" style="padding:9px 12px;">❤️ <span class="symbol-label">Kalp</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','♾️',this)" style="padding:9px 12px;">♾️ <span class="symbol-label">Sonsuzluk</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','⭐',this)" style="padding:9px 12px;">⭐ <span class="symbol-label">Yıldız</span></button>
-            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','🌙',this)" style="padding:9px 12px;">🌙 <span class="symbol-label">Ay</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','♥',this)" style="padding:9px 12px;">♥ <span class="symbol-label">Kalp</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','∞',this)" style="padding:9px 12px;">∞ <span class="symbol-label">Sonsuzluk</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','★',this)" style="padding:9px 12px;">★ <span class="symbol-label">Yıldız</span></button>
+            <button class="symbol-btn" onclick="toggleSymbolField('ord-ic-yazi-erkek','☽',this)" style="padding:9px 12px;">☽ <span class="symbol-label">Ay</span></button>
           </div>
         </div>
       </div>
@@ -1129,6 +1129,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     </div>
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeModal('modal-order-detail')">Kapat</button>
+      <button class="btn-edit" id="btn-admin-edit-order" onclick="openAdminEditOrder(currentDetailOrderId)" style="font-size:12px;">
+        <i class="ph ph-pencil"></i> Düzenle
+      </button>
       <button class="btn-primary" id="btn-update-status" onclick="updateOrderStatus()">
         <i class="ph ph-arrow-right"></i>&nbsp; Durumu İlerlet
       </button>
@@ -1931,8 +1934,8 @@ function openOrderDetail(orderId) {
         <div class="detail-item-label">Renk</div>
         <div class="detail-item-value">${renkLabel(o.renk||'')}${o.mixAciklama ? ' — ' + escHtml(o.mixAciklama) : ''}</div>
       </div>
-      ${o.icYaziKadin ? `<div class="detail-item"><div class="detail-item-label">👩 Kadın İç Yazı</div><div class="detail-item-value">${escHtml(o.icYaziKadin)}</div></div>` : ''}
-      ${o.icYaziErkek ? `<div class="detail-item"><div class="detail-item-label">👨 Erkek İç Yazı</div><div class="detail-item-value">${escHtml(o.icYaziErkek)}</div></div>` : ''}
+      ${o.icYaziKadin ? `<div class="detail-item"><div class="detail-item-label"> Kadın İç Yazı</div><div class="detail-item-value">${escHtml(o.icYaziKadin)}</div></div>` : ''}
+      ${o.icYaziErkek ? `<div class="detail-item"><div class="detail-item-label"> Erkek İç Yazı</div><div class="detail-item-value">${escHtml(o.icYaziErkek)}</div></div>` : ''}
     `;
   }
 
@@ -1951,7 +1954,10 @@ function openOrderDetail(orderId) {
     <div class="detail-grid">${detailRows}</div>
     ${o.not ? `<hr class="divider"><div><div class="detail-item-label" style="margin-bottom:4px;">Not</div><div style="font-size:13px;color:var(--ink-mid);line-height:1.6;">${escHtml(o.not)}</div></div>` : ''}
     <hr class="divider">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      <select class="select-field" id="quick-status-sel" style="font-size:11px;padding:7px 28px 7px 10px;height:auto;" onchange="quickUpdateStatus('${orderId}',this.value)">
+        ${STATUS_ORDER.concat(['iptal']).map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}
+      </select>
       <button class="btn-ghost" style="font-size:11px;" onclick="exportSingleOrderWhatsapp('${orderId}')"><i class="ph ph-whatsapp-logo"></i> WhatsApp</button>
       <button class="btn-ghost" style="font-size:11px;" onclick="exportSingleOrderPDF('${orderId}')"><i class="ph ph-file-pdf"></i> PDF</button>
     </div>
@@ -1969,8 +1975,149 @@ function updateOrderStatus() {
   db.ref('orders/'+currentDetailOrderId+'/status').set(next)
     .then(function() {
       showToast('Durum: ' + STATUS_LABELS[next],'success');
-      openOrderDetail(currentDetailOrderId); // refresh
+      openOrderDetail(currentDetailOrderId);
     });
+}
+
+// ── ADMİN SİPARİŞ DÜZENLE ────────────────────────
+function openAdminEditOrder(orderId) {
+  const o = allOrders[orderId];
+  if(!o) return;
+
+  // Durum seçenekleri
+  const statusOpts = [...STATUS_ORDER, 'iptal'].map(s =>
+    `<option value="${s}" ${o.status===s?'selected':''}>${STATUS_LABELS[s]}</option>`
+  ).join('');
+
+  let editBody = `
+    <div class="form-group">
+      <label class="field-label">Durum</label>
+      <select class="select-field" id="admin-edit-status">${statusOpts}</select>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Müşteri Adı Soyadı</label>
+      <input type="text" class="text-field" id="admin-edit-musteri" value="${escHtml(o.musteri||'')}">
+    </div>`;
+
+  if(o.type === 'katalog') {
+    editBody += `
+    <div class="form-row">
+      <div class="form-group">
+        <label class="field-label">Cinsiyet</label>
+        <select class="select-field" id="admin-edit-cinsiyet">
+          <option value="kadin" ${o.cinsiyet==='kadin'?'selected':''}>Kadın</option>
+          <option value="erkek" ${o.cinsiyet==='erkek'?'selected':''}>Erkek</option>
+          <option value="cift" ${o.cinsiyet==='cift'?'selected':''}>Çift</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="field-label">Kalınlık (mm)</label>
+        <input type="number" step="0.5" class="text-field" id="admin-edit-kalinlik" value="${escHtml(o.kalinlik||'')}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="field-label">Kadın Ölçüsü</label>
+        <input type="number" step="0.5" class="text-field" id="admin-edit-olcu-kadin" value="${escHtml(o.olcuKadin||'')}">
+      </div>
+      <div class="form-group">
+        <label class="field-label">Erkek Ölçüsü</label>
+        <input type="number" step="0.5" class="text-field" id="admin-edit-olcu-erkek" value="${escHtml(o.olcuErkek||'')}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Renk</label>
+      <select class="select-field" id="admin-edit-renk">
+        <option value="sari" ${o.renk==='sari'?'selected':''}>Sarı</option>
+        <option value="beyaz" ${o.renk==='beyaz'?'selected':''}>Beyaz</option>
+        <option value="rose" ${o.renk==='rose'?'selected':''}>Rose</option>
+        <option value="mix" ${o.renk==='mix'?'selected':''}>Mix</option>
+      </select>
+    </div>
+    <div class="form-group" id="admin-edit-mix-wrap" style="${o.renk==='mix'?'':'display:none;'}">
+      <label class="field-label">Mix Renk Detayı</label>
+      <input type="text" class="text-field" id="admin-edit-mix" value="${escHtml(o.mixAciklama||'')}">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="field-label">👩 Kadın İç Yazı</label>
+        <input type="text" class="text-field" id="admin-edit-ic-kadin" value="${escHtml(o.icYaziKadin||'')}">
+      </div>
+      <div class="form-group">
+        <label class="field-label">👨 Erkek İç Yazı</label>
+        <input type="text" class="text-field" id="admin-edit-ic-erkek" value="${escHtml(o.icYaziErkek||'')}">
+      </div>
+    </div>`;
+  } else {
+    editBody += `
+    <div class="form-group">
+      <label class="field-label">Sipariş Detayı</label>
+      <textarea class="text-field" id="admin-edit-detay" rows="4">${escHtml(o.detay||'')}</textarea>
+    </div>`;
+  }
+
+  editBody += `
+    <div class="form-group">
+      <label class="field-label">Not</label>
+      <textarea class="text-field" id="admin-edit-not" rows="2">${escHtml(o.not||'')}</textarea>
+    </div>`;
+
+  document.getElementById('order-detail-body').innerHTML = editBody;
+
+  // Mix renk toggle
+  const renkSel = document.getElementById('admin-edit-renk');
+  if(renkSel) renkSel.onchange = function() {
+    const mw = document.getElementById('admin-edit-mix-wrap');
+    if(mw) mw.style.display = this.value === 'mix' ? '' : 'none';
+  };
+
+  // Footer: Kaydet butonu
+  document.getElementById('btn-update-status').style.display = 'none';
+  document.getElementById('btn-admin-edit-order').innerHTML = '<i class="ph ph-floppy-disk"></i> Kaydet';
+  document.getElementById('btn-admin-edit-order').onclick = function() { saveAdminOrderEdit(orderId); };
+}
+
+function saveAdminOrderEdit(orderId) {
+  const o = allOrders[orderId];
+  if(!o) return;
+
+  const updates = {
+    status:  document.getElementById('admin-edit-status').value,
+    musteri: document.getElementById('admin-edit-musteri').value.trim(),
+    not:     document.getElementById('admin-edit-not').value.trim(),
+    updatedAt: Date.now()
+  };
+
+  if(o.type === 'katalog') {
+    updates.cinsiyet   = document.getElementById('admin-edit-cinsiyet').value;
+    updates.kalinlik   = document.getElementById('admin-edit-kalinlik').value.trim();
+    updates.olcuKadin  = document.getElementById('admin-edit-olcu-kadin').value.trim();
+    updates.olcuErkek  = document.getElementById('admin-edit-olcu-erkek').value.trim();
+    updates.renk       = document.getElementById('admin-edit-renk').value;
+    updates.mixAciklama= document.getElementById('admin-edit-mix') ? document.getElementById('admin-edit-mix').value.trim() : '';
+    updates.icYaziKadin= document.getElementById('admin-edit-ic-kadin').value.trim();
+    updates.icYaziErkek= document.getElementById('admin-edit-ic-erkek').value.trim();
+  } else {
+    updates.detay = document.getElementById('admin-edit-detay').value.trim();
+  }
+
+  db.ref('orders/'+orderId).update(updates)
+    .then(function() {
+      showToast('Sipariş güncellendi ✓','success');
+      closeModal('modal-order-detail');
+      // Butonu sıfırla
+      document.getElementById('btn-admin-edit-order').innerHTML = '<i class="ph ph-pencil"></i> Düzenle';
+      document.getElementById('btn-admin-edit-order').onclick = function() { openAdminEditOrder(currentDetailOrderId); };
+      document.getElementById('btn-update-status').style.display = '';
+    })
+    .catch(function(e) { showToast('Hata: '+e.message,'error'); });
+}
+
+function quickUpdateStatus(orderId, newStatus) {
+  if(!newStatus) return;
+  db.ref('orders/'+orderId+'/status').set(newStatus)
+    .then(function() { showToast('Durum: ' + STATUS_LABELS[newStatus],'success'); })
+    .catch(function(e) { showToast('Hata: '+e.message,'error'); });
 }
 
 // ── ADMIN: PRODUCTS ───────────────────────────────
@@ -2346,11 +2493,11 @@ function exportSingleOrderWhatsapp(orderId) {
 }
 
 function buildWhatsappText(orders) {
-  const lines = ['*SİNA PIRLANTA – ALYAN SİPARİŞ* 💎', new Date().toLocaleDateString('tr-TR'), ''];
+  const lines = ['*SİNA PIRLANTA – ALYAN SİPARİŞ* ', new Date().toLocaleDateString('tr-TR'), ''];
   orders.forEach(([id,o], i) => {
     lines.push(`*${i+1}. ${o.musteri||''}* (${o.storeName||''})`);
     if(o.type === 'ozel') {
-      lines.push('📌 Özel Sipariş');
+      lines.push(' Özel Sipariş');
       lines.push(o.detay||'');
     } else {
       lines.push(`Ürün: ${o.productCode||''} ${o.productName||''}`);
