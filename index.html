@@ -458,6 +458,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   transition:background .18s;
 }
 .btn-danger:hover { background:var(--rose-pale); }
+.btn-danger svg { flex-shrink:0; }
 .btn-edit {
   padding:8px 16px; background:var(--bg); color:var(--ink-mid);
   border:1.5px solid var(--border); border-radius:var(--r-sm);
@@ -1130,7 +1131,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
             <i class="ph ph-file-pdf"></i> PDF
           </button>
           <button class="btn-danger" onclick="resetAllOrders()" style="font-size:11px;">
-            <i class="ph ph-trash"></i> Sıfırla
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm0-128H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z"/></svg> Sıfırla
           </button>
         </div>
       </div>
@@ -1169,7 +1170,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
             <i class="ph ph-sparkle"></i> Demo Yükle
           </button>
           <button class="btn-danger" onclick="clearDemoProducts()" style="font-size:11px;">
-            <i class="ph ph-trash"></i> Demoyu Temizle
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm0-128H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z"/></svg> Demoyu Temizle
           </button>
           <button class="btn-danger" onclick="resetAllProducts()" style="font-size:11px;background:#fff0f3;border-color:#c8244c;color:#c8244c;font-weight:800;">
             <i class="ph ph-warning"></i> Tümünü Sil
@@ -1240,66 +1241,104 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 
     <!-- RAPORLAR -->
     <div class="page" id="page-admin-raporlar">
-      <div class="section-header">
+      <div class="section-header" style="flex-wrap:wrap;gap:10px;">
         <div>
           <div class="section-title">Raporlar</div>
-          <div class="section-sub">Sipariş analizleri ve istatistikler</div>
+          <div class="section-sub">Sipariş analizleri ve karlılık</div>
         </div>
-        <div style="display:flex;gap:8px;">
-          <select class="select-field" id="rapor-period" onchange="renderRaporlar()" style="font-size:11px;padding:7px 28px 7px 10px;">
-            <option value="all">Tüm Zamanlar</option>
-            <option value="month">Bu Ay</option>
-            <option value="week">Bu Hafta</option>
-          </select>
+        <button class="btn-ghost" onclick="exportRaporPDF()" style="font-size:11px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M224,152a8,8,0,0,1-8,8H184v16h24a8,8,0,0,1,0,16H184v16a8,8,0,0,1-16,0V152a8,8,0,0,1,8-8h40A8,8,0,0,1,224,152ZM92,172a28,28,0,0,1-28,28H56v8a8,8,0,0,1-16,0V152a8,8,0,0,1,8-8H64A28,28,0,0,1,92,172Zm-16,0a12,12,0,0,0-12-12H56v24h8A12,12,0,0,0,76,172Zm88,8a36,36,0,0,1-36,36H112a8,8,0,0,1-8-8V152a8,8,0,0,1,8-8h16A36,36,0,0,1,164,180Zm-16,0a20,20,0,0,0-20-20h-8v40h8A20,20,0,0,0,148,180ZM40,112V40A16,16,0,0,1,56,24h96a8,8,0,0,1,5.66,2.34l56,56A8,8,0,0,1,216,88v24a8,8,0,0,1-16,0V96H152a8,8,0,0,1-8-8V40H56v72a8,8,0,0,1-16,0ZM160,80h28.69L160,51.31Z"/></svg>
+          Rapor PDF
+        </button>
+      </div>
+
+      <!-- FİLTRELER -->
+      <div class="card" style="margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">Filtreler</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <label class="field-label">Dönem</label>
+            <select class="select-field" id="rapor-period" onchange="onRaporPeriodChange()" style="margin-top:4px;">
+              <option value="all">Tüm Zamanlar</option>
+              <option value="week">Bu Hafta</option>
+              <option value="month">Bu Ay</option>
+              <option value="custom">Özel Aralık</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Mağaza</label>
+            <select class="select-field" id="rapor-magaza" onchange="renderRaporlar()" style="margin-top:4px;">
+              <option value="all">Tüm Mağazalar</option>
+            </select>
+          </div>
+        </div>
+        <div id="rapor-tarih-wrap" style="display:none;margin-bottom:10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label class="field-label">Başlangıç</label>
+              <input type="date" class="text-field" id="rapor-tarih-bas" onchange="renderRaporlar()" style="margin-top:4px;">
+            </div>
+            <div>
+              <label class="field-label">Bitiş</label>
+              <input type="date" class="text-field" id="rapor-tarih-bit" onchange="renderRaporlar()" style="margin-top:4px;">
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label class="field-label">Ürün Grubu</label>
+            <select class="select-field" id="rapor-grup" onchange="renderRaporlar()" style="margin-top:4px;">
+              <option value="all">Tüm Gruplar</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Sıralama</label>
+            <select class="select-field" id="rapor-siralama" onchange="renderRaporlar()" style="margin-top:4px;">
+              <option value="siparis">En Çok Sipariş</option>
+              <option value="kar">En Yüksek Kar</option>
+              <option value="alfa">Alfabetik</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;justify-content:flex-end;">
+          <button class="btn-primary" onclick="renderRaporlar()" style="font-size:11px;padding:9px 18px;">
+            Raporu Güncelle
+          </button>
         </div>
       </div>
 
-      <!-- Özet satırı -->
-      <div class="stats-grid" id="rapor-ozet-grid" style="margin-bottom:20px;"></div>
+      <!-- ÖZET KARTLAR -->
+      <div class="stats-grid" id="rapor-ozet-grid" style="margin-bottom:16px;"></div>
 
-      <!-- Grid: 2 kolon -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" id="rapor-grid">
-        <!-- Mağaza sıralaması -->
+      <!-- RAPOR İÇERİĞİ -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="rapor-grid">
         <div class="card" style="grid-column:1/-1;">
-          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-            <i class="ph ph-storefront" style="color:var(--rose);"></i> Mağaza Bazlı Sipariş
-          </div>
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;">Mağaza Bazlı Analiz</div>
           <div id="rapor-magaza-list"></div>
         </div>
-        <!-- Model sıralaması -->
         <div class="card">
-          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-            <i class="ph ph-diamond" style="color:var(--rose);"></i> En Çok Giden Modeller
-          </div>
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;">En Çok Giden Modeller</div>
           <div id="rapor-model-list"></div>
         </div>
-        <!-- Renk dağılımı -->
         <div class="card">
-          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-            <i class="ph ph-palette" style="color:var(--rose);"></i> Renk Dağılımı
-          </div>
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;">Renk Dağılımı</div>
           <div id="rapor-renk-list"></div>
         </div>
-        <!-- Kalınlık dağılımı -->
         <div class="card">
-          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-            <i class="ph ph-ruler" style="color:var(--rose);"></i> Kalınlık Dağılımı (mm)
-          </div>
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;">Kalınlık Dağılımı (mm)</div>
           <div id="rapor-kalinlik-list"></div>
         </div>
-        <!-- Cinsiyet dağılımı -->
         <div class="card">
-          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-            <i class="ph ph-users" style="color:var(--rose);"></i> Cinsiyet Dağılımı
-          </div>
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;">Cinsiyet Dağılımı</div>
           <div id="rapor-cinsiyet-list"></div>
         </div>
-        <!-- Durum dağılımı -->
         <div class="card">
-          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-            <i class="ph ph-flag" style="color:var(--rose);"></i> Durum Dağılımı
-          </div>
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;">Durum Dağılımı</div>
           <div id="rapor-durum-list"></div>
+        </div>
+        <div class="card" style="grid-column:1/-1;">
+          <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:14px;">Ayar Dağılımı</div>
+          <div id="rapor-ayar-list"></div>
         </div>
       </div>
     </div>
@@ -1398,44 +1437,91 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         </div>
       </div>
 
-      <!-- Ayar -->
-      <div class="form-group" id="ord-ayar-wrap">
-        <label class="field-label">Ayar</label>
-        <div style="display:flex;gap:8px;margin-top:6px;" id="ord-ayar-btns"></div>
-        <input type="hidden" id="ord-ayar" value="">
+      <!-- Ayar + İçi Yapı + Renk — Çift için ayrı ayrı -->
+      <div id="ord-kadin-secimler" style="display:none;">
+        <div style="font-size:11px;font-weight:800;color:var(--rose);background:var(--rose-pale);padding:8px 12px;border-radius:var(--r-sm);margin-bottom:10px;">
+          👩 Kadın Yüzüğü
+        </div>
+        <div class="form-group">
+          <label class="field-label">Ayar</label>
+          <div style="display:flex;gap:8px;margin-top:6px;" id="ord-ayar-btns-kadin"></div>
+          <input type="hidden" id="ord-ayar-kadin" value="">
+        </div>
+        <div class="form-group" id="ord-ic-wrap-kadin" style="display:none;">
+          <label class="field-label">İç Yapı</label>
+          <div style="display:flex;gap:8px;margin-top:6px;">
+            <button class="seg-btn" id="ord-ic-dolu-btn-kadin" onclick="selectIcYapiCins('kadin','dolu')" style="flex:1;"><i class="ph ph-circle-fill"></i><br>İçi Dolu</button>
+            <button class="seg-btn" id="ord-ic-bos-btn-kadin" onclick="selectIcYapiCins('kadin','bos')" style="flex:1;"><i class="ph ph-circle"></i><br>İçi Boş</button>
+          </div>
+          <input type="hidden" id="ord-ic-yapi-kadin" value="">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Renk</label>
+          <div class="color-picker" id="ord-renk-kadin-picker" style="gap:8px;margin-top:6px;"></div>
+          <input type="hidden" id="ord-renk-kadin" value="sari">
+          <div id="ord-mix-kadin-wrap" style="display:none;margin-top:8px;">
+            <input type="text" class="text-field" id="ord-mix-kadin" placeholder="Mix renk detayı…">
+          </div>
+        </div>
       </div>
 
-      <!-- İçi Boş/Dolu -->
-      <div class="form-group" id="ord-ic-wrap" style="display:none;">
-        <label class="field-label">İç Yapı</label>
-        <div style="display:flex;gap:8px;margin-top:6px;">
-          <button class="seg-btn" id="ord-ic-dolu-btn" onclick="selectIcYapi('dolu')" style="flex:1;">
-            <i class="ph ph-circle-fill" style="font-size:18px;"></i><br>İçi Dolu
-          </button>
-          <button class="seg-btn" id="ord-ic-bos-btn" onclick="selectIcYapi('bos')" style="flex:1;">
-            <i class="ph ph-circle" style="font-size:18px;"></i><br>İçi Boş
-          </button>
+      <div id="ord-erkek-secimler" style="display:none;">
+        <div style="font-size:11px;font-weight:800;color:#1a4a9c;background:#e8f0ff;padding:8px 12px;border-radius:var(--r-sm);margin-bottom:10px;">
+          👨 Erkek Yüzüğü
         </div>
-        <input type="hidden" id="ord-ic-yapi" value="">
+        <div class="form-group">
+          <label class="field-label">Ayar</label>
+          <div style="display:flex;gap:8px;margin-top:6px;" id="ord-ayar-btns-erkek"></div>
+          <input type="hidden" id="ord-ayar-erkek" value="">
+        </div>
+        <div class="form-group" id="ord-ic-wrap-erkek" style="display:none;">
+          <label class="field-label">İç Yapı</label>
+          <div style="display:flex;gap:8px;margin-top:6px;">
+            <button class="seg-btn" id="ord-ic-dolu-btn-erkek" onclick="selectIcYapiCins('erkek','dolu')" style="flex:1;"><i class="ph ph-circle-fill"></i><br>İçi Dolu</button>
+            <button class="seg-btn" id="ord-ic-bos-btn-erkek" onclick="selectIcYapiCins('erkek','bos')" style="flex:1;"><i class="ph ph-circle"></i><br>İçi Boş</button>
+          </div>
+          <input type="hidden" id="ord-ic-yapi-erkek" value="">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Renk</label>
+          <div class="color-picker" id="ord-renk-erkek-picker" style="gap:8px;margin-top:6px;"></div>
+          <input type="hidden" id="ord-renk-erkek" value="sari">
+          <div id="ord-mix-erkek-wrap" style="display:none;margin-top:8px;">
+            <input type="text" class="text-field" id="ord-mix-erkek" placeholder="Mix renk detayı…">
+          </div>
+        </div>
+      </div>
+
+      <!-- Tek (kadın veya erkek) için ayar + içi yapı -->
+      <div id="ord-tek-secimler">
+        <div class="form-group" id="ord-ayar-wrap">
+          <label class="field-label">Ayar</label>
+          <div style="display:flex;gap:8px;margin-top:6px;" id="ord-ayar-btns"></div>
+          <input type="hidden" id="ord-ayar" value="">
+        </div>
+        <div class="form-group" id="ord-ic-wrap" style="display:none;">
+          <label class="field-label">İç Yapı</label>
+          <div style="display:flex;gap:8px;margin-top:6px;">
+            <button class="seg-btn" id="ord-ic-dolu-btn" onclick="selectIcYapi('dolu')" style="flex:1;"><i class="ph ph-circle-fill" style="font-size:18px;"></i><br>İçi Dolu</button>
+            <button class="seg-btn" id="ord-ic-bos-btn" onclick="selectIcYapi('bos')" style="flex:1;"><i class="ph ph-circle" style="font-size:18px;"></i><br>İçi Boş</button>
+          </div>
+          <input type="hidden" id="ord-ic-yapi" value="">
+        </div>
       </div>
 
       <!-- Hesap Kutusu -->
       <div id="ord-hesap-wrap" style="display:none;">
         <div class="hesap-box">
-          <div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;"><i class="ph ph-calculator"></i> Gramaj Hesabı</div>
+          <div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;"><i class="ph ph-calculator"></i> Gramaj Tahmini</div>
           <div class="hesap-row">
-            <span class="hesap-label">Tahmini Gramaj</span>
+            <span class="hesap-label">≈ Tahmini Gramaj</span>
             <span class="hesap-value" id="hesap-gramaj">–</span>
-          </div>
-          <div class="hesap-row">
-            <span class="hesap-label">Saf Altın (Satış)</span>
-            <span class="hesap-value rose" id="hesap-saf-satis">–</span>
           </div>
         </div>
       </div>
 
-      <!-- Renk -->
-      <div class="form-group">
+      <!-- Renk — tek yüzük için -->
+      <div class="form-group" id="ord-renk-tek-wrap">
         <label class="field-label">Altın Rengi</label>
         <div class="color-picker" style="gap:10px;margin-top:8px;">
           <button class="color-btn active" onclick="selectColor('sari',this)" style="flex:1;justify-content:center;padding:10px 8px;">
@@ -1830,7 +1916,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeModal('modal-confirm')">Vazgeç</button>
       <button class="btn-danger" id="confirm-ok-btn" style="padding:11px 22px;border-radius:var(--r-md);font-size:12px;">
-        <i class="ph ph-trash"></i> Sil
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm0-128H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z"/></svg> Sil
       </button>
     </div>
   </div>
@@ -2110,8 +2196,8 @@ function openOrderModal(productId) {
   document.getElementById('ord-musteri').value   = '';
   document.getElementById('ord-cinsiyet').value  = 'kadin';
   document.getElementById('ord-adet').value      = 'tek';
-  document.getElementById('ord-olcu-kadin').value= '';
-  document.getElementById('ord-olcu-erkek').value= '';
+  document.getElementById('ord-olcu-kadin').value= '14';
+  document.getElementById('ord-olcu-erkek').value= '20';
   document.getElementById('ord-kalinlik').value  = p.thickness || '';
 
   // Ayar butonları
@@ -2143,6 +2229,7 @@ function openOrderModal(productId) {
 
   // Cinsiyet değişince ölçü alanlarını güncelle
   resetSegButtons();
+  updateCiftTekView('kadin');
   updateOlcuFields();
 
   openModal('modal-order');
@@ -2171,19 +2258,83 @@ function toggleSymbolField(inputId, emoji, btn) {
 const MILYEM = { '14': 0.585, '22': 0.916, 'gumus': 0.995 };
 const AYAR_LABEL = { '14': '14 Ayar', '22': '22 Ayar', 'gumus': 'Gümüş' };
 
+const RENK_OPTS = [
+  { val:'sari',  label:'Sarı',  dot:'#f5c842' },
+  { val:'beyaz', label:'Beyaz', dot:'#e8e4ec', border:'#ccc' },
+  { val:'rose',  label:'Rose',  dot:'#e8a0b0' },
+  { val:'mix',   label:'Mix',   dot:'linear-gradient(135deg,#f5c842 40%,#e8a0b0 60%)' }
+];
+
+function buildRenkPicker(containerId, hiddenId, mixWrapId, mixInputId) {
+  const wrap = document.getElementById(containerId);
+  if(!wrap) return;
+  wrap.innerHTML = RENK_OPTS.map(r => `
+    <button class="color-btn ${r.val==='sari'?'active':''}" onclick="selectColorFor('${hiddenId}','${mixWrapId}','${r.val}',this)" style="flex:1;justify-content:center;padding:9px 6px;">
+      <span class="color-dot" style="background:${r.dot};${r.border?'border-color:'+r.border+';':''}width:12px;height:12px;"></span> ${r.label}
+    </button>`).join('');
+  document.getElementById(hiddenId).value = 'sari';
+}
+
+function selectColorFor(hiddenId, mixWrapId, val, btn) {
+  document.getElementById(hiddenId).value = val;
+  const wrap = btn.closest('.color-picker');
+  wrap.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const mw = document.getElementById(mixWrapId);
+  if(mw) mw.style.display = val === 'mix' ? '' : 'none';
+}
+
+function selectIcYapiCins(cins, tip) {
+  document.getElementById('ord-ic-yapi-'+cins).value = tip;
+  document.getElementById('ord-ic-dolu-btn-'+cins).classList.toggle('active', tip==='dolu');
+  document.getElementById('ord-ic-bos-btn-'+cins).classList.toggle('active', tip==='bos');
+  updateHesap();
+}
+
+function updateCiftTekView(cinsiyet) {
+  const isCift = cinsiyet === 'cift';
+  document.getElementById('ord-kadin-secimler').style.display = isCift ? '' : 'none';
+  document.getElementById('ord-erkek-secimler').style.display = isCift ? '' : 'none';
+  document.getElementById('ord-tek-secimler').style.display   = isCift ? 'none' : '';
+  document.getElementById('ord-renk-tek-wrap').style.display  = isCift ? 'none' : '';
+  if(isCift) {
+    // Çift renk pickerlarını kur
+    buildRenkPicker('ord-renk-kadin-picker','ord-renk-kadin','ord-mix-kadin-wrap','ord-mix-kadin');
+    buildRenkPicker('ord-renk-erkek-picker','ord-renk-erkek','ord-mix-erkek-wrap','ord-mix-erkek');
+  }
+}
+
+function buildAyarButtonsFor(containerId, hiddenId, ayarlar, onSelect) {
+  const wrap = document.getElementById(containerId);
+  if(!wrap) return;
+  if(!ayarlar || !ayarlar.length) { wrap.style.display='none'; return; }
+  wrap.style.display = '';
+  wrap.innerHTML = ayarlar.map(a => `
+    <button class="seg-btn" id="${containerId}-btn-${a}" onclick="selectAyarFor('${containerId}','${hiddenId}','${a}')" style="flex:1;padding:10px 8px;">
+      ${AYAR_LABEL[a]||a}
+    </button>`).join('');
+  document.getElementById(hiddenId).value = '';
+  if(ayarlar.length === 1) selectAyarFor(containerId, hiddenId, ayarlar[0]);
+}
+
+function selectAyarFor(containerId, hiddenId, ayar) {
+  document.getElementById(hiddenId).value = ayar;
+  document.querySelectorAll(`#${containerId} .seg-btn`).forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(containerId+'-btn-'+ayar);
+  if(btn) btn.classList.add('active');
+  updateHesap();
+}
+
 function buildAyarButtons(ayarlar) {
   const wrap = document.getElementById('ord-ayar-btns');
   const ayarWrap = document.getElementById('ord-ayar-wrap');
   if(!wrap) return;
   if(!ayarlar || !ayarlar.length) { ayarWrap.style.display='none'; return; }
   ayarWrap.style.display = '';
-  wrap.innerHTML = ayarlar.map(a => `
-    <button class="seg-btn" id="ord-ayar-btn-${a}" onclick="selectAyar('${a}')" style="flex:1;padding:10px 8px;">
-      ${AYAR_LABEL[a]||a}
-    </button>`).join('');
-  document.getElementById('ord-ayar').value = '';
-  // Tek seçenek varsa otomatik seç
-  if(ayarlar.length === 1) selectAyar(ayarlar[0]);
+  buildAyarButtonsFor('ord-ayar-btns', 'ord-ayar', ayarlar, updateHesap);
+  // Çift için de kur
+  buildAyarButtonsFor('ord-ayar-btns-kadin', 'ord-ayar-kadin', ayarlar, updateHesap);
+  buildAyarButtonsFor('ord-ayar-btns-erkek', 'ord-ayar-erkek', ayarlar, updateHesap);
 }
 
 function selectAyar(ayar) {
@@ -2246,9 +2397,9 @@ function selectSeg(group, value, btn) {
   siblings.forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   if(group === 'cinsiyet') {
-    // Cinsiyet cift seçilince adet de cift olsun
     const adetEl = document.getElementById('ord-adet');
     if(adetEl) adetEl.value = (value === 'cift') ? 'cift' : 'tek';
+    updateCiftTekView(value);
     updateOlcuFields();
   }
 }
@@ -2344,10 +2495,18 @@ function submitOrder() {
     olcuKadin:   (cinsiyet !== 'erkek') ? olcuKadin : '',
     olcuErkek:   (cinsiyet !== 'kadin') ? olcuErkek : '',
     kalinlik,
-    ayar,
-    icYapi,
-    renk:        selectedColor,
+    ayar:        document.getElementById('ord-cinsiyet').value === 'cift' ? '' : ayar,
+    ayarKadin:   document.getElementById('ord-cinsiyet').value === 'cift' ? document.getElementById('ord-ayar-kadin').value : ayar,
+    ayarErkek:   document.getElementById('ord-cinsiyet').value === 'cift' ? document.getElementById('ord-ayar-erkek').value : ayar,
+    icYapi:      document.getElementById('ord-cinsiyet').value === 'cift' ? '' : icYapi,
+    icYapiKadin: document.getElementById('ord-cinsiyet').value === 'cift' ? document.getElementById('ord-ic-yapi-kadin').value : icYapi,
+    icYapiErkek: document.getElementById('ord-cinsiyet').value === 'cift' ? document.getElementById('ord-ic-yapi-erkek').value : icYapi,
+    renk:        document.getElementById('ord-cinsiyet').value === 'cift' ? '' : selectedColor,
+    renkKadin:   document.getElementById('ord-cinsiyet').value === 'cift' ? document.getElementById('ord-renk-kadin').value : selectedColor,
+    renkErkek:   document.getElementById('ord-cinsiyet').value === 'cift' ? document.getElementById('ord-renk-erkek').value : selectedColor,
     mixAciklama: selectedColor === 'mix' ? mixAcik : '',
+    mixKadin:    document.getElementById('ord-cinsiyet').value === 'cift' ? (document.getElementById('ord-mix-kadin')?document.getElementById('ord-mix-kadin').value:'') : '',
+    mixErkek:    document.getElementById('ord-cinsiyet').value === 'cift' ? (document.getElementById('ord-mix-erkek')?document.getElementById('ord-mix-erkek').value:'') : '',
     icYaziKadin,
     icYaziErkek,
     semboller:   '',
@@ -2369,6 +2528,8 @@ function submitOrder() {
       btn.disabled = false;
       btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i>&nbsp; Sipariş Gönder';
       closeModal('modal-order');
+      // Telegram bildirimi
+      sendTelegram(buildTelegramMsg(order));
       // Başarı popup
       const musteri = document.getElementById('ord-musteri') ? document.getElementById('ord-musteri').value.trim() : '';
       showSiparisBasari(order.orderNo, musteri, allProducts[currentOrderProductId]);
@@ -2893,6 +3054,7 @@ function openOrderDetail(orderId) {
     <div class="stepper">${stepperHtml}</div>
     ${buildTimelineHtml(o)}
     <hr class="divider">
+    ${buildAdminIscillikHtml(o)}
     <div class="detail-grid">${detailRows}</div>
     ${buildAdminHesapHtml(o)}
     ${o.not ? `<hr class="divider"><div><div class="detail-item-label" style="margin-bottom:4px;">Not</div><div style="font-size:13px;color:var(--ink-mid);line-height:1.6;">${escHtml(o.not)}</div></div>` : ''}
@@ -3074,6 +3236,42 @@ function showConfirm(title, message, onOk, okLabel, okIcon) {
   openModal('modal-confirm');
 }
 
+function buildAdminIscillikHtml(o) {
+  if(o.type === 'ozel') return '';
+  const p = o.productId ? allProducts[o.productId] : null;
+  const hedefIscil = p ? (p.iscilSatis || '') : '';
+  const mevcutIscil = o.iscilSatis || '';
+  return `<div style="background:var(--gold-pale);border:1.5px solid #e8d5b0;border-radius:var(--r-md);padding:14px;margin-bottom:12px;">
+    <div style="font-size:10px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">
+      <i class="ph ph-scales"></i> Satış İşçiliği Belirle
+    </div>
+    <div style="font-size:11px;color:var(--ink-dim);margin-bottom:8px;">
+      Bu mağazaya vereceğin işçilik gramını gir. Hedef: <b>${hedefIscil} gr</b>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="number" step="0.01" class="text-field" id="admin-iscil-input"
+        value="${mevcutIscil}"
+        placeholder="${hedefIscil}"
+        style="flex:1;font-size:16px;font-weight:800;padding:12px 14px;">
+      <span style="font-size:12px;color:var(--ink-dim);font-weight:600;white-space:nowrap;">gr işçilik</span>
+      <button class="btn-primary" onclick="saveIscilSatis('${o._id||currentDetailOrderId}')" style="padding:12px 16px;white-space:nowrap;">
+        <i class="ph ph-floppy-disk"></i> Kaydet
+      </button>
+    </div>
+    ${mevcutIscil ? `<div style="font-size:10px;color:var(--success);margin-top:6px;font-weight:600;"><i class="ph ph-check-circle"></i> Kaydedilmiş işçilik: ${mevcutIscil} gr</div>` : '<div style="font-size:10px;color:var(--warn);margin-top:6px;"><i class="ph ph-warning"></i> Henüz işçilik girilmemiş</div>'}
+  </div>`;
+}
+
+function saveIscilSatis(orderId) {
+  const val = parseFloat(document.getElementById('admin-iscil-input').value);
+  if(!val || val <= 0) { showToast('Geçerli bir işçilik gramı gir.','warn'); return; }
+  db.ref('orders/'+orderId+'/iscilSatis').set(val)
+    .then(function() {
+      showToast('İşçilik kaydedildi ✓','success');
+      openOrderDetail(orderId);
+    });
+}
+
 function buildAdminHesapHtml(o) {
   if(!o.ayar || !o.icYapi) return '';
   const p = allProducts[o.productId];
@@ -3087,7 +3285,7 @@ function buildAdminHesapHtml(o) {
   if(o.ayar === '22' && p.ekstra22) gramaj += p.ekstra22;
 
   const milyem = MILYEM[o.ayar] || 1;
-  const iscilSatis   = p.iscilSatis   || 0;
+  const iscilSatis   = o.iscilSatis   || p.iscilSatis   || 0;
   const iscilMaliyet = p.iscilMaliyet || 0;
   const safSatis   = (gramaj + iscilSatis)   * milyem;
   const safMaliyet = (gramaj + iscilMaliyet) * milyem;
@@ -3100,6 +3298,7 @@ function buildAdminHesapHtml(o) {
     <div style="font-size:10px;font-weight:800;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">
       <i class="ph ph-calculator"></i> Maliyet & Kar Hesabı — ${ayarLabel}
     </div>
+    ${!o.iscilSatis ? '<div style="font-size:10px;color:var(--warn);margin-bottom:8px;"><i class="ph ph-warning"></i> İşçilik girilmemiş — yukarıdan gir</div>' : ''}
     <div class="hesap-row">
       <span class="hesap-label">Gramaj</span>
       <span class="hesap-value">${gramaj.toFixed(2)} gr</span>
@@ -3331,6 +3530,11 @@ function saveProduct() {
   function doSave(photoUrl) {
     if(photoUrl !== undefined) data.photoUrl = photoUrl;
     else if(pendingProductPhotoUrl) data.photoUrl = pendingProductPhotoUrl;
+    // Düzenleme modunda fotoğraf değiştirilmediyse mevcut fotoğrafı koru
+    else if(currentEditProductId) {
+      const existing = allProducts[currentEditProductId];
+      if(existing && existing.photoUrl) data.photoUrl = existing.photoUrl;
+    }
 
     const ref = currentEditProductId
       ? db.ref('products/'+currentEditProductId)
@@ -3350,148 +3554,343 @@ function saveProduct() {
 }
 
 // ── RAPORLAR ─────────────────────────────────────────
-function renderRaporlar() {
-  const period = document.getElementById('rapor-period') ? document.getElementById('rapor-period').value : 'all';
+function onRaporPeriodChange() {
+  const v = document.getElementById('rapor-period').value;
+  document.getElementById('rapor-tarih-wrap').style.display = v === 'custom' ? '' : 'none';
+  renderRaporlar();
+}
+
+function initRaporFilters() {
+  // Mağaza dropdown
+  const magSel = document.getElementById('rapor-magaza');
+  if(!magSel) return;
+  const stores = [...new Set(Object.values(allOrders).map(o=>o.storeName||'').filter(Boolean))].sort();
+  magSel.innerHTML = '<option value="all">Tüm Mağazalar</option>'
+    + stores.map(s=>`<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
+  // Grup dropdown
+  const grupSel = document.getElementById('rapor-grup');
+  if(grupSel) {
+    const gruplar = [...new Set(Object.values(allProducts).map(p=>p.category||'').filter(Boolean))].sort();
+    grupSel.innerHTML = '<option value="all">Tüm Gruplar</option>'
+      + gruplar.map(g=>`<option value="${escHtml(g)}">${escHtml(g)}</option>`).join('');
+  }
+}
+
+function getRaporOrders() {
+  const period   = document.getElementById('rapor-period')?.value || 'all';
+  const magaza   = document.getElementById('rapor-magaza')?.value || 'all';
+  const grup     = document.getElementById('rapor-grup')?.value   || 'all';
   const now = Date.now();
-  const weekMs  = 7 * 86400000;
-  const monthMs = 30 * 86400000;
 
-  let orders = Object.values(allOrders).filter(o => o.status !== 'iptal');
-  if(period === 'week')  orders = orders.filter(o => (now - o.createdAt) <= weekMs);
-  if(period === 'month') orders = orders.filter(o => (now - o.createdAt) <= monthMs);
+  let orders = Object.entries(allOrders).filter(([,o]) => o.status !== 'iptal');
 
+  // Dönem filtresi
+  if(period === 'week')  orders = orders.filter(([,o]) => (now-o.createdAt) <= 7*86400000);
+  if(period === 'month') orders = orders.filter(([,o]) => (now-o.createdAt) <= 30*86400000);
+  if(period === 'custom') {
+    const bas = document.getElementById('rapor-tarih-bas')?.value;
+    const bit = document.getElementById('rapor-tarih-bit')?.value;
+    if(bas) orders = orders.filter(([,o]) => o.createdAt >= new Date(bas).getTime());
+    if(bit) orders = orders.filter(([,o]) => o.createdAt <= new Date(bit).getTime()+86399999);
+  }
+  // Mağaza filtresi
+  if(magaza !== 'all') orders = orders.filter(([,o]) => (o.storeName||'') === magaza);
+  // Grup filtresi
+  if(grup !== 'all') orders = orders.filter(([,o]) => {
+    const p = allProducts[o.productId];
+    return p && p.category === grup;
+  });
+
+  return orders;
+}
+
+function calcKar(o) {
+  if(o.type === 'ozel' || !o.iscilSatis) return { gramaj:0, safSatis:0, safMaliyet:0, kar:0 };
+  const p = allProducts[o.productId];
+  if(!p) return { gramaj:0, safSatis:0, safMaliyet:0, kar:0 };
+  const ayar = o.ayarKadin || o.ayar || '';
+  const icYapi = o.icYapiKadin || o.icYapi || '';
+  const olcu = parseFloat(o.olcuKadin || o.olcuErkek) || 0;
+  const tablo = icYapi === 'dolu' ? p.gramajDolu : p.gramajBos;
+  let gramaj = findGramaj(tablo, olcu) || 0;
+  if(ayar === '22' && p.ekstra22) gramaj += p.ekstra22;
+  const milyem = MILYEM[ayar] || 0;
+  const safSatis   = (gramaj + (o.iscilSatis   || 0)) * milyem;
+  const safMaliyet = (gramaj + (p.iscilMaliyet || 0)) * milyem;
+  return { gramaj, safSatis, safMaliyet, kar: safSatis - safMaliyet };
+}
+
+function renderRaporlar() {
+  initRaporFilters();
+  const orders   = getRaporOrders();
+  const siralama = document.getElementById('rapor-siralama')?.value || 'siparis';
   const total    = orders.length;
-  const katalog  = orders.filter(o => o.type !== 'ozel').length;
-  const ozel     = orders.filter(o => o.type === 'ozel').length;
-  const bekleyen = orders.filter(o => o.status === 'beklemede').length;
+  const katalog  = orders.filter(([,o])=>o.type!=='ozel').length;
+  const ozel     = orders.filter(([,o])=>o.type==='ozel').length;
+  const bekleyen = orders.filter(([,o])=>o.status==='beklemede').length;
+
+  // Toplam kar
+  let toplamKar = 0, toplamSatis = 0, toplamMaliyet = 0;
+  orders.forEach(([,o]) => {
+    const k = calcKar(o);
+    toplamKar     += k.kar;
+    toplamSatis   += k.safSatis;
+    toplamMaliyet += k.safMaliyet;
+  });
+  const karliOrders = orders.filter(([,o]) => o.iscilSatis).length;
 
   // Özet kartlar
   document.getElementById('rapor-ozet-grid').innerHTML = [
     ['Toplam Sipariş', total, 'var(--ink)'],
-    ['Katalog', katalog, '#1a4a9c'],
-    ['Özel', ozel, 'var(--gold)'],
+    ['Katalog / Özel', katalog+' / '+ozel, '#1a4a9c'],
     ['Beklemede', bekleyen, 'var(--warn)'],
+    ['Toplam Satış (gr)', karliOrders ? toplamSatis.toFixed(3)+' gr' : '–', 'var(--rose)'],
+    ['Toplam Maliyet (gr)', karliOrders ? toplamMaliyet.toFixed(3)+' gr' : '–', 'var(--ink-mid)'],
+    ['Toplam Kar (gr)', karliOrders ? toplamKar.toFixed(3)+' gr' : '–', 'var(--success)'],
   ].map(([l,v,col]) => `
     <div class="stat-card">
       <div class="stat-label">${l}</div>
-      <div class="stat-value" style="color:${col};">${v}</div>
+      <div class="stat-value" style="color:${col};font-size:16px;">${v}</div>
     </div>`).join('');
 
-  // ── MAĞAZA SIRALAMASI ──
+  // ── MAĞAZA ANALİZİ ──
   const magMap = {};
-  orders.forEach(o => {
-    const k = o.storeName || 'Bilinmiyor';
-    if(!magMap[k]) magMap[k] = { count:0, bekleyen:0, isleme:0, hazir:0, kargo:0 };
+  orders.forEach(([,o]) => {
+    const k = o.storeName||'Bilinmiyor';
+    if(!magMap[k]) magMap[k] = {count:0, kar:0, satis:0, bekleyen:0};
     magMap[k].count++;
-    if(magMap[k][o.status] !== undefined) magMap[k][o.status]++;
+    if(o.status==='beklemede') magMap[k].bekleyen++;
+    const kHesap = calcKar(o);
+    magMap[k].kar   += kHesap.kar;
+    magMap[k].satis += kHesap.safSatis;
   });
-  const magSorted = Object.entries(magMap).sort((a,b)=>b[1].count-a[1].count);
-  const magMax = magSorted[0] ? magSorted[0][1].count : 1;
-  document.getElementById('rapor-magaza-list').innerHTML = magSorted.length
-    ? magSorted.map(([name,d]) => `
+  let magEntries = Object.entries(magMap);
+  if(siralama==='kar')  magEntries.sort((a,b)=>b[1].kar-a[1].kar);
+  else if(siralama==='alfa') magEntries.sort((a,b)=>a[0].localeCompare(b[0]));
+  else magEntries.sort((a,b)=>b[1].count-a[1].count);
+  const magMax = magEntries[0]?magEntries[0][1].count:1;
+  document.getElementById('rapor-magaza-list').innerHTML = magEntries.length
+    ? magEntries.map(([name,d]) => `
       <div class="rapor-bar-wrap">
         <div class="rapor-bar-label">
           <span>${escHtml(name)}</span>
-          <span>${d.count} sipariş</span>
+          <span>${d.count} sipariş${d.kar?` · <span style="color:var(--success);font-weight:800;">${d.kar.toFixed(3)} gr kar</span>`:''}
+          ${d.bekleyen?`<span style="color:var(--warn);font-size:10px;"> · ${d.bekleyen} bekl.</span>`:''}</span>
         </div>
         <div class="rapor-bar-track"><div class="rapor-bar-fill" style="width:${Math.round(d.count/magMax*100)}%"></div></div>
-        <div style="font-size:10px;color:var(--ink-dim);margin-top:3px;">
-          Bekleyen: ${d.beklemede} · İşlemde: ${d.isleme} · Hazır: ${d.hazir} · Kargo: ${d.kargo}
-        </div>
-      </div>`).join('')
-    : '<div class="empty-state" style="padding:24px;"><div class="empty-state-title">Veri yok</div></div>';
-
-  // ── MODEL SIRALAMASI ──
-  const modelMap = {};
-  orders.filter(o=>o.type!=='ozel').forEach(o => {
-    const k = (o.productCode||'') + (o.productName ? ' – '+o.productName : '');
-    modelMap[k] = (modelMap[k]||0) + 1;
-  });
-  const modelSorted = Object.entries(modelMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const modelMax = modelSorted[0] ? modelSorted[0][1] : 1;
-  document.getElementById('rapor-model-list').innerHTML = modelSorted.length
-    ? modelSorted.map(([name,cnt],i) => `
-      <div class="rapor-bar-wrap">
-        <div class="rapor-bar-label"><span>${escHtml(name)}</span><span>${cnt}</span></div>
-        <div class="rapor-bar-track"><div class="rapor-bar-fill blue" style="width:${Math.round(cnt/modelMax*100)}%"></div></div>
       </div>`).join('')
     : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
 
-  // ── RENK DAĞILIMI ──
-  const renkMap = {};
-  orders.filter(o=>o.renk).forEach(o => {
-    const k = renkLabel(o.renk);
-    renkMap[k] = (renkMap[k]||0) + 1;
+  // ── MODEL ANALİZİ ──
+  const modelMap = {};
+  orders.filter(([,o])=>o.type!=='ozel').forEach(([,o]) => {
+    const k = (o.productCode||'')+(o.productName?' – '+o.productName:'');
+    if(!modelMap[k]) modelMap[k] = {count:0, kar:0};
+    modelMap[k].count++;
+    modelMap[k].kar += calcKar(o).kar;
   });
-  const renkColors = { 'Sarı':'#f5c842', 'Beyaz':'#b0b0c0', 'Rose':'#e8a0b0', 'Mix':'linear-gradient(135deg,#f5c842,#e8a0b0)' };
-  const renkSorted = Object.entries(renkMap).sort((a,b)=>b[1]-a[1]);
-  const renkMax = renkSorted[0] ? renkSorted[0][1] : 1;
-  document.getElementById('rapor-renk-list').innerHTML = renkSorted.length
-    ? renkSorted.map(([name,cnt]) => `
+  let modelEntries = Object.entries(modelMap);
+  if(siralama==='kar') modelEntries.sort((a,b)=>b[1].kar-a[1].kar);
+  else if(siralama==='alfa') modelEntries.sort((a,b)=>a[0].localeCompare(b[0]));
+  else modelEntries.sort((a,b)=>b[1].count-a[1].count);
+  modelEntries = modelEntries.slice(0,12);
+  const modelMax = modelEntries[0]?modelEntries[0][1].count:1;
+  document.getElementById('rapor-model-list').innerHTML = modelEntries.length
+    ? modelEntries.map(([name,d]) => `
       <div class="rapor-bar-wrap">
         <div class="rapor-bar-label">
-          <span style="display:flex;align-items:center;gap:6px;">
-            <span style="width:10px;height:10px;border-radius:50%;background:${renkColors[name]||'#ccc'};flex-shrink:0;border:1px solid rgba(0,0,0,.08);"></span>
-            ${escHtml(name)}
-          </span>
+          <span>${escHtml(name)}</span>
+          <span>${d.count}${d.kar?` · <span style="color:var(--success);">${d.kar.toFixed(3)} gr</span>`:''}</span>
+        </div>
+        <div class="rapor-bar-track"><div class="rapor-bar-fill blue" style="width:${Math.round(d.count/modelMax*100)}%"></div></div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink-dim);">Veri yok</div>';
+
+  // ── RENK ──
+  const renkMap = {};
+  orders.filter(([,o])=>o.renk||o.renkKadin).forEach(([,o]) => {
+    [o.renk, o.renkKadin, o.renkErkek].filter(Boolean).forEach(r => {
+      const k = renkLabel(r); renkMap[k] = (renkMap[k]||0)+1;
+    });
+  });
+  const renkColors = {'Sarı':'#f5c842','Beyaz':'#b0b0c0','Rose':'#e8a0b0','Mix':'linear-gradient(135deg,#f5c842,#e8a0b0)'};
+  const renkS = Object.entries(renkMap).sort((a,b)=>b[1]-a[1]);
+  const renkMax = renkS[0]?renkS[0][1]:1;
+  document.getElementById('rapor-renk-list').innerHTML = renkS.length
+    ? renkS.map(([name,cnt]) => `
+      <div class="rapor-bar-wrap">
+        <div class="rapor-bar-label">
+          <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:${renkColors[name]||'#ccc'};flex-shrink:0;border:1px solid rgba(0,0,0,.08);"></span>${escHtml(name)}</span>
           <span>${cnt}</span>
         </div>
         <div class="rapor-bar-track"><div class="rapor-bar-fill gold" style="width:${Math.round(cnt/renkMax*100)}%"></div></div>
       </div>`).join('')
-    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
+    : '<div style="font-size:12px;color:var(--ink-dim);">Veri yok</div>';
 
-  // ── KALINLIK DAĞILIMI ──
+  // ── KALINLIK ──
   const kalinMap = {};
-  orders.filter(o=>o.kalinlik).forEach(o => {
-    const k = o.kalinlik + ' mm';
-    kalinMap[k] = (kalinMap[k]||0) + 1;
-  });
-  const kalinSorted = Object.entries(kalinMap).sort((a,b) => parseFloat(a[0])-parseFloat(b[0]));
-  const kalinMax = kalinSorted.length ? Math.max(...kalinSorted.map(([,v])=>v)) : 1;
-  document.getElementById('rapor-kalinlik-list').innerHTML = kalinSorted.length
-    ? kalinSorted.map(([name,cnt]) => `
+  orders.filter(([,o])=>o.kalinlik).forEach(([,o])=>{kalinMap[o.kalinlik+' mm']=(kalinMap[o.kalinlik+' mm']||0)+1;});
+  const kalinS = Object.entries(kalinMap).sort((a,b)=>parseFloat(a)-parseFloat(b));
+  const kalinMax = kalinS.length?Math.max(...kalinS.map(([,v])=>v)):1;
+  document.getElementById('rapor-kalinlik-list').innerHTML = kalinS.length
+    ? kalinS.map(([name,cnt]) => `
       <div class="rapor-bar-wrap">
         <div class="rapor-bar-label"><span>${escHtml(name)}</span><span>${cnt}</span></div>
         <div class="rapor-bar-track"><div class="rapor-bar-fill green" style="width:${Math.round(cnt/kalinMax*100)}%"></div></div>
       </div>`).join('')
-    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
+    : '<div style="font-size:12px;color:var(--ink-dim);">Veri yok</div>';
 
-  // ── CİNSİYET DAĞILIMI ──
+  // ── CİNSİYET ──
   const cinsMap = {};
-  orders.filter(o=>o.cinsiyet).forEach(o => {
-    const k = cinsiyetLabel(o.cinsiyet);
-    cinsMap[k] = (cinsMap[k]||0) + 1;
-  });
-  const cinsSorted = Object.entries(cinsMap).sort((a,b)=>b[1]-a[1]);
-  const cinsMax = cinsSorted[0] ? cinsSorted[0][1] : 1;
-  document.getElementById('rapor-cinsiyet-list').innerHTML = cinsSorted.length
-    ? cinsSorted.map(([name,cnt]) => `
+  orders.filter(([,o])=>o.cinsiyet).forEach(([,o])=>{const k=cinsiyetLabel(o.cinsiyet);cinsMap[k]=(cinsMap[k]||0)+1;});
+  const cinsS = Object.entries(cinsMap).sort((a,b)=>b[1]-a[1]);
+  const cinsMax = cinsS[0]?cinsS[0][1]:1;
+  document.getElementById('rapor-cinsiyet-list').innerHTML = cinsS.length
+    ? cinsS.map(([name,cnt]) => `
       <div class="rapor-bar-wrap">
         <div class="rapor-bar-label"><span>${escHtml(name)}</span><span>${cnt}</span></div>
         <div class="rapor-bar-track"><div class="rapor-bar-fill purple" style="width:${Math.round(cnt/cinsMax*100)}%"></div></div>
       </div>`).join('')
-    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
+    : '<div style="font-size:12px;color:var(--ink-dim);">Veri yok</div>';
 
-  // ── DURUM DAĞILIMI ──
+  // ── DURUM ──
   const durumMap = {};
-  Object.values(allOrders).forEach(o => {
-    const k = STATUS_LABELS[o.status] || o.status;
-    durumMap[k] = (durumMap[k]||0) + 1;
-  });
-  const durumColors = { 'Beklemede':'status-beklemede','İşleme Alındı':'status-isleme','Hazır':'status-hazir','Kargoya Verildi':'status-kargo','İptal':'status-iptal' };
-  const durumSorted = Object.entries(durumMap).sort((a,b)=>b[1]-a[1]);
-  const durumMax = durumSorted[0] ? durumSorted[0][1] : 1;
-  document.getElementById('rapor-durum-list').innerHTML = durumSorted.length
-    ? durumSorted.map(([name,cnt]) => `
+  Object.values(allOrders).forEach(o=>{const k=STATUS_LABELS[o.status]||o.status;durumMap[k]=(durumMap[k]||0)+1;});
+  const durumS = Object.entries(durumMap).sort((a,b)=>b[1]-a[1]);
+  const durumMax = durumS[0]?durumS[0][1]:1;
+  const durumColors={'Beklemede':'status-beklemede','İşleme Alındı':'status-isleme','Hazır':'status-hazir','Kargoya Verildi':'status-kargo','İptal':'status-iptal'};
+  document.getElementById('rapor-durum-list').innerHTML = durumS.length
+    ? durumS.map(([name,cnt]) => `
       <div class="rapor-bar-wrap">
         <div class="rapor-bar-label">
           <span><span class="status-badge ${durumColors[name]||''}" style="font-size:9px;padding:2px 8px;">${escHtml(name)}</span></span>
-          <span style="font-weight:800;color:var(--ink);">${cnt}</span>
+          <span style="font-weight:800;">${cnt}</span>
         </div>
         <div class="rapor-bar-track"><div class="rapor-bar-fill" style="width:${Math.round(cnt/durumMax*100)}%"></div></div>
       </div>`).join('')
-    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Veri yok</div>';
+    : '<div style="font-size:12px;color:var(--ink-dim);">Veri yok</div>';
+
+  // ── AYAR ──
+  const ayarMap = {};
+  orders.forEach(([,o])=>{
+    [o.ayar, o.ayarKadin, o.ayarErkek].filter(Boolean).forEach(a=>{
+      const k=AYAR_LABEL[a]||a; ayarMap[k]=(ayarMap[k]||0)+1;
+    });
+  });
+  const ayarS = Object.entries(ayarMap).sort((a,b)=>b[1]-a[1]);
+  const ayarMax = ayarS[0]?ayarS[0][1]:1;
+  document.getElementById('rapor-ayar-list').innerHTML = ayarS.length
+    ? ayarS.map(([name,cnt]) => `
+      <div class="rapor-bar-wrap">
+        <div class="rapor-bar-label"><span>${escHtml(name)}</span><span>${cnt}</span></div>
+        <div class="rapor-bar-track"><div class="rapor-bar-fill" style="width:${Math.round(cnt/ayarMax*100)}%"></div></div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink-dim);">Veri yok</div>';
 }
+
+// ── RAPOR PDF ──────────────────────────────────────
+function exportRaporPDF() {
+  const orders   = getRaporOrders();
+  const siralama = document.getElementById('rapor-siralama')?.value || 'siparis';
+  const period   = document.getElementById('rapor-period')?.value || 'all';
+  const magaza   = document.getElementById('rapor-magaza')?.value || 'all';
+  const grup     = document.getElementById('rapor-grup')?.value   || 'all';
+  const periodLabels = {'all':'Tüm Zamanlar','week':'Bu Hafta','month':'Bu Ay','custom':'Özel Aralık'};
+  const siralamaLabels = {'siparis':'En Çok Sipariş','kar':'En Yüksek Kar','alfa':'Alfabetik'};
+
+  let toplamKar=0, toplamSatis=0, toplamMaliyet=0;
+  const magMap={}, modelMap={};
+  orders.forEach(([,o])=>{
+    const k=calcKar(o);
+    toplamKar+=k.kar; toplamSatis+=k.safSatis; toplamMaliyet+=k.safMaliyet;
+    const mName=o.storeName||'?';
+    if(!magMap[mName]) magMap[mName]={count:0,kar:0};
+    magMap[mName].count++; magMap[mName].kar+=k.kar;
+    if(o.type!=='ozel'){
+      const pName=(o.productCode||'')+(o.productName?' – '+o.productName:'');
+      if(!modelMap[pName]) modelMap[pName]={count:0,kar:0};
+      modelMap[pName].count++; modelMap[pName].kar+=k.kar;
+    }
+  });
+
+  let magEntries=Object.entries(magMap);
+  if(siralama==='kar') magEntries.sort((a,b)=>b[1].kar-a[1].kar);
+  else magEntries.sort((a,b)=>b[1].count-a[1].count);
+
+  let modelEntries=Object.entries(modelMap).sort((a,b)=>b[1].count-a[1].count).slice(0,10);
+
+  const karliSayisi = orders.filter(([,o])=>o.iscilSatis).length;
+
+  const html = `
+    <style>
+      body { font-family:'Segoe UI',Arial,sans-serif; color:#1a1a24; }
+      table { width:100%; border-collapse:collapse; font-size:11px; margin-bottom:20px; }
+      th { background:#faf9fb; border-bottom:2px solid #e8e4ec; padding:8px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:#9090a0; }
+      td { padding:8px; border-bottom:1px solid #f0eef2; }
+      .badge { padding:3px 8px; border-radius:100px; font-size:9px; font-weight:700; }
+      .rose { color:#c8244c; } .green { color:#1a7a4a; } .gold { color:#b8966a; }
+      h3 { font-size:13px; color:#c8244c; border-left:3px solid #c8244c; padding-left:10px; margin:20px 0 10px; }
+      @page { size:A4; margin:14mm 12mm; }
+    </style>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:3px solid #c8244c;margin-bottom:20px;">
+      <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" style="height:40px;">
+      <div style="text-align:right;">
+        <div style="font-size:16px;font-weight:800;color:#1a1a24;">SİPARİŞ RAPORU</div>
+        <div style="font-size:11px;color:#9090a0;margin-top:2px;">${new Date().toLocaleDateString('tr-TR',{day:'2-digit',month:'long',year:'numeric'})}</div>
+      </div>
+    </div>
+
+    <div style="background:#faf9fb;border:1px solid #e8e4ec;border-radius:8px;padding:12px;margin-bottom:20px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+      <div><div style="font-size:9px;color:#9090a0;text-transform:uppercase;letter-spacing:.08em;">Dönem</div><div style="font-size:13px;font-weight:700;">${periodLabels[period]||period}</div></div>
+      <div><div style="font-size:9px;color:#9090a0;text-transform:uppercase;letter-spacing:.08em;">Mağaza</div><div style="font-size:13px;font-weight:700;">${magaza==='all'?'Tüm Mağazalar':escHtml(magaza)}</div></div>
+      <div><div style="font-size:9px;color:#9090a0;text-transform:uppercase;letter-spacing:.08em;">Sıralama</div><div style="font-size:13px;font-weight:700;">${siralamaLabels[siralama]||siralama}</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+      <div style="background:#fdf0f3;border-radius:8px;padding:14px;text-align:center;">
+        <div style="font-size:9px;color:#9090a0;text-transform:uppercase;letter-spacing:.08em;">Toplam Sipariş</div>
+        <div style="font-size:28px;font-weight:800;color:#c8244c;">${orders.length}</div>
+      </div>
+      <div style="background:#f9f5ef;border-radius:8px;padding:14px;text-align:center;">
+        <div style="font-size:9px;color:#9090a0;text-transform:uppercase;letter-spacing:.08em;">Toplam Satış (gr)</div>
+        <div style="font-size:20px;font-weight:800;color:#b8966a;">${karliSayisi?toplamSatis.toFixed(3)+' gr':'–'}</div>
+      </div>
+      <div style="background:#eaf6f0;border-radius:8px;padding:14px;text-align:center;">
+        <div style="font-size:9px;color:#9090a0;text-transform:uppercase;letter-spacing:.08em;">Toplam Kar (gr)</div>
+        <div style="font-size:20px;font-weight:800;color:#1a7a4a;">${karliSayisi?toplamKar.toFixed(3)+' gr':'–'}</div>
+      </div>
+    </div>
+
+    <h3>Mağaza Bazlı Analiz</h3>
+    <table>
+      <thead><tr><th>#</th><th>Mağaza</th><th>Sipariş</th><th>Satış (gr)</th><th>Kar (gr)</th></tr></thead>
+      <tbody>${magEntries.map(([name,d],i)=>`<tr>
+        <td style="color:#9090a0;">${i+1}</td>
+        <td><b>${escHtml(name)}</b></td>
+        <td>${d.count}</td>
+        <td>${d.kar?toplamSatis.toFixed(3):'–'}</td>
+        <td class="green" style="font-weight:700;">${d.kar?d.kar.toFixed(3)+' gr':'–'}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+
+    <h3>En Çok Giden Modeller (Top 10)</h3>
+    <table>
+      <thead><tr><th>#</th><th>Model</th><th>Sipariş</th><th>Kar (gr)</th></tr></thead>
+      <tbody>${modelEntries.map(([name,d],i)=>`<tr>
+        <td style="color:#9090a0;">${i+1}</td>
+        <td>${escHtml(name)}</td>
+        <td>${d.count}</td>
+        <td class="green" style="font-weight:700;">${d.kar?d.kar.toFixed(3)+' gr':'–'}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+
+    <div style="margin-top:28px;padding-top:12px;border-top:1px solid #e8e4ec;text-align:center;">
+      <div style="font-size:10px;color:#c0b8cc;letter-spacing:.1em;font-weight:600;">www.sinapirlanta.com</div>
+    </div>`;
+
+  printHtml(html);
+}
+
 
 // ── DEMO ÜRÜNLER ─────────────────────────────────
 const DEMO_PRODUCTS = [
@@ -3756,7 +4155,7 @@ function renderAdminProducts() {
       </div>
       <div class="admin-product-actions">
         <button class="btn-edit" onclick="openEditProduct('${id}')"><i class="ph ph-pencil"></i> Düzenle</button>
-        <button class="btn-danger" onclick="deleteProduct('${id}')" style="font-size:11px;padding:8px 16px;"><i class="ph ph-trash"></i> Sil</button>
+        <button class="btn-danger" onclick="deleteProduct('${id}')" style="font-size:11px;padding:8px 16px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm0-128H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z"/></svg> Sil</button>
       </div>
     </div>
   `).join('');
@@ -3826,24 +4225,25 @@ function updateGramajVisibility() {
   document.getElementById('gramaj-empty-note').style.display = (!dolu && !bos) ? '' : 'none';
 }
 
-function addGramajRow(tip, olcuMin, olcuMax, gram) {
+function addGramajRow(tip, olcuMin, olcuMax, gramMin, gramMax) {
   const container = document.getElementById('gramaj-'+tip+'-rows');
   const idx = tip === 'dolu' ? ++gramajRowCountDolu : ++gramajRowCountBos;
   const row = document.createElement('div');
   row.className = 'gramaj-row';
   row.id = 'gramaj-row-'+tip+'-'+idx;
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:6px;align-items:center;margin-bottom:6px;';
   row.innerHTML = `
-    <input type="number" class="text-field" placeholder="Min ölçü" value="${olcuMin||''}" id="gr-${tip}-min-${idx}" step="0.5" style="font-size:12px;padding:8px 10px;">
-    <input type="number" class="text-field" placeholder="Max ölçü" value="${olcuMax||''}" id="gr-${tip}-max-${idx}" step="0.5" style="font-size:12px;padding:8px 10px;">
-    <input type="number" class="text-field" placeholder="Gramaj" value="${gram||''}" id="gr-${tip}-gram-${idx}" step="0.01" style="font-size:12px;padding:8px 10px;">
-    <button class="btn-danger" onclick="this.parentElement.remove()" style="padding:8px;width:36px;height:36px;justify-content:center;display:flex;align-items:center;flex-shrink:0;">
-      <i class="ph ph-trash"></i>
+    <input type="number" class="text-field" placeholder="Min ölçü" value="${olcuMin||''}" id="gr-${tip}-min-${idx}" step="0.5" style="font-size:11px;padding:7px 8px;">
+    <input type="number" class="text-field" placeholder="Max ölçü" value="${olcuMax||''}" id="gr-${tip}-max-${idx}" step="0.5" style="font-size:11px;padding:7px 8px;">
+    <input type="number" class="text-field" placeholder="Min gr" value="${gramMin||''}" id="gr-${tip}-gmin-${idx}" step="0.01" style="font-size:11px;padding:7px 8px;">
+    <input type="number" class="text-field" placeholder="Max gr" value="${gramMax||''}" id="gr-${tip}-gmax-${idx}" step="0.01" style="font-size:11px;padding:7px 8px;">
+    <button class="btn-danger" onclick="this.parentElement.remove()" style="padding:0;width:34px;height:34px;justify-content:center;display:flex;align-items:center;flex-shrink:0;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm0-128H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z"/></svg>
     </button>`;
-  // Header ekle (sadece ilk satırda)
   if(container.children.length === 0) {
     const header = document.createElement('div');
-    header.className = 'gramaj-header';
-    header.innerHTML = '<span>Min Ölçü</span><span>Max Ölçü</span><span>Gramaj (gr)</span><span></span>';
+    header.style.cssText = 'display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:6px;margin-bottom:4px;';
+    header.innerHTML = '<span style="font-size:9px;font-weight:700;color:var(--ink-dim);">Min Ölçü</span><span style="font-size:9px;font-weight:700;color:var(--ink-dim);">Max Ölçü</span><span style="font-size:9px;font-weight:700;color:var(--ink-dim);">Min Gram</span><span style="font-size:9px;font-weight:700;color:var(--ink-dim);">Max Gram</span><span></span>';
     container.appendChild(header);
   }
   container.appendChild(row);
@@ -3853,11 +4253,12 @@ function getGramajTable(tip) {
   const rows = document.querySelectorAll(`[id^="gramaj-row-${tip}-"]`);
   const table = [];
   rows.forEach(function(row) {
-    const id = row.id.split('-').pop();
+    const id   = row.id.split('-').pop();
     const min  = parseFloat(document.getElementById(`gr-${tip}-min-${id}`)?.value);
     const max  = parseFloat(document.getElementById(`gr-${tip}-max-${id}`)?.value);
-    const gram = parseFloat(document.getElementById(`gr-${tip}-gram-${id}`)?.value);
-    if(!isNaN(min) && !isNaN(max) && !isNaN(gram)) table.push({min,max,gram});
+    const gmin = parseFloat(document.getElementById(`gr-${tip}-gmin-${id}`)?.value);
+    const gmax = parseFloat(document.getElementById(`gr-${tip}-gmax-${id}`)?.value);
+    if(!isNaN(min) && !isNaN(max) && !isNaN(gmin)) table.push({min, max, gramMin:gmin, gramMax:isNaN(gmax)?gmin:gmax});
   });
   return table;
 }
@@ -3867,20 +4268,28 @@ function loadGramajTable(tip, table) {
   container.innerHTML = '';
   if(tip === 'dolu') gramajRowCountDolu = 0;
   else gramajRowCountBos = 0;
-  (table||[]).forEach(function(row) { addGramajRow(tip, row.min, row.max, row.gram); });
+  (table||[]).forEach(function(row) { addGramajRow(tip, row.min, row.max, row.gramMin||row.gram, row.gramMax||row.gram); });
 }
 
 function findGramaj(table, olcu) {
   if(!table || !table.length) return null;
   olcu = parseFloat(olcu);
   if(isNaN(olcu)) return null;
-  // 27 üzeri: max gramajı bul + 0.50
   const maxRow = table.reduce((a,b) => a.max > b.max ? a : b, table[0]);
-  if(olcu > 27) return maxRow.gram + 0.50;
-  for(const row of table) {
-    if(olcu >= row.min && olcu <= row.max) return row.gram;
+  let row = null;
+  if(olcu > 27) {
+    // Max gramajın üzerine +0.50
+    const base = maxRow.gramMax || maxRow.gramMin || maxRow.gram || 0;
+    return base + 0.50;
   }
-  return maxRow.gram; // en yakın
+  for(const r of table) {
+    if(olcu >= r.min && olcu <= r.max) { row = r; break; }
+  }
+  if(!row) row = maxRow;
+  // Ortalama gramaj döndür
+  const gMin = row.gramMin || row.gram || 0;
+  const gMax = row.gramMax || gMin;
+  return (gMin + gMax) / 2;
 }
 
 function setProductActive(val) {
@@ -3969,7 +4378,7 @@ function renderAdminGroups(groups) {
           <i class="ph ph-pencil"></i> Düzenle
         </button>
         <button class="btn-danger" onclick="deleteGroup('${id}','${escHtml(g.name||'')}')" style="font-size:11px;padding:8px 14px;">
-          <i class="ph ph-trash"></i> Sil
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm0-128H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z"/></svg> Sil
         </button>
       </div>
     </div>`;
@@ -4057,7 +4466,7 @@ function renderAdminStores(stores) {
         </div>
       </div>
       <div class="admin-product-actions">
-        <button class="btn-danger" onclick="deleteStore('${uid}','${escHtml(s.name||'')}')" style="font-size:11px;padding:8px 14px;"><i class="ph ph-trash"></i> Sil</button>
+        <button class="btn-danger" onclick="deleteStore('${uid}','${escHtml(s.name||'')}')" style="font-size:11px;padding:8px 14px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM112,168a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm0-128H96V40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Z"/></svg> Sil</button>
       </div>
     </div>
   `).join('');
@@ -4194,7 +4603,15 @@ async function buildAndPrintOrdersPDF(orders) {
       if(o.olcuKadin) parts.push('K: '+o.olcuKadin);
       if(o.olcuErkek) parts.push('E: '+o.olcuErkek);
       if(o.kalinlik)  parts.push(o.kalinlik+' mm');
-      if(o.renk)      parts.push(renkLabel(o.renk)+(o.mixAciklama?' ('+o.mixAciklama+')':''));
+      if(o.cinsiyet === 'cift') {
+      if(o.renkKadin) parts.push('K-Renk: '+renkLabel(o.renkKadin)+(o.mixKadin?' ('+o.mixKadin+')':''));
+      if(o.renkErkek) parts.push('E-Renk: '+renkLabel(o.renkErkek)+(o.mixErkek?' ('+o.mixErkek+')':''));
+      if(o.ayarKadin) parts.push('K-Ayar: '+(AYAR_LABEL[o.ayarKadin]||o.ayarKadin));
+      if(o.ayarErkek) parts.push('E-Ayar: '+(AYAR_LABEL[o.ayarErkek]||o.ayarErkek));
+    } else {
+      if(o.renk) parts.push(renkLabel(o.renk)+(o.mixAciklama?' ('+o.mixAciklama+')':''));
+      if(o.ayar) parts.push(AYAR_LABEL[o.ayar]||o.ayar);
+    }
       if(o.icYaziKadin) parts.push('K-Yazı: '+escHtml(o.icYaziKadin));
       if(o.icYaziErkek) parts.push('E-Yazı: '+escHtml(o.icYaziErkek));
       details = parts.join(' · ');
@@ -4311,12 +4728,7 @@ ${html}
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// Overlay dışına tık → kapat
-document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
-  overlay.addEventListener('click', function(e) {
-    if(e.target === overlay) overlay.classList.remove('open');
-  });
-});
+// Modal dışına tık → kapatmıyor (sadece X butonu kapatır)
 
 // ── LOADING ───────────────────────────────────────
 function showLoading() { document.getElementById('loading-overlay').style.display = 'flex'; }
@@ -4534,6 +4946,58 @@ window.dismissInstallBanner = function() {
   document.getElementById('pwa-install-banner').classList.remove('show');
   localStorage.setItem('pwa-dismissed', '1');
 };
+
+// ── TELEGRAM BİLDİRİM ───────────────────────────────
+const TG_TOKEN   = '8714596921:AAFal2JLkIktFRwqpanO8rdlla4t7o0bOpU';
+const TG_CHAT_ID = '8551802969';
+
+function sendTelegram(msg) {
+  fetch('https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: TG_CHAT_ID,
+      text: msg,
+      parse_mode: 'HTML'
+    })
+  }).catch(function() {}); // sessizce hata yut
+}
+
+function buildTelegramMsg(order) {
+  var nl = "\n";
+  var msg = "";
+  msg += "YENI SIPARIS — " + (order.orderNo||"") + nl;
+  msg += nl;
+  msg += "Magaza: " + (order.storeName||"") + nl;
+  msg += "Musteri: " + (order.musteri||"") + nl;
+  if(order.telefon) msg += "Tel: " + order.telefon + nl;
+  if(order.type === "ozel") {
+    msg += "Tip: Ozel Siparis" + nl;
+    msg += (order.detay||"").substring(0,200) + nl;
+  } else {
+    msg += "Urun: " + (order.productCode||"") + " " + (order.productName||"") + nl;
+    if(order.cinsiyet) msg += "Cinsiyet: " + cinsiyetLabel(order.cinsiyet) + nl;
+    if(order.olcuKadin) msg += "Kadin olcusu: " + order.olcuKadin + nl;
+    if(order.olcuErkek) msg += "Erkek olcusu: " + order.olcuErkek + nl;
+    if(order.kalinlik)  msg += "Kalinlik: " + order.kalinlik + " mm" + nl;
+    if(order.cinsiyet === "cift") {
+      if(order.ayarKadin) msg += "Kadin ayar: " + (AYAR_LABEL[order.ayarKadin]||order.ayarKadin) + nl;
+      if(order.ayarErkek) msg += "Erkek ayar: " + (AYAR_LABEL[order.ayarErkek]||order.ayarErkek) + nl;
+      if(order.renkKadin) msg += "Kadin renk: " + renkLabel(order.renkKadin) + (order.mixKadin?" ("+order.mixKadin+")":"") + nl;
+      if(order.renkErkek) msg += "Erkek renk: " + renkLabel(order.renkErkek) + (order.mixErkek?" ("+order.mixErkek+")":"") + nl;
+    } else {
+      if(order.ayar) msg += "Ayar: " + (AYAR_LABEL[order.ayar]||order.ayar) + nl;
+      if(order.renk) msg += "Renk: " + renkLabel(order.renk) + (order.mixAciklama?" ("+order.mixAciklama+")":"") + nl;
+    }
+    if(order.icYaziKadin) msg += "Kadin ic yazi: " + order.icYaziKadin + nl;
+    if(order.icYaziErkek) msg += "Erkek ic yazi: " + order.icYaziErkek + nl;
+    if(order.icYapi)  msg += "Ic yapi: " + (order.icYapi==="dolu"?"Ici Dolu":"Ici Bos") + nl;
+  }
+  if(order.not) msg += "Not: " + order.not + nl;
+  msg += nl;
+  msg += new Date().toLocaleString("tr-TR");
+  return msg;
+}
 
 // Başlangıçta loading göster
 showLoading();
