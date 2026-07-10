@@ -1470,6 +1470,39 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   </div>
 </div>
 
+<!-- İptal Nedeni Modal -->
+<div class="modal-overlay" id="modal-iptal">
+  <div class="modal-box" style="max-width:380px;">
+    <div class="modal-header">
+      <div class="modal-title">Siparişi İptal Et</div>
+      <button class="modal-close" onclick="closeModal('modal-iptal')"><i class="ph ph-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="field-label">İptal Nedeni *</label>
+        <select class="select-field" id="iptal-neden-select" onchange="document.getElementById('iptal-neden-diger').style.display=this.value==='diger'?'':'none'">
+          <option value="">— Seçiniz —</option>
+          <option value="Müşteri vazgeçti">Müşteri vazgeçti</option>
+          <option value="Yanlış sipariş girildi">Yanlış sipariş girildi</option>
+          <option value="Stokta yok">Stokta yok</option>
+          <option value="Ölçü hatası">Ölçü hatası</option>
+          <option value="diger">Diğer…</option>
+        </select>
+      </div>
+      <div class="form-group" id="iptal-neden-diger" style="display:none;">
+        <label class="field-label">Açıklama</label>
+        <textarea class="text-field" id="iptal-neden-text" placeholder="İptal nedenini yaz…" rows="3"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-iptal')">Vazgeç</button>
+      <button class="btn-danger" onclick="confirmIptal()" style="padding:11px 22px;border-radius:var(--r-md);font-size:12px;font-weight:700;">
+        <i class="ph ph-x-circle"></i> İptal Et
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Confirm Modal -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="modal-box" style="max-width:360px;">
@@ -2047,7 +2080,12 @@ function renderMagazaOrders() {
   updateBekleyenRozet();
   const list = document.getElementById('magaza-orders-list');
   let orders = Object.entries(allOrders)
-    .sort((a,b) => b[1].createdAt - a[1].createdAt);
+    .sort((a,b) => {
+      // İptal olanlar en alta
+      if(a[1].status === 'iptal' && b[1].status !== 'iptal') return 1;
+      if(b[1].status === 'iptal' && a[1].status !== 'iptal') return -1;
+      return b[1].createdAt - a[1].createdAt;
+    });
 
   if(currentOrderFilter !== 'all') {
     orders = orders.filter(([,o]) => o.status === currentOrderFilter);
@@ -2333,6 +2371,7 @@ function buildOrderCard(id, o, isAdminView) {
       ${isAdminView ? `<div style="font-size:11px;color:var(--ink-dim);margin-top:2px;"><i class="ph ph-storefront"></i> ${escHtml(o.storeName||'')}</div>` : ''}
       <div class="order-item-meta">${metaLines.join(' · ')}</div>
       ${o.not ? `<div class="order-item-note">${escHtml(o.not)}</div>` : ''}
+      ${o.status === 'iptal' && o.iptalNeden ? `<div style="font-size:11px;color:var(--rose);margin-top:4px;font-weight:600;"><i class="ph ph-x-circle"></i> İptal: ${escHtml(o.iptalNeden)}</div>` : ''}
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:8px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           ${o.orderNo ? `<span style="font-size:10px;font-weight:800;color:var(--rose);background:var(--rose-pale);padding:2px 8px;border-radius:100px;">${escHtml(o.orderNo)}</span>` : ''}
@@ -2458,6 +2497,7 @@ function updateOrderStatus() {
   const idx = STATUS_ORDER.indexOf(o.status);
   const next = STATUS_ORDER[idx+1];
   if(!next) return;
+  if(next === 'iptal') { openIptalModal(currentDetailOrderId); return; }
   const updates = {};
   updates['orders/'+currentDetailOrderId+'/status'] = next;
   updates['orders/'+currentDetailOrderId+'/timeline/'+next] = Date.now();
@@ -2657,8 +2697,42 @@ function fmtDuration(ms) {
   return mins + ' dk';
 }
 
+// ── İPTAL ────────────────────────────────────────
+let iptalOrderId = null;
+
+function openIptalModal(orderId) {
+  iptalOrderId = orderId;
+  document.getElementById('iptal-neden-select').value = '';
+  document.getElementById('iptal-neden-text').value = '';
+  document.getElementById('iptal-neden-diger').style.display = 'none';
+  openModal('modal-iptal');
+}
+
+function confirmIptal() {
+  const sel = document.getElementById('iptal-neden-select').value;
+  if(!sel) { showToast('İptal nedeni seç.','warn'); return; }
+  let neden = sel === 'diger'
+    ? document.getElementById('iptal-neden-text').value.trim()
+    : sel;
+  if(!neden) { showToast('İptal nedenini yaz.','warn'); return; }
+
+  const updates = {};
+  updates['orders/'+iptalOrderId+'/status']      = 'iptal';
+  updates['orders/'+iptalOrderId+'/iptalNeden']  = neden;
+  updates['orders/'+iptalOrderId+'/timeline/iptal'] = Date.now();
+
+  db.ref().update(updates)
+    .then(function() {
+      closeModal('modal-iptal');
+      closeModal('modal-order-detail');
+      showToast('Sipariş iptal edildi.','warn');
+    })
+    .catch(function(e) { showToast('Hata: '+e.message,'error'); });
+}
+
 function quickUpdateStatus(orderId, newStatus) {
   if(!newStatus) return;
+  if(newStatus === 'iptal') { openIptalModal(orderId); return; }
   const updates = {};
   updates['orders/'+orderId+'/status'] = newStatus;
   updates['orders/'+orderId+'/timeline/'+newStatus] = Date.now();
@@ -3490,7 +3564,8 @@ async function buildAndPrintOrdersPDF(orders) {
       details = parts.join(' · ');
     }
     return `<tr style="border-bottom:1px solid #f0eef2;">
-      <td style="padding:8px;width:60px;">${photoCell}</td>
+      <td style="padding:8px;font-size:10px;font-weight:800;color:#c8244c;white-space:nowrap;">${escHtml(o.orderNo||'–')}</td>
+      <td style="padding:8px;width:56px;">${photoCell}</td>
       <td style="padding:9px 8px;"><b>${escHtml(o.musteri||'')}</b><br><span style="font-size:9px;color:#9090a0;">${escHtml(o.storeName||'')}</span></td>
       <td style="padding:9px 8px;">${o.type==='ozel'?'<b style="color:#b8966a;">Özel</b>':escHtml((o.productCode||'')+(o.productName?' – '+o.productName:''))}</td>
       <td style="padding:9px 8px;font-size:10px;">${details}</td>
@@ -3510,6 +3585,7 @@ async function buildAndPrintOrdersPDF(orders) {
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
         <thead><tr style="background:#faf9fb;border-bottom:2px solid #e8e4ec;text-align:left;">
+          <th style="padding:8px;">No</th>
           <th style="padding:8px;">Foto</th>
           <th style="padding:8px;">Müşteri / Mağaza</th>
           <th style="padding:8px;">Ürün</th>
