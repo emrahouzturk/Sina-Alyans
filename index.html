@@ -490,6 +490,17 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   padding:3px 9px; border-radius:100px; letter-spacing:.06em;
 }
 
+/* ── SEGMENT BUTTON ── */
+.seg-btn {
+  padding:12px 10px; border-radius:var(--r-md);
+  border:2px solid var(--border); background:var(--surface);
+  font-family:'Poppins',sans-serif; font-size:12px; font-weight:700;
+  color:var(--ink-mid); cursor:pointer; transition:all .18s;
+  text-align:center; line-height:1.5;
+}
+.seg-btn.active { border-color:var(--rose); background:var(--rose-pale); color:var(--rose); }
+.seg-btn:hover:not(.active) { border-color:var(--rose-soft); }
+
 /* ── ORDER DETAIL GRID ── */
 .detail-grid {
   display:grid; grid-template-columns:1fr 1fr; gap:10px;
@@ -567,7 +578,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     </div>
     <div class="login-field">
       <label class="field-label">Şifre</label>
-      <input type="password" class="field-input" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+      <div style="position:relative;">
+        <input type="password" class="field-input" id="login-pass" placeholder="••••••••" autocomplete="current-password" style="padding-right:44px;">
+        <button type="button" onclick="togglePassVis('login-pass',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink-dim);font-size:18px;display:flex;align-items:center;padding:0;"><i class="ph ph-eye"></i></button>
+      </div>
     </div>
     <button class="btn-login" id="btn-login">Giriş Yap</button>
     <div class="login-error" id="login-error"></div>
@@ -790,12 +804,20 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     <div class="page" id="page-admin-urunler">
       <div class="section-header">
         <div class="section-title">Ürün Kataloğu</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-ghost" onclick="loadDemoProducts()" style="font-size:11px;">
+            <i class="ph ph-sparkle"></i> Demo Yükle
+          </button>
+          <button class="btn-danger" onclick="clearDemoProducts()" style="font-size:11px;">
+            <i class="ph ph-trash"></i> Demoyu Temizle
+          </button>
+        </div>
       </div>
       <div class="admin-product-list" id="admin-product-list">
         <div class="empty-state">
           <div class="empty-state-icon"><i class="ph ph-diamond"></i></div>
           <div class="empty-state-title">Ürün eklenmemiş</div>
-          <div class="empty-state-sub">"Ürün Ekle" butonuyla kataloğa ürün ekleyebilirsin.</div>
+          <div class="empty-state-sub">"Ürün Ekle" butonuyla ya da "Demo Yükle" ile başlayabilirsin.</div>
         </div>
       </div>
     </div>
@@ -851,86 +873,94 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       <!-- Müşteri -->
       <div class="form-group">
         <label class="field-label">Müşteri Adı Soyadı *</label>
-        <input type="text" class="text-field" id="ord-musteri" placeholder="Ad Soyad">
+        <input type="text" class="text-field" id="ord-musteri" placeholder="Ad Soyad" style="font-size:15px;padding:13px 16px;">
       </div>
 
-      <!-- Cinsiyet + Adet -->
-      <div class="form-row">
-        <div class="form-group">
-          <label class="field-label">Cinsiyet</label>
-          <select class="select-field" id="ord-cinsiyet">
-            <option value="kadin">Kadın</option>
-            <option value="erkek">Erkek</option>
-            <option value="cift">Çift (Kadın + Erkek)</option>
-          </select>
+      <!-- Cinsiyet — büyük butonlar -->
+      <div class="form-group">
+        <label class="field-label">Cinsiyet</label>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="seg-btn active" onclick="selectSeg('cinsiyet','kadin',this)" id="seg-kadin" style="flex:1;">
+            <span style="font-size:18px;">👩</span><br>Kadın
+          </button>
+          <button class="seg-btn" onclick="selectSeg('cinsiyet','erkek',this)" id="seg-erkek" style="flex:1;">
+            <span style="font-size:18px;">👨</span><br>Erkek
+          </button>
+          <button class="seg-btn" onclick="selectSeg('cinsiyet','cift',this)" id="seg-cift" style="flex:1;">
+            <span style="font-size:18px;">💑</span><br>Çift
+          </button>
         </div>
-        <div class="form-group">
-          <label class="field-label">Adet</label>
-          <select class="select-field" id="ord-adet">
-            <option value="tek">Tek</option>
-            <option value="cift">Çift</option>
-          </select>
-        </div>
+        <input type="hidden" id="ord-cinsiyet" value="kadin">
       </div>
 
-      <!-- Ölçüler — cinsiyet seçimine göre gösterilir -->
+      <!-- Adet — toggle -->
+      <div class="form-group">
+        <label class="field-label">Adet</label>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <button class="seg-btn active" onclick="selectSeg('adet','tek',this)" style="flex:1;">Tek</button>
+          <button class="seg-btn" onclick="selectSeg('adet','cift',this)" style="flex:1;">Çift</button>
+        </div>
+        <input type="hidden" id="ord-adet" value="tek">
+      </div>
+
+      <!-- Ölçüler -->
       <div id="olcu-kadin-wrap" class="form-group">
-        <label class="field-label">Kadın Ölçüsü (numara)</label>
-        <input type="text" class="text-field" id="ord-olcu-kadin" placeholder="ör: 12.5">
+        <label class="field-label">Kadın Ölçüsü <span style="color:var(--ink-dim);font-weight:400;">(numara)</span></label>
+        <input type="number" inputmode="decimal" class="text-field" id="ord-olcu-kadin" placeholder="ör: 12.5" style="font-size:18px;font-weight:700;padding:13px 16px;">
       </div>
       <div id="olcu-erkek-wrap" class="form-group" style="display:none;">
-        <label class="field-label">Erkek Ölçüsü (numara)</label>
-        <input type="text" class="text-field" id="ord-olcu-erkek" placeholder="ör: 20">
+        <label class="field-label">Erkek Ölçüsü <span style="color:var(--ink-dim);font-weight:400;">(numara)</span></label>
+        <input type="number" inputmode="decimal" class="text-field" id="ord-olcu-erkek" placeholder="ör: 20" style="font-size:18px;font-weight:700;padding:13px 16px;">
       </div>
 
       <!-- Kalınlık -->
       <div class="form-group">
-        <label class="field-label">Kalınlık (mm)</label>
-        <input type="text" class="text-field" id="ord-kalinlik" placeholder="ör: 3">
+        <label class="field-label">Kalınlık <span style="color:var(--ink-dim);font-weight:400;">(mm) — ürün kalınlığından farklıysa değiştir</span></label>
+        <input type="number" inputmode="decimal" class="text-field" id="ord-kalinlik" placeholder="ör: 3" style="font-size:18px;font-weight:700;padding:13px 16px;">
       </div>
 
       <!-- Renk -->
       <div class="form-group">
         <label class="field-label">Altın Rengi</label>
-        <div class="color-picker">
-          <button class="color-btn active" onclick="selectColor('sari',this)">
-            <span class="color-dot" style="background:#f5c842;"></span> Sarı
+        <div class="color-picker" style="gap:10px;margin-top:8px;">
+          <button class="color-btn active" onclick="selectColor('sari',this)" style="flex:1;justify-content:center;padding:10px 8px;">
+            <span class="color-dot" style="background:#f5c842;width:14px;height:14px;"></span> Sarı
           </button>
-          <button class="color-btn" onclick="selectColor('beyaz',this)">
-            <span class="color-dot" style="background:#e8e4ec; border-color:#ccc;"></span> Beyaz
+          <button class="color-btn" onclick="selectColor('beyaz',this)" style="flex:1;justify-content:center;padding:10px 8px;">
+            <span class="color-dot" style="background:#e8e4ec;border-color:#ccc;width:14px;height:14px;"></span> Beyaz
           </button>
-          <button class="color-btn" onclick="selectColor('rose',this)">
-            <span class="color-dot" style="background:#e8a0b0;"></span> Rose
+          <button class="color-btn" onclick="selectColor('rose',this)" style="flex:1;justify-content:center;padding:10px 8px;">
+            <span class="color-dot" style="background:#e8a0b0;width:14px;height:14px;"></span> Rose
           </button>
-          <button class="color-btn" onclick="selectColor('mix',this)">
-            <span class="color-dot" style="background:linear-gradient(135deg,#f5c842 40%,#e8a0b0 60%);"></span> Mix
+          <button class="color-btn" onclick="selectColor('mix',this)" style="flex:1;justify-content:center;padding:10px 8px;">
+            <span class="color-dot" style="background:linear-gradient(135deg,#f5c842 40%,#e8a0b0 60%);width:14px;height:14px;"></span> Mix
           </button>
         </div>
-        <div id="mix-aciklama-wrap" style="display:none; margin-top:10px;">
+        <div id="mix-aciklama-wrap" style="display:none;margin-top:10px;">
           <input type="text" class="text-field" id="ord-mix-aciklama" placeholder="Mix renk detayı (ör: dış sarı, iç rose)…">
         </div>
       </div>
 
-      <!-- İç Yazı -->
+      <!-- İç Yazı + Semboller -->
       <div class="form-group">
-        <label class="field-label">İç Yazı (isteğe bağlı)</label>
-        <input type="text" class="text-field" id="ord-ic-yazi" placeholder="Yazılacak metin…">
+        <label class="field-label">İç Yazı <span style="color:var(--ink-dim);font-weight:400;">(isteğe bağlı)</span></label>
+        <input type="text" class="text-field" id="ord-ic-yazi" placeholder="Yazılacak metin…" style="padding:13px 16px;">
         <div style="margin-top:10px;">
-          <div class="field-label" style="margin-bottom:6px;">Sembol Ekle</div>
-          <div class="symbol-picker" id="symbol-picker">
-            <button class="symbol-btn" onclick="toggleSymbol('❤️','Kalp',this)">❤️ <span class="symbol-label">Kalp</span></button>
-            <button class="symbol-btn" onclick="toggleSymbol('♾️','Sonsuzluk',this)">♾️ <span class="symbol-label">Sonsuzluk</span></button>
-            <button class="symbol-btn" onclick="toggleSymbol('⭐','Yıldız',this)">⭐ <span class="symbol-label">Yıldız</span></button>
-            <button class="symbol-btn" onclick="toggleSymbol('🌙','Ay',this)">🌙 <span class="symbol-label">Ay</span></button>
-            <button class="symbol-btn" onclick="toggleSymbol('✝️','Haç',this)">✝️ <span class="symbol-label">Haç</span></button>
-            <button class="symbol-btn" onclick="toggleSymbol('☪️','Hilal',this)">☪️ <span class="symbol-label">Hilal</span></button>
+          <div class="field-label" style="margin-bottom:8px;">Sembol Ekle</div>
+          <div class="symbol-picker" id="symbol-picker" style="gap:8px;">
+            <button class="symbol-btn" onclick="toggleSymbol('❤️','Kalp',this)" style="padding:10px 12px;">❤️ <span class="symbol-label">Kalp</span></button>
+            <button class="symbol-btn" onclick="toggleSymbol('♾️','Sonsuzluk',this)" style="padding:10px 12px;">♾️ <span class="symbol-label">Sonsuzluk</span></button>
+            <button class="symbol-btn" onclick="toggleSymbol('⭐','Yıldız',this)" style="padding:10px 12px;">⭐ <span class="symbol-label">Yıldız</span></button>
+            <button class="symbol-btn" onclick="toggleSymbol('🌙','Ay',this)" style="padding:10px 12px;">🌙 <span class="symbol-label">Ay</span></button>
+            <button class="symbol-btn" onclick="toggleSymbol('✝️','Haç',this)" style="padding:10px 12px;">✝️ <span class="symbol-label">Haç</span></button>
+            <button class="symbol-btn" onclick="toggleSymbol('☪️','Hilal',this)" style="padding:10px 12px;">☪️ <span class="symbol-label">Hilal</span></button>
           </div>
         </div>
       </div>
 
       <!-- Not -->
       <div class="form-group">
-        <label class="field-label">Not (isteğe bağlı)</label>
+        <label class="field-label">Not <span style="color:var(--ink-dim);font-weight:400;">(isteğe bağlı)</span></label>
         <textarea class="text-field" id="ord-not" placeholder="Eklemek istediğin not…" rows="2"></textarea>
       </div>
     </div>
@@ -1023,7 +1053,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       </div>
       <div class="form-group">
         <label class="field-label">Şifre *</label>
-        <input type="password" class="text-field" id="store-pass-input" placeholder="En az 6 karakter">
+        <div style="position:relative;">
+          <input type="password" class="text-field" id="store-pass-input" placeholder="En az 6 karakter" style="padding-right:44px;">
+          <button type="button" onclick="togglePassVis('store-pass-input',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink-dim);font-size:18px;display:flex;align-items:center;padding:0;"><i class="ph ph-eye"></i></button>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1327,16 +1360,47 @@ function openOrderModal(productId) {
   document.querySelectorAll('.symbol-btn').forEach(b => b.classList.remove('active'));
 
   // Cinsiyet değişince ölçü alanlarını güncelle
-  document.getElementById('ord-cinsiyet').onchange = updateOlcuFields;
+  resetSegButtons();
   updateOlcuFields();
 
   openModal('modal-order');
+}
+
+function selectSeg(group, value, btn) {
+  // Hidden input güncelle
+  const inputId = group === 'cinsiyet' ? 'ord-cinsiyet' : 'ord-adet';
+  document.getElementById(inputId).value = value;
+  // Buton stillerini güncelle — sadece aynı satırdaki seg-btn'lar
+  const siblings = btn.parentElement.querySelectorAll('.seg-btn');
+  siblings.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Cinsiyet değişince ölçü alanlarını güncelle
+  if(group === 'cinsiyet') updateOlcuFields();
 }
 
 function updateOlcuFields() {
   const v = document.getElementById('ord-cinsiyet').value;
   document.getElementById('olcu-kadin-wrap').style.display = (v === 'erkek') ? 'none' : '';
   document.getElementById('olcu-erkek-wrap').style.display = (v === 'kadin') ? 'none' : '';
+}
+
+function resetSegButtons() {
+  // Cinsiyet seg
+  ['seg-kadin','seg-erkek','seg-cift'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.classList.toggle('active', id === 'seg-kadin');
+  });
+  document.getElementById('ord-cinsiyet').value = 'kadin';
+  // Adet seg — her iki butonu bul
+  const adetRow = document.getElementById('ord-adet');
+  if(adetRow) {
+    adetRow.value = 'tek';
+    const parent = adetRow.previousElementSibling;
+    if(parent) {
+      const btns = parent.querySelectorAll('.seg-btn');
+      btns.forEach((b,i) => b.classList.toggle('active', i===0));
+    }
+  }
 }
 
 function selectColor(color, btn) {
@@ -1930,6 +1994,80 @@ function saveProduct() {
   }
 }
 
+// ── DEMO ÜRÜNLER ─────────────────────────────────
+const DEMO_PRODUCTS = [
+  {
+    code: 'AL-001', name: 'Klasik Düz Alyans',
+    desc: 'Sade ve şık, her tarza uygun klasik düz model.',
+    category: 'Klasik', thickness: '3',
+    photoUrl: 'https://www.sinapirlanta.com/themes/custom/sina/logo.svg',
+    _isDemo: true
+  },
+  {
+    code: 'AL-002', name: 'Oluklu Alyans',
+    desc: 'Yüzeyde ince oluk detayı ile modern görünüm.',
+    category: 'Klasik', thickness: '4',
+    photoUrl: '',
+    _isDemo: true
+  },
+  {
+    code: 'AL-003', name: 'Tek Taş Tektaş Alyans',
+    desc: 'Ortasında tek parlak taş, zarif ve göz alıcı.',
+    category: 'Taşlı', thickness: '3',
+    photoUrl: '',
+    _isDemo: true
+  },
+  {
+    code: 'AL-004', name: 'Pırlanta Setli Alyans',
+    desc: 'Yan yana dizili küçük pırlantalar ile lüks görünüm.',
+    category: 'Taşlı', thickness: '4',
+    photoUrl: '',
+    _isDemo: true
+  },
+  {
+    code: 'AL-005', name: 'Örgü Alyans',
+    desc: 'İki tonun birbirine örgülü şekilde işlendiği özel model.',
+    category: 'Örgü', thickness: '5',
+    photoUrl: '',
+    _isDemo: true
+  },
+  {
+    code: 'AL-006', name: 'Mat-Parlak Kombine',
+    desc: 'Yüzeyin yarısı mat yarısı parlak, modern iki tonlu tasarım.',
+    category: 'Özel', thickness: '5',
+    photoUrl: '',
+    _isDemo: true
+  }
+];
+
+function loadDemoProducts() {
+  if(!confirm('6 demo ürün eklenecek. Devam et?')) return;
+  showLoading();
+  const promises = DEMO_PRODUCTS.map(p => {
+    return db.ref('products').push({
+      ...p,
+      active: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    });
+  });
+  Promise.all(promises)
+    .then(function() { hideLoading(); showToast('6 demo ürün yüklendi ✓','success'); })
+    .catch(function(e) { hideLoading(); showToast('Hata: '+e.message,'error'); });
+}
+
+function clearDemoProducts() {
+  const demoIds = Object.entries(allProducts)
+    .filter(([,p]) => p._isDemo === true)
+    .map(([id]) => id);
+  if(!demoIds.length) { showToast('Silinecek demo ürün yok.','warn'); return; }
+  if(!confirm(demoIds.length + ' demo ürün silinecek. Devam et?')) return;
+  showLoading();
+  Promise.all(demoIds.map(id => db.ref('products/'+id).remove()))
+    .then(function() { hideLoading(); showToast('Demo ürünler silindi.','warn'); })
+    .catch(function(e) { hideLoading(); showToast('Hata: '+e.message,'error'); });
+}
+
 function deleteProduct(id) {
   if(!confirm('Bu ürünü silmek istiyor musun?')) return;
   db.ref('products/'+id).remove()
@@ -1981,7 +2119,7 @@ function createStore() {
   const secondary = firebase.initializeApp(FIREBASE_CONFIG, 'secondary_' + Date.now());
   secondary.auth().createUserWithEmailAndPassword(email, pass)
     .then(function(cred) {
-      return db.ref('stores/'+cred.user.uid).set({ name, username, email, createdAt: Date.now() })
+      return db.ref('stores/'+cred.user.uid).set({ name, username, email, password: pass, createdAt: Date.now() })
         .then(function() { secondary.delete(); });
     })
     .then(function() {
@@ -2016,7 +2154,11 @@ function renderAdminStores(stores) {
       </div>
       <div class="admin-product-body">
         <div class="admin-product-name">${escHtml(s.name||'')}</div>
-        <div class="admin-product-desc">Kullanıcı adı: <b>${escHtml(s.username||s.email||'')}</b></div>
+        <div class="admin-product-desc">
+          Kullanıcı adı: <b>${escHtml(s.username||'')}</b>
+          &nbsp;·&nbsp; Şifre: <span id="pass-${uid}" style="filter:blur(4px);transition:filter .2s;font-weight:600;">${escHtml(s.password||'••••••')}</span>
+          <button type="button" onclick="toggleStorePass('${uid}')" style="background:none;border:none;cursor:pointer;color:var(--ink-dim);font-size:14px;vertical-align:middle;padding:0 4px;"><i class="ph ph-eye"></i></button>
+        </div>
       </div>
       <div class="admin-product-actions">
         <button class="btn-danger" onclick="deleteStore('${uid}','${escHtml(s.name||'')}')"><i class="ph ph-trash"></i></button>
@@ -2171,6 +2313,20 @@ function escHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+
+function togglePassVis(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+  btn.innerHTML = isPass ? '<i class="ph ph-eye-slash"></i>' : '<i class="ph ph-eye"></i>';
+}
+
+function toggleStorePass(uid) {
+  const el = document.getElementById('pass-'+uid);
+  if(!el) return;
+  const isBlurred = el.style.filter !== 'none' && el.style.filter !== '';
+  el.style.filter = isBlurred ? 'none' : 'blur(4px)';
+}
 
 // Başlangıçta loading göster
 showLoading();
