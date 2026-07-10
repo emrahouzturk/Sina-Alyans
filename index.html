@@ -2202,17 +2202,16 @@ function openOrderModal(productId) {
 
   // Ayar butonları
   buildAyarButtons(p.ayarlar || []);
-  // İçi boş/dolu
-  const icWrap = document.getElementById('ord-ic-wrap');
-  const hasIcSecim = p.icYapi && p.icYapi.length > 1;
-  if(icWrap) icWrap.style.display = (p.icYapi && p.icYapi.length) ? '' : 'none';
+  // İçi boş/dolu reset
   document.getElementById('ord-ic-yapi').value = '';
-  document.getElementById('ord-ic-dolu-btn').classList.remove('active');
-  document.getElementById('ord-ic-bos-btn').classList.remove('active');
-  // Eğer sadece biri varsa otomatik seç
-  if(p.icYapi && p.icYapi.length === 1) {
-    selectIcYapi(p.icYapi[0]);
-  }
+  document.getElementById('ord-ic-yapi-kadin').value = '';
+  document.getElementById('ord-ic-yapi-erkek').value = '';
+  ['ord-ic-dolu-btn','ord-ic-bos-btn',
+   'ord-ic-dolu-btn-kadin','ord-ic-bos-btn-kadin',
+   'ord-ic-dolu-btn-erkek','ord-ic-bos-btn-erkek'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('active');
+  });
   updateHesap();
   document.getElementById('ord-ic-yazi-kadin').value = '';
   document.getElementById('ord-ic-yazi-erkek').value = '';
@@ -2297,10 +2296,33 @@ function updateCiftTekView(cinsiyet) {
   document.getElementById('ord-erkek-secimler').style.display = isCift ? '' : 'none';
   document.getElementById('ord-tek-secimler').style.display   = isCift ? 'none' : '';
   document.getElementById('ord-renk-tek-wrap').style.display  = isCift ? 'none' : '';
+
   if(isCift) {
-    // Çift renk pickerlarını kur
+    // Renk pickerları kur
     buildRenkPicker('ord-renk-kadin-picker','ord-renk-kadin','ord-mix-kadin-wrap','ord-mix-kadin');
     buildRenkPicker('ord-renk-erkek-picker','ord-renk-erkek','ord-mix-erkek-wrap','ord-mix-erkek');
+    // İçi boş/dolu — ürünün icYapi'sine göre kadın ve erkek için ayrı ayrı göster
+    const p = currentOrderProductId ? allProducts[currentOrderProductId] : null;
+    const icYapi = p ? (p.icYapi || []) : [];
+    const hasIcSecim = icYapi.length > 0;
+    // Kadın içi boş/dolu wrap
+    const kadinIcWrap = document.getElementById('ord-ic-wrap-kadin');
+    if(kadinIcWrap) kadinIcWrap.style.display = hasIcSecim ? '' : 'none';
+    // Erkek içi boş/dolu wrap
+    const erkekIcWrap = document.getElementById('ord-ic-wrap-erkek');
+    if(erkekIcWrap) erkekIcWrap.style.display = hasIcSecim ? '' : 'none';
+    // Eğer tek seçenek varsa otomatik seç
+    if(icYapi.length === 1) {
+      selectIcYapiCins('kadin', icYapi[0]);
+      selectIcYapiCins('erkek', icYapi[0]);
+    }
+  } else {
+    // Tek yüzük — mevcut ic-wrap göster/gizle
+    const p = currentOrderProductId ? allProducts[currentOrderProductId] : null;
+    const icYapi = p ? (p.icYapi || []) : [];
+    const icWrap = document.getElementById('ord-ic-wrap');
+    if(icWrap) icWrap.style.display = icYapi.length ? '' : 'none';
+    if(icYapi.length === 1) selectIcYapi(icYapi[0]);
   }
 }
 
@@ -4966,9 +4988,11 @@ function sendTelegram(msg) {
 function buildTelegramMsg(order) {
   var nl = "\n";
   var msg = "";
-  msg += "YENI SIPARIS — " + (order.orderNo||"") + nl;
+  msg += "<b>SİNA PIRLANTA</b>" + nl;
+  msg += "<b>" + (order.storeName||"") + "</b>" + nl;
+  msg += "——————————————" + nl;
+  msg += "<b>YENİ SİPARİŞ — " + (order.orderNo||"") + "</b>" + nl;
   msg += nl;
-  msg += "Magaza: " + (order.storeName||"") + nl;
   msg += "Musteri: " + (order.musteri||"") + nl;
   if(order.telefon) msg += "Tel: " + order.telefon + nl;
   if(order.type === "ozel") {
@@ -4996,6 +5020,8 @@ function buildTelegramMsg(order) {
   if(order.not) msg += "Not: " + order.not + nl;
   msg += nl;
   msg += new Date().toLocaleString("tr-TR");
+  msg += nl + nl;
+  msg += "Sistemi ac: https://emrahouzturk.github.io/sina-alyans/";
   return msg;
 }
 
