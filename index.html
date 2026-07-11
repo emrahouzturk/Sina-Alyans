@@ -197,7 +197,7 @@ html, body { min-height:100vh; margin:0; background:var(--bg); color:var(--ink);
   letter-spacing:.14em; text-transform:uppercase;
 }
 .top-bar-sep { color:var(--border); font-size:18px; }
-.top-bar-title { font-size:12px; font-weight:600; color:var(--ink-mid); }
+.top-bar-title { font-size:12px; font-weight:700; color:#5a1020; }
 .top-bar-spacer { flex:1; }
 .top-store-badge {
   font-size:11px; font-weight:700; color:var(--ink-mid);
@@ -675,7 +675,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 /* ── RESPONSIVE ── */
 @media(max-width:768px) {
   .top-bar { padding:0 12px; gap:6px; height:56px; }
-  .top-bar-title { display:none; }
+  
   .top-bar-sep { display:none; }
   .page-content { padding:14px 12px; }
   .product-grid { grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:10px; }
@@ -945,9 +945,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 <div class="screen" id="screen-magaza">
   <!-- Top Bar -->
   <div class="top-bar">
-    <div class="top-store-badge" id="store-name-badge" style="font-size:11px;font-weight:700;color:#fff;background:none;border:none;padding:0;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+    <div class="top-store-badge" id="store-name-badge" style="font-size:11px;font-weight:700;color:#5a1020;background:none;border:none;padding:0;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
     <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:26px;flex:1;object-fit:contain;filter:brightness(0) invert(1);">
-    <button class="btn-ghost" onclick="doLogout()" style="background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;font-size:11px;padding:6px 12px;white-space:nowrap;">
+    <button class="btn-ghost" onclick="doLogout()" style="background:rgba(90,16,32,.12);border-color:#c4929e;color:#5a1020;font-size:11px;padding:6px 12px;white-space:nowrap;">
       <i class="ph ph-sign-out"></i> Çıkış
     </button>
   </div>
@@ -1183,11 +1183,11 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 <div class="screen" id="screen-admin">
   <!-- Top Bar -->
   <div class="top-bar">
-    <button class="btn-ghost" onclick="openAddProduct()" style="background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;font-size:11px;padding:6px 12px;white-space:nowrap;">
+    <button class="btn-ghost" onclick="openAddProduct()" style="background:rgba(90,16,32,.12);border-color:#c4929e;color:#5a1020;font-size:11px;padding:6px 12px;white-space:nowrap;">
       <i class="ph ph-plus"></i> Ürün Ekle
     </button>
     <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:26px;flex:1;object-fit:contain;filter:brightness(0) invert(1);">
-    <button class="btn-ghost" onclick="doLogout()" style="background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;font-size:11px;padding:6px 12px;white-space:nowrap;">
+    <button class="btn-ghost" onclick="doLogout()" style="background:rgba(90,16,32,.12);border-color:#c4929e;color:#5a1020;font-size:11px;padding:6px 12px;white-space:nowrap;">
       <i class="ph ph-sign-out"></i> Çıkış
     </button>
   </div>
