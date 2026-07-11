@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -817,18 +816,8 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   <div class="ysb-progress"><div class="ysb-progress-bar" id="ysb-bar" style="width:100%"></div></div>
 </div>
 
-<!-- PWA INSTALL BANNER -->
-<div id="pwa-install-banner">
-  <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Alyans">
-  <div class="pwa-install-text">
-    <div class="pwa-install-title">Ana Ekrana Ekle</div>
-    <div class="pwa-install-sub">Uygulama gibi kullan, hızlı aç</div>
-  </div>
-  <button class="pwa-install-btn" id="pwa-install-btn">Ekle</button>
-  <button class="pwa-install-close" onclick="dismissInstallBanner()">
-    <i class="ph ph-x"></i>
-  </button>
-</div>
+<!-- PWA INSTALL BANNER — gizli, JS tarafından tetiklenir -->
+<div id="pwa-install-banner" style="display:none!important;"></div>
 
 <!-- LOADING -->
 <div class="loading-overlay" id="loading-overlay">
@@ -3075,9 +3064,23 @@ function loadAdminData() {
     // Bekleyen yoksa hatırlatıcıyı durdur
     const bekleyenVar = Object.values(allOrders).some(o => o.status === 'beklemede');
     if(!bekleyenVar) stopReminder();
+    // İlk yüklemede bekleyen varsa uyar
+    if(prevOrderCount < 0) {
+      const bekleyenler = Object.values(allOrders).filter(function(o) { return o.status === 'beklemede'; });
+      if(bekleyenler.length > 0) {
+        setTimeout(function() {
+          showYeniSiparisBanner(bekleyenler.length, true);
+          if(notifSound) notifSound();
+          if(navigator.vibrate) navigator.vibrate([300,100,300,100,500]);
+          document.title = '🔔 ' + bekleyenler.length + ' Bekleyen · Sina Alyans';
+          startReminder();
+        }, 1000);
+      }
+    }
     prevOrderCount = count;
     renderAdminOrders();
     updateAdminStats();
+    updateDurumBadges();
   });
   db.ref('stores').on('value', function(snap) {
     renderAdminStores(snap.val() || {});
@@ -3190,14 +3193,14 @@ function buildOrderCard(id, o, isAdminView) {
   }
 
   const clickAttr = isAdminView ? `onclick="openOrderDetail('${id}')" style="cursor:pointer;"` : '';
-  const checkboxHtml = isAdminView ? `<div style="position:absolute;top:10px;left:10px;z-index:2;" onclick="event.stopPropagation()"><input type="checkbox" id="chk-${id}" value="${id}" onchange="updateTopluSecim()" style="width:18px;height:18px;accent-color:var(--rose);cursor:pointer;"></div>` : '';
+  const checkboxHtml = isAdminView ? `<div style="position:absolute;top:10px;left:10px;z-index:2;" onclick="event.stopPropagation();return false;"><input type="checkbox" id="chk-${id}" value="${id}" onchange="updateTopluSecim()" style="width:18px;height:18px;accent-color:var(--rose);cursor:pointer;"></div>` : '';
   const editable = !isAdminView && o.status === 'beklemede';
 
   if(isAdminView) {
     // ADMIN — kompakt kart
-    return `<div class="order-item" style="position:relative;padding:10px 12px 10px 16px;cursor:pointer;">
+    return `<div class="order-item" style="position:relative;padding:10px 12px 10px 16px;cursor:pointer;" onclick="openOrderDetail('${id}')">
       ${checkboxHtml}
-      <div style="display:flex;align-items:center;gap:10px;" onclick="openOrderDetail('${id}')">
+      <div style="display:flex;align-items:center;gap:10px;">
         <div class="order-item-img" style="width:38px;height:38px;min-width:38px;border-radius:6px;font-size:16px;">${imgHtml}</div>
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px;">
@@ -5389,13 +5392,20 @@ function updateOrderTimers() {
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     deferredPrompt = e;
-    // Daha önce kapatmadıysa banner'ı göster
-    if(!localStorage.getItem('pwa-dismissed')) {
-      setTimeout(function() {
-        document.getElementById('pwa-install-banner').classList.add('show');
-      }, 2000);
-    }
+    window._deferredPWAPrompt = e;
+    // Inline butonu göster
+    const btn = document.getElementById('pwa-install-inline-btn');
+    const iosNote = document.getElementById('pwa-ios-note');
+    if(btn) btn.style.display = 'inline-flex';
+    if(iosNote) iosNote.style.display = 'none';
   });
+  // iOS kontrolü
+  if(/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
+    setTimeout(function() {
+      const iosNote = document.getElementById('pwa-ios-note');
+      if(iosNote) iosNote.style.display = 'block';
+    }, 500);
+  }
 
   document.getElementById('pwa-install-btn').addEventListener('click', function() {
     if(!deferredPrompt) return;
@@ -5498,6 +5508,16 @@ function goToYeniSiparis() {
   const bekleBtn = document.querySelector('#page-admin-siparisler .filter-chip:nth-child(2)');
   if(bekleBtn) bekleBtn.click();
 }
+
+window.triggerPWAInstall = function() {
+  if(window._deferredPWAPrompt) {
+    window._deferredPWAPrompt.prompt();
+    window._deferredPWAPrompt.userChoice.then(function(r) {
+      if(r.outcome === 'accepted') showToast('Ana ekrana eklendi ✓','success');
+      window._deferredPWAPrompt = null;
+    });
+  }
+};
 
 window.dismissInstallBanner = function() {
   document.getElementById('pwa-install-banner').classList.remove('show');
