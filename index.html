@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -972,6 +973,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 
     <!-- KATALOG -->
     <div class="page active" id="page-magaza-katalog">
+      <!-- Logo -->
+      <div style="text-align:center;padding:20px 16px 8px;">
+        <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:36px;width:auto;">
+      </div>
       <div class="section-header" style="padding-bottom:8px;">
         <div>
           <div class="section-title">Ürün Kataloğu</div>
@@ -1193,10 +1198,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   </div>
   <!-- Nav -->
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchTab('admin','dashboard',this);renderDashboard()">
-      <i class="ph ph-squares-four"></i> Özet
-    </button>
-    <button class="nav-tab" onclick="switchTab('admin','siparisler',this)">
+    <button class="nav-tab active" onclick="switchTab('admin','siparisler',this)">
       <i class="ph ph-clipboard-text"></i> Siparişler
     </button>
     <button class="nav-tab" onclick="switchTab('admin','urunler',this)">
@@ -1217,7 +1219,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 
     <!-- SİPARİŞLER -->
     <!-- DASHBOARD -->
-    <div class="page active" id="page-admin-dashboard">
+    <div class="page" id="page-admin-dashboard" style="display:none!important;">
       <div class="section-header">
         <div>
           <div class="section-title">Genel Bakış</div>
@@ -1254,7 +1256,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       </div>
     </div>
 
-    <div class="page" id="page-admin-siparisler">
+    <div class="page active" id="page-admin-siparisler">
       <div class="stats-grid" id="admin-stats-grid">
         <div class="stat-card">
           <div class="stat-label">Toplam Sipariş</div>
@@ -3193,9 +3195,9 @@ function buildOrderCard(id, o, isAdminView) {
 
   if(isAdminView) {
     // ADMIN — kompakt kart
-    return `<div class="order-item" ${clickAttr} style="position:relative;padding:10px 12px 10px 16px;">
+    return `<div class="order-item" style="position:relative;padding:10px 12px 10px 16px;cursor:pointer;">
       ${checkboxHtml}
-      <div style="display:flex;align-items:center;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;" onclick="openOrderDetail('${id}')">
         <div class="order-item-img" style="width:38px;height:38px;min-width:38px;border-radius:6px;font-size:16px;">${imgHtml}</div>
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px;">
