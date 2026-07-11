@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -2632,7 +2633,7 @@ function updateHesap() {
   // Saf altın hesabı
   const milyem   = MILYEM[ayar] || 1;
   const iscilSat = p.iscilSatis || 0;
-  const safSatis = (gramaj + iscilSat) * milyem;
+  const safSatis = gramaj * milyem + parseFloat(iscilSat||0);
 
   // Min/maks bul
   const tablo2 = icYapi === 'dolu' ? p.gramajDolu : p.gramajBos;
@@ -3633,8 +3634,8 @@ function buildAdminHesapHtml(o) {
   const milyem = MILYEM[o.ayar] || 1;
   const iscilSatis   = o.iscilSatis   || p.iscilSatis   || 0;
   const iscilMaliyet = p.iscilMaliyet || 0;
-  const safSatis   = (gramaj + iscilSatis)   * milyem;
-  const safMaliyet = (gramaj + iscilMaliyet) * milyem;
+  const safSatis   = gramaj * milyem + parseFloat(iscilSatis||0);
+  const safMaliyet = gramaj * milyem + parseFloat(iscilMaliyet||0);
   const kar = safSatis - safMaliyet;
 
   const ayarLabel = AYAR_LABEL[o.ayar] || o.ayar;
