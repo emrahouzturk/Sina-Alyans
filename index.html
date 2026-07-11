@@ -789,7 +789,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 
 /* ── PRINT ── */
 @media print {
-  .top-bar, .nav-tabs, .modal-overlay, .toast-wrap { display:none !important; }
+  .top-bar, .nav-tabs, .toast-wrap { display:none !important; }
   .page-content { padding:0; }
   body { background:#fff; }
   @page :blank { display:none; }
@@ -2579,6 +2579,30 @@ function selectIcYapi(tip) {
   updateHesap();
 }
 
+function getGramajForAyarIc(p, ayar, icYapi, olcu) {
+  if(!p || !ayar || !icYapi || isNaN(parseFloat(olcu))) return null;
+  const tablo = icYapi === 'dolu' ? p.gramajDolu : p.gramajBos;
+  if(!tablo || !tablo.length) return null;
+  const olcuF = parseFloat(olcu);
+  const maxRow = tablo.reduce(function(a,b) { return a.max > b.max ? a : b; }, tablo[0]);
+  let row = null;
+  if(olcuF > 27) {
+    const base = (maxRow.gramMin || maxRow.gram || 0);
+    const baseMax = (maxRow.gramMax || base);
+    let gmin = base + 0.50, gmax = baseMax + 0.50;
+    if(ayar === '22' && p.ekstra22) { gmin += p.ekstra22; gmax += p.ekstra22; }
+    return { min: gmin, max: gmax };
+  }
+  for(let i=0; i<tablo.length; i++) {
+    if(olcuF >= tablo[i].min && olcuF <= tablo[i].max) { row = tablo[i]; break; }
+  }
+  if(!row) row = maxRow;
+  let gmin = row.gramMin || row.gram || 0;
+  let gmax = row.gramMax || gmin;
+  if(ayar === '22' && p.ekstra22) { gmin += p.ekstra22; gmax += p.ekstra22; }
+  return { min: gmin, max: gmax };
+}
+
 function updateHesap() {
   const p = currentOrderProductId ? allProducts[currentOrderProductId] : null;
   if(!p) return;
@@ -3193,7 +3217,7 @@ function buildOrderCard(id, o, isAdminView) {
   }
 
   const clickAttr = isAdminView ? `onclick="openOrderDetail('${id}')" style="cursor:pointer;"` : '';
-  const checkboxHtml = isAdminView ? `<div style="position:absolute;top:10px;left:10px;z-index:2;" onclick="event.stopPropagation();return false;"><input type="checkbox" id="chk-${id}" value="${id}" onchange="updateTopluSecim()" style="width:18px;height:18px;accent-color:var(--rose);cursor:pointer;"></div>` : '';
+  const checkboxHtml = '';
   const editable = !isAdminView && o.status === 'beklemede';
 
   if(isAdminView) {
