@@ -28,22 +28,7 @@
   animation:slideDown .3s ease;
   overflow:hidden;
 }
-#yeni-siparis-banner::before {
-  content:'';
-  position:absolute; right:-20px; top:-20px;
-  width:80px; height:80px;
-  background:rgba(255,255,255,.08);
-  border-radius:50%;
-  pointer-events:none;
-}
-#yeni-siparis-banner::after {
-  content:'';
-  position:absolute; right:40px; bottom:-30px;
-  width:60px; height:60px;
-  background:rgba(255,255,255,.06);
-  border-radius:50%;
-  pointer-events:none;
-}
+
 #yeni-siparis-banner.show { display:block; }
 @keyframes slideDown {
   from { transform:translateY(-100%); opacity:0; }
@@ -818,14 +803,19 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 <!-- YENİ SİPARİŞ BİLDİRİMİ -->
 <div id="yeni-siparis-banner">
   <div class="ysb-inner">
-    <div class="ysb-icon"><i class="ph ph-bell-ringing" style="font-size:24px;"></i></div>
+    <!-- Sol dekoratif daire -->
+    <div style="width:44px;height:44px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:pulse 1.2s ease infinite;">
+      <i class="ph ph-bell-ringing" style="font-size:22px;color:#fff;"></i>
+    </div>
     <div class="ysb-text">
       <div class="ysb-title" id="ysb-title">Yeni Sipariş Geldi!</div>
       <div class="ysb-sub" id="ysb-sub">Siparişler sekmesini kontrol et</div>
       <div style="font-size:9px;opacity:.6;margin-top:3px;" id="ysb-reminder-info"></div>
     </div>
-    <div style="font-size:28px;opacity:.25;flex-shrink:0;"><i class="ph ph-diamond"></i></div>
     <button class="ysb-btn" onclick="goToYeniSiparis()">Gör</button>
+    <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <i class="ph ph-diamond" style="font-size:18px;color:#fff;"></i>
+    </div>
     <button class="ysb-close" onclick="closeYeniSiparisBanner()" title="Kapat (hatırlatmaya devam eder)"><i class="ph ph-x"></i></button>
     <button class="ysb-close" onclick="closeYeniSiparisBanner();stopReminder();" title="Sustur" style="background:rgba(255,255,255,.1);margin-left:-8px;">
       <i class="ph ph-bell-slash"></i>
