@@ -3623,6 +3623,13 @@ function buildAdminHesapHtml(o) {
 
   if(o.ayar === '22' && p.ekstra22) gramaj += p.ekstra22;
 
+  // Gerçek gramaj girildiyse onu kullan, yoksa tablo değeri
+  let gramajKaynagi = 'Tablo';
+  if(o.gercekGramaj && o.gercekGramaj > 0) {
+    gramaj = o.gercekGramaj;
+    gramajKaynagi = 'Gerçek';
+  }
+
   const milyem = MILYEM[o.ayar] || 1;
   const iscilSatis   = o.iscilSatis   || p.iscilSatis   || 0;
   const iscilMaliyet = p.iscilMaliyet || 0;
