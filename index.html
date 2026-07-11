@@ -945,9 +945,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 <div class="screen" id="screen-magaza">
   <!-- Top Bar -->
   <div class="top-bar">
-    <div class="top-store-badge" id="store-name-badge" style="font-size:11px;font-weight:700;color:rgba(255,255,255,.8);background:none;border:none;padding:0;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-    <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:26px;flex:1;object-fit:contain;filter:brightness(0) saturate(0) opacity(.7);">
-    <button class="btn-ghost" onclick="doLogout()" style="background:rgba(90,32,48,.1);border-color:#c4929e;color:#5a2030;font-size:11px;padding:6px 12px;white-space:nowrap;">
+    <div class="top-store-badge" id="store-name-badge" style="font-size:11px;font-weight:700;color:#fff;background:none;border:none;padding:0;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+    <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:26px;flex:1;object-fit:contain;filter:brightness(0) invert(1);">
+    <button class="btn-ghost" onclick="doLogout()" style="background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;font-size:11px;padding:6px 12px;white-space:nowrap;">
       <i class="ph ph-sign-out"></i> Çıkış
     </button>
   </div>
@@ -1183,11 +1183,11 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 <div class="screen" id="screen-admin">
   <!-- Top Bar -->
   <div class="top-bar">
-    <button class="btn-ghost" onclick="openAddProduct()" style="background:rgba(90,32,48,.1);border-color:#c4929e;color:#5a2030;font-size:11px;padding:6px 12px;white-space:nowrap;">
+    <button class="btn-ghost" onclick="openAddProduct()" style="background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;font-size:11px;padding:6px 12px;white-space:nowrap;">
       <i class="ph ph-plus"></i> Ürün Ekle
     </button>
-    <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:26px;flex:1;object-fit:contain;filter:brightness(0) saturate(0) opacity(.7);">
-    <button class="btn-ghost" onclick="doLogout()" style="background:rgba(90,32,48,.1);border-color:#c4929e;color:#5a2030;font-size:11px;padding:6px 12px;white-space:nowrap;">
+    <img src="https://www.sinapirlanta.com/themes/custom/sina/logo.svg" alt="Sina Pırlanta" style="height:26px;flex:1;object-fit:contain;filter:brightness(0) invert(1);">
+    <button class="btn-ghost" onclick="doLogout()" style="background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;font-size:11px;padding:6px 12px;white-space:nowrap;">
       <i class="ph ph-sign-out"></i> Çıkış
     </button>
   </div>
@@ -1754,6 +1754,13 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     <div class="modal-body">
       <input type="hidden" id="edit-product-id">
 
+      <!-- Sekmeler -->
+      <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px;">
+        <button class="prod-tab active" onclick="switchProdTab('temel',this)" style="padding:9px 16px;border:none;background:transparent;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;color:var(--rose);border-bottom:2px solid var(--rose);margin-bottom:-2px;cursor:pointer;">Temel Bilgiler</button>
+        <button class="prod-tab" onclick="switchProdTab('uretim',this)" style="padding:9px 16px;border:none;background:transparent;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;color:var(--ink-dim);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;">Üretim</button>
+        <button class="prod-tab" onclick="switchProdTab('gramaj',this)" style="padding:9px 16px;border:none;background:transparent;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;color:var(--ink-dim);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;">Gramaj</button>
+      </div>
+      <div id="prod-tab-temel">
       <!-- Temel Bilgiler -->
       <div style="font-size:11px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">Temel Bilgiler</div>
       <div style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start;">
@@ -1800,8 +1807,8 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <textarea class="text-field" id="product-desc" placeholder="Ürün hakkında kısa açıklama…" rows="2"></textarea>
       </div>
 
-      <hr class="divider">
-
+      </div><!-- /temel -->
+      <div id="prod-tab-uretim" style="display:none;">
       <!-- Ayar ve İçi Boş/Dolu -->
       <div style="font-size:11px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;">Üretim Özellikleri</div>
       <div class="form-row">
@@ -1852,8 +1859,8 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <input type="number" step="0.1" class="text-field" id="product-22-ekstra" placeholder="ör: 1.25">
       </div>
 
-      <hr class="divider">
-
+      </div><!-- /uretim -->
+      <div id="prod-tab-gramaj" style="display:none;">
       <!-- Gramaj Tablosu -->
       <div style="font-size:11px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;">Gramaj Tablosu</div>
       <div style="font-size:11px;color:var(--ink-dim);margin-bottom:12px;">İçi dolu ve boş için ayrı ayrı gir. Ölçü 27 üzeri otomatik +0.50 gr eklenir.</div>
@@ -1884,8 +1891,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         İçi dolu ve/veya boş seçimi yapınca gramaj tablosu buraya gelir.
       </div>
 
-      <hr class="divider">
-
+      </div><!-- /gramaj -->
       <!-- Durum -->
       <div class="form-group" style="margin-bottom:0;">
         <label class="field-label">Ürün Durumu</label>
@@ -3774,6 +3780,8 @@ function openAddProduct() {
   document.getElementById('product-photo-input').value = '';
   setProductActive(true);
   initGramajHandlers();
+  var ft = document.querySelector('.prod-tab');
+  if(ft) switchProdTab('temel', ft);
   openModal('modal-add-product');
 }
 
@@ -3800,7 +3808,28 @@ function openEditProduct(id) {
     document.getElementById('product-photo-area').classList.remove('has-photo');
   }
   document.getElementById('product-photo-input').value = '';
-  setProductActive(true);
+  // İşçilik
+  document.getElementById('product-iscil-maliyet').value = p.iscilMaliyet || '';
+  document.getElementById('product-iscil-satis').value   = p.iscilSatis   || '';
+  document.getElementById('product-22-ekstra').value     = p.ekstra22     || '';
+  // Ayar checkboxları
+  document.getElementById('ayar-14').checked    = !!(p.ayarlar && p.ayarlar.includes('14'));
+  document.getElementById('ayar-22').checked    = !!(p.ayarlar && p.ayarlar.includes('22'));
+  document.getElementById('ayar-gumus').checked = !!(p.ayarlar && p.ayarlar.includes('gumus'));
+  // İç yapı
+  document.getElementById('ic-dolu').checked = !!(p.icYapi && p.icYapi.includes('dolu'));
+  document.getElementById('ic-bos').checked  = !!(p.icYapi && p.icYapi.includes('bos'));
+  // Gramaj tabloları
+  gramajRowCountDolu = 0; gramajRowCountBos = 0;
+  document.getElementById('gramaj-dolu-rows').innerHTML = '';
+  document.getElementById('gramaj-bos-rows').innerHTML  = '';
+  loadGramajTable('dolu', p.gramajDolu || []);
+  loadGramajTable('bos',  p.gramajBos  || []);
+  initGramajHandlers(); // visibility'yi içinde çağırıyor
+  setProductActive(p.active !== false);
+  // Sekmeyi temel'e sıfırla
+  var ft = document.querySelector('.prod-tab');
+  if(ft) switchProdTab('temel', ft);
   openModal('modal-add-product');
 }
 
@@ -4578,17 +4607,21 @@ let gramajRowCountDolu = 0;
 let gramajRowCountBos  = 0;
 
 function initGramajHandlers() {
-  // ic-dolu ve ic-bos checkbox'larını dinle
   document.getElementById('ic-dolu').onchange = updateGramajVisibility;
   document.getElementById('ic-bos').onchange  = updateGramajVisibility;
+  // Mevcut durumu hemen uygula
+  updateGramajVisibility();
 }
 
 function updateGramajVisibility() {
   const dolu = document.getElementById('ic-dolu').checked;
   const bos  = document.getElementById('ic-bos').checked;
-  document.getElementById('gramaj-dolu-wrap').style.display = dolu ? '' : 'none';
-  document.getElementById('gramaj-bos-wrap').style.display  = bos  ? '' : 'none';
-  document.getElementById('gramaj-empty-note').style.display = (!dolu && !bos) ? '' : 'none';
+  const doluWrap = document.getElementById('gramaj-dolu-wrap');
+  const bosWrap  = document.getElementById('gramaj-bos-wrap');
+  const emptyNote = document.getElementById('gramaj-empty-note');
+  if(doluWrap) doluWrap.style.display = dolu ? '' : 'none';
+  if(bosWrap)  bosWrap.style.display  = bos  ? '' : 'none';
+  if(emptyNote) emptyNote.style.display = (!dolu && !bos) ? '' : 'none';
 }
 
 function addGramajRow(tip, olcuMin, olcuMax, gramMin, gramMax) {
@@ -4656,6 +4689,20 @@ function findGramaj(table, olcu) {
   const gMin = row.gramMin || row.gram || 0;
   const gMax = row.gramMax || gMin;
   return (gMin + gMax) / 2;
+}
+
+function switchProdTab(tab, btn) {
+  ['temel','uretim','gramaj'].forEach(function(t) {
+    const el = document.getElementById('prod-tab-'+t);
+    if(el) el.style.display = t===tab ? '' : 'none';
+  });
+  document.querySelectorAll('.prod-tab').forEach(function(b) {
+    b.style.color = 'var(--ink-dim)';
+    b.style.borderBottomColor = 'transparent';
+  });
+  btn.style.color = 'var(--rose)';
+  btn.style.borderBottomColor = 'var(--rose)';
+  if(tab === 'gramaj') updateGramajVisibility();
 }
 
 function setProductActive(val) {
@@ -5162,23 +5209,30 @@ function openProductDetail(productId) {
   }
   if(p.iscilSatis) details.push({ label: 'Hedef İşçilik', value: p.iscilSatis + ' gr' });
 
-  function buildGramajTable(tablo, baslik) {
+  function buildGramajTable(tablo, baslik, ekstra22) {
     if(!tablo || !tablo.length) return '';
+    const has22 = ekstra22 && ekstra22 > 0;
     return `<div style="margin-top:10px;">
       <div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">${baslik}</div>
       <table style="width:100%;border-collapse:collapse;font-size:11px;">
         <thead><tr style="background:var(--rose-pale);">
           <th style="padding:5px 8px;text-align:left;font-weight:700;color:var(--rose);">Ölçü</th>
-          <th style="padding:5px 8px;text-align:left;font-weight:700;color:var(--rose);">Min Gram</th>
-          <th style="padding:5px 8px;text-align:left;font-weight:700;color:var(--rose);">Max Gram</th>
+          <th style="padding:5px 8px;text-align:left;font-weight:700;color:var(--rose);">14 Ayar</th>
+          ${has22 ? `<th style="padding:5px 8px;text-align:left;font-weight:700;color:var(--rose);">22 Ayar</th>` : ''}
         </tr></thead>
-        <tbody>${tablo.map(r => `<tr style="border-bottom:1px solid var(--border-light);">
-          <td style="padding:5px 8px;color:var(--ink-mid);">${r.min} – ${r.max}</td>
-          <td style="padding:5px 8px;font-weight:700;">≈ ${(r.gramMin||r.gram||0).toFixed(2)} gr</td>
-          <td style="padding:5px 8px;font-weight:700;">≈ ${(r.gramMax||r.gramMin||r.gram||0).toFixed(2)} gr</td>
-        </tr>`).join('')}</tbody>
+        <tbody>${tablo.map(r => {
+          const gMin14 = (r.gramMin||r.gram||0);
+          const gMax14 = (r.gramMax||gMin14);
+          const gMin22 = gMin14 + (ekstra22||0);
+          const gMax22 = gMax14 + (ekstra22||0);
+          return `<tr style="border-bottom:1px solid var(--border-light);">
+            <td style="padding:5px 8px;color:var(--ink-mid);">${r.min} – ${r.max}</td>
+            <td style="padding:5px 8px;font-weight:700;">≈ ${gMin14.toFixed(2)} – ${gMax14.toFixed(2)} gr</td>
+            ${has22 ? `<td style="padding:5px 8px;font-weight:700;color:#9c1a38;">≈ ${gMin22.toFixed(2)} – ${gMax22.toFixed(2)} gr</td>` : ''}
+          </tr>`;
+        }).join('')}</tbody>
       </table>
-      <div style="font-size:9px;color:var(--ink-dim);margin-top:3px;">* 27 üzeri ölçülerde +0.50 gr eklenir</div>
+      <div style="font-size:9px;color:var(--ink-dim);margin-top:3px;">* 27 üzeri ölçülerde +0.50 gr eklenir${has22 ? ' · 22 ayar '+ekstra22+' gr ekstra' : ''}</div>
     </div>`;
   }
 
@@ -5188,8 +5242,8 @@ function openProductDetail(productId) {
       <span style="font-size:13px;font-weight:700;color:var(--ink);">${escHtml(d.value)}</span>
     </div>`).join('');
 
-  if(p.gramajDolu && p.gramajDolu.length) detailsHtml += buildGramajTable(p.gramajDolu, 'İçi Dolu Gramaj');
-  if(p.gramajBos  && p.gramajBos.length)  detailsHtml += buildGramajTable(p.gramajBos,  'İçi Boş Gramaj');
+  if(p.gramajDolu && p.gramajDolu.length) detailsHtml += buildGramajTable(p.gramajDolu, 'İçi Dolu Gramaj', p.ekstra22);
+  if(p.gramajBos  && p.gramajBos.length)  detailsHtml += buildGramajTable(p.gramajBos,  'İçi Boş Gramaj', p.ekstra22);
 
   document.getElementById('pd-details').innerHTML = detailsHtml;
 
