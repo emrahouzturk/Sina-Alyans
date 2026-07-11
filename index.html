@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -93,22 +93,34 @@
 </style>
 <style>
 :root {
+  /* Sina Pırlanta — Pudra Pembe Kurumsal Palet */
   --rose:       #c8244c;
   --rose-dim:   #9c1a38;
-  --rose-soft:  #f5dde4;
+  --rose-soft:  #f2cdd8;
   --rose-pale:  #fdf0f3;
+
+  /* Pudra pembe — imza renk */
+  --pudra:      #e8c4cc;
+  --pudra-light:#f5e8eb;
+  --pudra-dark: #c4929e;
+
   --gold:       #b8966a;
   --gold-pale:  #f9f5ef;
   --success:    #1a7a4a;
   --success-bg: #eaf6f0;
   --warn:       #a06a00;
   --warn-bg:    #fff6e0;
+
+  /* Koyu top bar rengi */
+  --topbar-bg:  #1a0a0f;
+  --topbar-border: #2e1520;
+
   --ink:        #1a1a24;
   --ink-mid:    #4a4a5a;
   --ink-dim:    #9090a0;
-  --border:     #e8e4ec;
+  --border:     #ede8ec;
   --surface:    #ffffff;
-  --bg:         #f7f5f8;
+  --bg:         #f8f4f5;
   --shadow-sm:  0 1px 4px rgba(26,26,36,.06);
   --shadow-md:  0 4px 20px rgba(26,26,36,.10);
   --shadow-lg:  0 12px 40px rgba(26,26,36,.14);
@@ -1625,23 +1637,11 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         </div>
       </div>
 
-      <!-- Hesap Kutusu -->
+      <!-- Gramaj kutusu kaldırıldı -->
       <div id="ord-hesap-wrap" style="display:none;">
-        <div class="hesap-box">
-          <div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;"><i class="ph ph-calculator"></i> Gramaj Tahmini</div>
-          <div class="hesap-row">
-            <span class="hesap-label">≈ Minimum Gramaj</span>
-            <span class="hesap-value" id="hesap-gramaj-min">–</span>
-          </div>
-          <div class="hesap-row">
-            <span class="hesap-label">≈ Maksimum Gramaj</span>
-            <span class="hesap-value" id="hesap-gramaj-max">–</span>
-          </div>
-          <div class="hesap-row" style="border-top:1.5px solid var(--rose-soft);margin-top:4px;padding-top:8px;">
-            <span class="hesap-label" style="font-weight:800;">≈ Ortalama Gramaj</span>
-            <span class="hesap-value rose" id="hesap-gramaj">–</span>
-          </div>
-        </div>
+        <span id="hesap-gramaj-min" style="display:none;"></span>
+        <span id="hesap-gramaj-max" style="display:none;"></span>
+        <span id="hesap-gramaj" style="display:none;"></span>
       </div>
 
       <!-- Renk — tek yüzük için -->
@@ -3147,16 +3147,43 @@ function buildOrderCard(id, o, isAdminView) {
   }
 
   const clickAttr = isAdminView ? `onclick="openOrderDetail('${id}')" style="cursor:pointer;"` : '';
-  const editable  = !isAdminView && o.status === 'beklemede';
+  const checkboxHtml = isAdminView ? `<div style="position:absolute;top:10px;left:10px;z-index:2;" onclick="event.stopPropagation()"><input type="checkbox" id="chk-${id}" value="${id}" onchange="updateTopluSecim()" style="width:18px;height:18px;accent-color:var(--rose);cursor:pointer;"></div>` : '';
+  const editable = !isAdminView && o.status === 'beklemede';
 
-  return `<div class="order-item" ${clickAttr}>
+  if(isAdminView) {
+    // ADMIN — kompakt kart
+    return `<div class="order-item" ${clickAttr} style="position:relative;padding:10px 12px 10px 16px;">
+      ${checkboxHtml}
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="order-item-img" style="width:38px;height:38px;min-width:38px;border-radius:6px;font-size:16px;">${imgHtml}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px;">
+            <div style="display:flex;align-items:center;gap:5px;min-width:0;">
+              ${o.orderNo ? `<span style="font-size:9px;font-weight:800;color:var(--rose);background:var(--rose-pale);padding:1px 6px;border-radius:100px;flex-shrink:0;">${escHtml(o.orderNo)}</span>` : ''}
+              <span style="font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${o.type==='ozel' ? '<span style="color:var(--gold);font-weight:800;">Özel</span>' : escHtml(o.productName||o.productCode||'')}</span>
+            </div>
+            <span class="status-badge ${statusClass}" style="font-size:9px;padding:2px 7px;flex-shrink:0;">${statusLabel}</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;">
+            <div style="font-size:11px;color:var(--ink-mid);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+              ${escHtml(o.musteri||'')} <span style="color:var(--ink-dim);font-weight:400;">· ${escHtml(o.storeName||'')}</span>
+            </div>
+            <span style="font-size:10px;color:var(--ink-dim);flex-shrink:0;">${dateStr}</span>
+          </div>
+          ${metaLines.length ? `<div style="font-size:10px;color:var(--ink-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${metaLines.join(' · ')}</div>` : ''}
+          ${o.status === 'iptal' && o.iptalNeden ? `<div style="font-size:10px;color:var(--rose);margin-top:2px;font-weight:600;">İptal: ${escHtml(o.iptalNeden)}</div>` : ''}
+          ${o.not ? `<div style="font-size:10px;color:var(--ink-dim);font-style:italic;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(o.not)}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // MAĞAZA — detaylı kart
+  return `<div class="order-item" style="position:relative;">
     <div class="order-item-img">${imgHtml}</div>
     <div class="order-item-body">
       <div class="order-item-top">
         <div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px;">
-            ${o.orderNo ? `<span style="font-size:10px;font-weight:800;color:var(--rose);background:var(--rose-pale);padding:2px 8px;border-radius:100px;">${escHtml(o.orderNo)}</span>` : ''}
-          </div>
           ${o.type === 'ozel'
             ? `<div class="order-item-name"><span class="ozel-badge">Özel</span></div>`
             : `<div class="order-item-code">${escHtml(o.productCode||'')}</div>
@@ -3165,7 +3192,6 @@ function buildOrderCard(id, o, isAdminView) {
         <span class="status-badge ${statusClass}">${statusLabel}</span>
       </div>
       <div class="order-item-customer"><i class="ph ph-user"></i> ${escHtml(o.musteri||'')}</div>
-      ${isAdminView ? `<div style="font-size:11px;color:var(--ink-dim);margin-top:2px;"><i class="ph ph-storefront"></i> ${escHtml(o.storeName||'')}</div>` : ''}
       <div class="order-item-meta">${metaLines.join(' · ')}</div>
       ${o.not ? `<div class="order-item-note">${escHtml(o.not)}</div>` : ''}
       ${o.status === 'iptal' && o.iptalNeden ? `<div style="font-size:11px;color:var(--rose);margin-top:4px;font-weight:600;"><i class="ph ph-x-circle"></i> İptal: ${escHtml(o.iptalNeden)}</div>` : ''}
@@ -3173,12 +3199,12 @@ function buildOrderCard(id, o, isAdminView) {
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           ${o.orderNo ? `<span style="font-size:10px;font-weight:800;color:var(--rose);background:var(--rose-pale);padding:2px 8px;border-radius:100px;">${escHtml(o.orderNo)}</span>` : ''}
           <span style="font-size:10px;color:var(--ink-dim);">${dateStr}</span>
-          ${!isAdminView && o.status !== 'kargo' && o.status !== 'iptal' ? `<span style="font-size:10px;color:var(--ink-dim);" id="timer-${id}"></span>` : ''}
-          ${!isAdminView && o.status === 'kargo' ? `<span style="font-size:10px;color:var(--success);font-weight:600;"><i class="ph ph-check-circle"></i> Teslim edildi</span>` : ''}
+          ${o.status !== 'kargo' && o.status !== 'iptal' ? `<span style="font-size:10px;color:var(--ink-dim);" id="timer-${id}"></span>` : ''}
+          ${o.status === 'kargo' ? `<span style="font-size:10px;color:var(--success);font-weight:600;"><i class="ph ph-check-circle"></i> Teslim edildi</span>` : ''}
         </div>
         <div style="display:flex;gap:6px;">
           ${editable ? `<button class="btn-edit" style="font-size:10px;padding:5px 10px;" onclick="openEditOrder('${id}')"><i class="ph ph-pencil-simple"></i> Düzenle</button>` : ''}
-          ${!isAdminView && o.status !== 'beklemede' ? `<div style="font-size:10px;color:var(--ink-dim);align-self:center;"><i class="ph ph-lock-simple"></i> Kilitli</div>` : ''}
+          ${!editable && o.status !== 'beklemede' ? `<div style="font-size:10px;color:var(--ink-dim);align-self:center;"><i class="ph ph-lock-simple"></i> Kilitli</div>` : ''}
         </div>
       </div>
     </div>
@@ -5040,11 +5066,36 @@ function openProductDetail(productId) {
   }
   if(p.iscilSatis) details.push({ label: 'Hedef İşçilik', value: p.iscilSatis + ' gr' });
 
-  document.getElementById('pd-details').innerHTML = details.map(d => `
+  function buildGramajTable(tablo, baslik) {
+    if(!tablo || !tablo.length) return '';
+    return `<div style="margin-top:10px;">
+      <div style="font-size:10px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">${baslik}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead><tr style="background:var(--rose-pale);">
+          <th style="padding:5px 8px;text-align:left;font-weight:700;color:var(--rose);">Ölçü</th>
+          <th style="padding:5px 8px;text-align:left;font-weight:700;color:var(--rose);">Min Gram</th>
+          <th style="padding:5px 8px;text-align:left;font-weight:700;color:var(--rose);">Max Gram</th>
+        </tr></thead>
+        <tbody>${tablo.map(r => `<tr style="border-bottom:1px solid var(--border-light);">
+          <td style="padding:5px 8px;color:var(--ink-mid);">${r.min} – ${r.max}</td>
+          <td style="padding:5px 8px;font-weight:700;">≈ ${(r.gramMin||r.gram||0).toFixed(2)} gr</td>
+          <td style="padding:5px 8px;font-weight:700;">≈ ${(r.gramMax||r.gramMin||r.gram||0).toFixed(2)} gr</td>
+        </tr>`).join('')}</tbody>
+      </table>
+      <div style="font-size:9px;color:var(--ink-dim);margin-top:3px;">* 27 üzeri ölçülerde +0.50 gr eklenir</div>
+    </div>`;
+  }
+
+  let detailsHtml = details.map(d => `
     <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">
       <span style="font-size:10px;font-weight:700;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.06em;min-width:90px;">${escHtml(d.label)}</span>
       <span style="font-size:13px;font-weight:700;color:var(--ink);">${escHtml(d.value)}</span>
     </div>`).join('');
+
+  if(p.gramajDolu && p.gramajDolu.length) detailsHtml += buildGramajTable(p.gramajDolu, 'İçi Dolu Gramaj');
+  if(p.gramajBos  && p.gramajBos.length)  detailsHtml += buildGramajTable(p.gramajBos,  'İçi Boş Gramaj');
+
+  document.getElementById('pd-details').innerHTML = detailsHtml;
 
   // Sipariş Ver butonu
   const btn = document.getElementById('pd-siparis-btn');
@@ -5073,11 +5124,35 @@ function openZoom(src, productId) {
     if(p.ayarlar&&p.ayarlar.length) details.push({ l:'Ayar', v:p.ayarlar.map(a=>AYAR_LABEL[a]||a).join(' / ') });
     if(p.icYapi&&p.icYapi.length)   details.push({ l:'İç Yapı', v:p.icYapi.map(t=>t==='dolu'?'İçi Dolu':'İçi Boş').join(' / ') });
   }
-  document.getElementById('zf-details').innerHTML = details.map(d =>
+  let zfHtml = details.map(d =>
     `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08);">
       <span style="font-size:10px;font-weight:700;color:#6060a0;min-width:70px;text-transform:uppercase;">${escHtml(d.l)}</span>
       <span style="font-size:12px;font-weight:700;color:#fff;">${escHtml(d.v)}</span>
     </div>`).join('');
+
+  // Gramaj tabloları
+  if(p && p.gramajDolu && p.gramajDolu.length) {
+    zfHtml += '<div style="margin-top:10px;"><div style="font-size:9px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">İÇİ DOLU GRAMAJ</div>';
+    zfHtml += '<table style="width:100%;border-collapse:collapse;font-size:10px;">';
+    p.gramajDolu.forEach(function(r) {
+      zfHtml += '<tr><td style="padding:3px 6px;color:#9090b0;">' + r.min + '–' + r.max + '</td>';
+      zfHtml += '<td style="padding:3px 6px;font-weight:700;color:#fff;">≈ ' + (r.gramMin||r.gram||0).toFixed(2) + ' gr</td>';
+      zfHtml += '<td style="padding:3px 6px;font-weight:700;color:#fff;">≈ ' + (r.gramMax||r.gramMin||r.gram||0).toFixed(2) + ' gr</td></tr>';
+    });
+    zfHtml += '</table></div>';
+  }
+  if(p && p.gramajBos && p.gramajBos.length) {
+    zfHtml += '<div style="margin-top:8px;"><div style="font-size:9px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;">İÇİ BOŞ GRAMAJ</div>';
+    zfHtml += '<table style="width:100%;border-collapse:collapse;font-size:10px;">';
+    p.gramajBos.forEach(function(r) {
+      zfHtml += '<tr><td style="padding:3px 6px;color:#9090b0;">' + r.min + '–' + r.max + '</td>';
+      zfHtml += '<td style="padding:3px 6px;font-weight:700;color:#fff;">≈ ' + (r.gramMin||r.gram||0).toFixed(2) + ' gr</td>';
+      zfHtml += '<td style="padding:3px 6px;font-weight:700;color:#fff;">≈ ' + (r.gramMax||r.gramMin||r.gram||0).toFixed(2) + ' gr</td></tr>';
+    });
+    zfHtml += '</table></div>';
+  }
+
+  document.getElementById('zf-details').innerHTML = zfHtml;
   // Sipariş butonu
   const sipBtn = document.getElementById('zf-siparis-btn');
   sipBtn.style.display = p ? '' : 'none';
