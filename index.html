@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -805,7 +806,7 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   <div class="ysb-inner">
     <!-- Sol dekoratif daire -->
     <div style="width:44px;height:44px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:pulse 1.2s ease infinite;">
-      <i class="ph ph-bell-ringing" style="font-size:22px;color:#fff;"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 256 256" fill="#fff"><path d="M221.8,175.94C216.25,166.38,208,139.33,208,104a80,80,0,1,0-160,0c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0H208a16,16,0,0,0,13.8-24.06ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a64,64,0,1,1,128,0c0,36.05,8.28,66.73,16,80Z"/></svg>
     </div>
     <div class="ysb-text">
       <div class="ysb-title" id="ysb-title">Yeni Sipariş Geldi!</div>
@@ -814,11 +815,11 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
     </div>
     <button class="ysb-btn" onclick="goToYeniSiparis()">Gör</button>
     <div style="width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <i class="ph ph-diamond" style="font-size:18px;color:#fff;"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 256 256" fill="#fff"><path d="M240,98.94a13.94,13.94,0,0,0-3.24-4.69L182.6,40.09a14,14,0,0,0-9.9-4.09H83.3a14,14,0,0,0-9.9,4.09L19.24,94.25A14,14,0,0,0,18,112.79l100,125.91a14,14,0,0,0,21.94,0l100-125.91A13.94,13.94,0,0,0,240,98.94ZM177.39,52l42.67,42.67H157.33L136,52ZM98.61,52,120,94.67H36.94L79.61,52ZM128,213.06,45.93,110.67H210.07Z"/></svg>
     </div>
-    <button class="ysb-close" onclick="closeYeniSiparisBanner()" title="Kapat (hatırlatmaya devam eder)"><i class="ph ph-x"></i></button>
+    <button class="ysb-close" onclick="closeYeniSiparisBanner()" title="Kapat (hatırlatmaya devam eder)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="#fff"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
     <button class="ysb-close" onclick="closeYeniSiparisBanner();stopReminder();" title="Sustur" style="background:rgba(255,255,255,.1);margin-left:-8px;">
-      <i class="ph ph-bell-slash"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" fill="#fff"><path d="M53.92,34.62A8,8,0,1,0,42.08,45.38L58.82,63.8A79.59,79.59,0,0,0,48,104c0,35.34-8.26,62.38-13.81,71.94A16,16,0,0,0,48,200H88.81a40,40,0,0,0,78.38,0h18.65l16.24,17.86a8,8,0,1,0,11.84-10.76ZM128,216a24,24,0,0,1-22.62-16h45.24A24,24,0,0,1,128,216ZM48,184c7.7-13.24,16-43.92,16-80a63.65,63.65,0,0,1,6.26-27.62L171.55,184Zm25.81-143.7A63.93,63.93,0,0,1,192,104c0,20.62,2.7,40.06,7.34,55.19a8,8,0,0,0,15.3-4.69C210.62,141.13,208,123.24,208,104a80,80,0,0,0-119.7-69.42,8,8,0,1,0,7.92,13.92A63.63,63.63,0,0,1,128,40,64.07,64.07,0,0,1,73.81,40.3Z"/></svg>
     </button>
   </div>
   <div class="ysb-progress"><div class="ysb-progress-bar" id="ysb-bar" style="width:100%"></div></div>
