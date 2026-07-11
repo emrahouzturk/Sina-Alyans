@@ -975,13 +975,13 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 
     <!-- KATALOG -->
     <div class="page active" id="page-magaza-katalog">
-      <div class="section-header">
+      <div class="section-header" style="padding-bottom:8px;">
         <div>
           <div class="section-title">Ürün Kataloğu</div>
-          <div class="section-sub">Ürüne tıklayarak sipariş ver</div>
+          <div class="section-sub">Fotoğrafa tıkla, incele, sipariş ver</div>
         </div>
         <button class="btn-ghost" onclick="exportCatalogPDF()" style="font-size:11px;">
-          <i class="ph ph-file-pdf"></i> Katalog PDF
+          <i class="ph ph-file-pdf"></i> PDF
         </button>
       </div>
       <div style="margin-bottom:12px;">
@@ -1199,7 +1199,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   </div>
   <!-- Nav -->
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchTab('admin','siparisler',this)">
+    <button class="nav-tab active" onclick="switchTab('admin','dashboard',this);renderDashboard()">
+      <i class="ph ph-squares-four"></i> Özet
+    </button>
+    <button class="nav-tab" onclick="switchTab('admin','siparisler',this)">
       <i class="ph ph-clipboard-text"></i> Siparişler
     </button>
     <button class="nav-tab" onclick="switchTab('admin','urunler',this)">
@@ -1219,7 +1222,45 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
   <div class="page-content">
 
     <!-- SİPARİŞLER -->
-    <div class="page active" id="page-admin-siparisler">
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-admin-dashboard">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Genel Bakış</div>
+          <div class="section-sub" id="dashboard-tarih"></div>
+        </div>
+      </div>
+
+      <!-- Özet kartlar -->
+      <div class="stats-grid" id="db-stats" style="margin-bottom:16px;"></div>
+
+      <!-- Hızlı eylemler -->
+      <div style="display:flex;gap:8px;padding:0 12px 14px;flex-wrap:wrap;">
+        <button class="btn-primary" style="flex:1;justify-content:center;" onclick="switchTab('admin','siparisler',document.querySelector('#screen-admin .nav-tab:nth-child(2)'));hizliFiltre('bekleyen',document.getElementById('hizli-bekleyen'))">
+          <i class="ph ph-bell"></i> Bekleyenler
+        </button>
+        <button class="btn-secondary" style="flex:1;justify-content:center;" onclick="switchTab('admin','siparisler',document.querySelector('#screen-admin .nav-tab:nth-child(2)'));hizliFiltre('bugun',document.getElementById('hizli-bugun'))">
+          <i class="ph ph-calendar"></i> Bugün
+        </button>
+      </div>
+
+      <!-- Son siparişler -->
+      <div class="card" style="margin:0 12px 12px;">
+        <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+          Son Siparişler
+          <button class="btn-ghost" style="font-size:10px;padding:4px 10px;" onclick="switchTab('admin','siparisler',document.querySelector('#screen-admin .nav-tab:nth-child(2)'))">Tümü →</button>
+        </div>
+        <div id="db-son-siparisler"></div>
+      </div>
+
+      <!-- Mağaza sıralaması -->
+      <div class="card" style="margin:0 12px 12px;">
+        <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;">Bu Ay — Mağaza Sıralaması</div>
+        <div id="db-magaza-sirala"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-admin-siparisler">
       <div class="stats-grid" id="admin-stats-grid">
         <div class="stat-card">
           <div class="stat-label">Toplam Sipariş</div>
@@ -3821,6 +3862,67 @@ function saveProduct() {
 
   // base64 URL zaten pendingProductPhotoUrl'de hazır
   doSave(pendingProductPhotoUrl || undefined);
+}
+
+// ── DASHBOARD ────────────────────────────────────────
+function renderDashboard() {
+  const now = Date.now();
+  const bugun = new Date(); bugun.setHours(0,0,0,0);
+  const orders = Object.entries(allOrders);
+
+  // Tarih
+  const tarihEl = document.getElementById('dashboard-tarih');
+  if(tarihEl) tarihEl.textContent = new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  // Özet
+  const bekleyen = orders.filter(([,o]) => o.status==='beklemede').length;
+  const isleme   = orders.filter(([,o]) => o.status==='isleme').length;
+  const hazir    = orders.filter(([,o]) => o.status==='hazir').length;
+  const bugunSip = orders.filter(([,o]) => o.createdAt >= bugun.getTime()).length;
+
+  const dbStats = document.getElementById('db-stats');
+  if(dbStats) dbStats.innerHTML = [
+    ['⏳ Bekleyen', bekleyen, 'var(--warn)'],
+    ['🔄 İşlemde',  isleme,   '#4080e0'],
+    ['✅ Hazır',    hazir,    'var(--success)'],
+    ['📅 Bugün',   bugunSip, 'var(--rose)'],
+  ].map(([l,v,col]) => `
+    <div class="stat-card" style="cursor:pointer;" onclick="switchTab('admin','siparisler',document.querySelector('#screen-admin .nav-tab:nth-child(2)'))">
+      <div class="stat-label">${l}</div>
+      <div class="stat-value" style="color:${col};font-size:28px;">${v}</div>
+    </div>`).join('');
+
+  // Son 8 sipariş
+  const son = orders.sort((a,b) => b[1].createdAt-a[1].createdAt).slice(0,8);
+  const dbSon = document.getElementById('db-son-siparisler');
+  if(dbSon) dbSon.innerHTML = son.length
+    ? son.map(([id,o]) => buildOrderCard(id,o,true)).join('')
+    : '<div style="font-size:12px;color:var(--ink-dim);padding:8px 0;">Henüz sipariş yok</div>';
+
+  // Mağaza sıralaması (bu ay)
+  const ayBaslangic = new Date(); ayBaslangic.setDate(1); ayBaslangic.setHours(0,0,0,0);
+  const buAy = orders.filter(([,o]) => o.createdAt >= ayBaslangic.getTime());
+  const magMap = {};
+  buAy.forEach(([,o]) => {
+    const k = o.storeName||'Bilinmiyor';
+    magMap[k] = (magMap[k]||0)+1;
+  });
+  const magSorted = Object.entries(magMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const magMax = magSorted[0] ? magSorted[0][1] : 1;
+  const dbMag = document.getElementById('db-magaza-sirala');
+  if(dbMag) dbMag.innerHTML = magSorted.length
+    ? magSorted.map(([name,cnt],i) => `
+      <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border-light);">
+        <span style="font-size:11px;font-weight:800;color:var(--ink-dim);width:16px;">${i+1}</span>
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:3px;">${escHtml(name)}</div>
+          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+            <div style="height:100%;width:${Math.round(cnt/magMax*100)}%;background:var(--rose);border-radius:2px;"></div>
+          </div>
+        </div>
+        <span style="font-size:12px;font-weight:800;color:var(--rose);">${cnt}</span>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:var(--ink-dim);">Bu ay sipariş yok</div>';
 }
 
 // ── RAPORLAR ─────────────────────────────────────────
