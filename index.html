@@ -2889,10 +2889,15 @@ function submitOrder() {
     const icK   = document.getElementById('ord-ic-yapi-kadin') ? document.getElementById('ord-ic-yapi-kadin').value : '';
     const icE   = document.getElementById('ord-ic-yapi-erkek') ? document.getElementById('ord-ic-yapi-erkek').value : '';
     if(ordProd && ordProd.ayarlar && ordProd.ayarlar.length && (!ayarK || !ayarE)) { showToast('Kadın ve erkek için ayar seç.','error'); return; }
-    if(ordProd && ordProd.icYapi  && ordProd.icYapi.length  && (!icK || !icE))     { showToast('Kadın ve erkek için içi dolu/boş seç.','error'); return; }
+    // Gümüşte iç yapı sorulmaz — sadece altın seçilen taraf için zorunlu
+    const icKGerekli = ayarK !== 'gumus';
+    const icEGerekli = ayarE !== 'gumus';
+    if(ordProd && ordProd.icYapi && ordProd.icYapi.length && ((icKGerekli && !icK) || (icEGerekli && !icE))) {
+      showToast('İçi dolu/boş seçimini tamamla.','error'); return;
+    }
   } else {
     if(ordProd && ordProd.ayarlar && ordProd.ayarlar.length && !ayar) { showToast('Ayar seçimi zorunlu.','error'); return; }
-    if(ordProd && ordProd.icYapi  && ordProd.icYapi.length  && !icYapi) { showToast('İçi dolu/boş seçimi zorunlu.','error'); return; }
+    if(ayar !== 'gumus' && ordProd && ordProd.icYapi && ordProd.icYapi.length && !icYapi) { showToast('İçi dolu/boş seçimi zorunlu.','error'); return; }
   }
   const olcuKadin = olcuK;
   const olcuErkek = olcuE;
@@ -5841,14 +5846,23 @@ function sendTelegram(msg) {
   var base = 'https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage'
     + '?chat_id=' + TG_CHAT_ID
     + '&text=' + encodeURIComponent(msg);
-  // Önce Markdown dene — reddedilirse (müşteri adında * _ [ gibi karakter varsa) düz metin gönder
+  // Önce Markdown dene — reddedilirse düz metin gönder; ikisi de olmazsa kullanıcıya söyle
   fetch(base + '&parse_mode=Markdown')
-    .then(function(r) {
-      if(!r.ok) return fetch(base); // parse hatası → düz metin fallback
+    .then(function(r) { return r.json(); })
+    .then(function(j) {
+      if(j && j.ok) return null; // gönderildi
+      console.warn('Telegram Markdown reddetti:', j && j.description);
+      return fetch(base).then(function(r2) { return r2.json(); });
     })
-    .catch(function() {
-      // Ağ hatası — bir kez daha düz dene
-      try { fetch(base).catch(function(){}); } catch(e) {}
+    .then(function(j2) {
+      if(j2 === null) return;
+      if(j2 && j2.ok) return;
+      console.error('Telegram düz metin de reddetti:', j2 && j2.description);
+      showToast('Telegram bildirimi gönderilemedi: ' + ((j2 && j2.description) || 'bilinmeyen hata'), 'warn');
+    })
+    .catch(function(e) {
+      console.error('Telegram ağ hatası:', e);
+      showToast('Telegram bildirimi gönderilemedi (bağlantı)', 'warn');
     });
 }
 
