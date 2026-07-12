@@ -1103,6 +1103,12 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       <div class="section-header">
         <div>
           <div class="section-title">Kullanım Kılavuzu</div>
+      <div class="card" style="margin-top:8px;">
+        <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:8px;">Ana Ekrana Ekle</div>
+        <div style="font-size:12px;color:var(--ink-dim);margin-bottom:10px;">Uygulamayı telefonuna kur, tek dokunuşla aç.</div>
+        <button id="pwa-install-inline-btn" class="btn-primary" style="display:none;font-size:12px;" onclick="triggerPWAInstall()">Ana Ekrana Ekle</button>
+        <div id="pwa-ios-note" style="display:none;font-size:12px;color:var(--ink-dim);line-height:1.6;">iPhone: Safari'de <b>Paylaş</b> → <b>Ana Ekrana Ekle</b></div>
+      </div>
           <div class="section-sub">Sistemi nasıl kullanacağını adım adım anlatan rehber</div>
         </div>
       </div>
@@ -5726,7 +5732,8 @@ function updateOrderTimers() {
     }, 500);
   }
 
-  document.getElementById('pwa-install-btn').addEventListener('click', function() {
+  var pwaBtn = document.getElementById('pwa-install-btn');
+  if(pwaBtn) pwaBtn.addEventListener('click', function() {
     if(!deferredPrompt) return;
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(function(result) {
@@ -5734,7 +5741,8 @@ function updateOrderTimers() {
         showToast('Uygulama ana ekrana eklendi ✓','success');
       }
       deferredPrompt = null;
-      document.getElementById('pwa-install-banner').classList.remove('show');
+      var pib = document.getElementById('pwa-install-banner');
+      if(pib) pib.classList.remove('show');
     });
   });
 
