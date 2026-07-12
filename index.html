@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -1470,8 +1469,17 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         </div>
       </div>
 
+      <!-- DÖNEM KARŞILAŞTIRMASI -->
+      <div id="rapor-kiyas" style="padding:0 12px;"></div>
+
       <!-- ÖZET KARTLAR -->
       <div class="stats-grid" id="rapor-ozet-grid" style="margin-bottom:16px;"></div>
+
+      <!-- TESLİM SÜRESİ -->
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:12px;">Teslim Süresi Analizi</div>
+        <div id="rapor-teslim"></div>
+      </div>
 
       <!-- RAPOR İÇERİĞİ -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="rapor-grid">
@@ -3247,7 +3255,14 @@ function buildOrderCard(id, o, isAdminView) {
             <div style="font-size:11px;color:var(--ink-mid);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
               ${escHtml(o.musteri||'')} <span style="color:var(--ink-dim);font-weight:400;">· ${escHtml(o.storeName||'')}</span>
             </div>
-            <span style="font-size:10px;color:var(--ink-dim);flex-shrink:0;">${dateStr}</span>
+            <span style="font-size:10px;color:var(--ink-dim);flex-shrink:0;">${dateStr}${(function(){
+              if(o.status !== 'beklemede' && o.status !== 'isleme') return '';
+              const gun = Math.floor((Date.now() - (o.createdAt||Date.now())) / 86400000);
+              if(gun < 1) return '';
+              const renk = gun >= 3 ? '#c0152a' : (gun >= 2 ? '#a06a00' : 'var(--ink-dim)');
+              const agir = gun >= 3 ? '800' : '600';
+              return ' · <span style="color:'+renk+';font-weight:'+agir+';">'+gun+' gündür bekliyor</span>';
+            })()}</span>
           </div>
           ${metaLines.length ? `<div style="font-size:10px;color:var(--ink-dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${metaLines.join(' · ')}</div>` : ''}
           ${o.status === 'iptal' && o.iptalNeden ? `<div style="font-size:10px;color:var(--rose);margin-top:2px;font-weight:600;">İptal: ${escHtml(o.iptalNeden)}</div>` : ''}
@@ -4078,6 +4093,81 @@ function renderRaporlar() {
     toplamMaliyet += k.safMaliyet;
   });
   const karliOrders = orders.filter(([,o]) => o.iscilSatis).length;
+
+  // ── DÖNEM KARŞILAŞTIRMASI (hafta/ay seçiliyse önceki dönemle kıyasla) ──
+  const period = document.getElementById('rapor-period')?.value || 'all';
+  let kiyasHtml = '';
+  if(period === 'week' || period === 'month') {
+    const gunMs = 86400000;
+    const sure = period === 'week' ? 7*gunMs : 30*gunMs;
+    const now2 = Date.now();
+    const oncekiOrders = Object.entries(allOrders).filter(([,o]) =>
+      o.status !== 'iptal' &&
+      (now2 - o.createdAt) > sure &&
+      (now2 - o.createdAt) <= sure*2
+    );
+    let oncekiKar = 0;
+    oncekiOrders.forEach(([,o]) => { oncekiKar += calcKar(o).kar; });
+    const adetFark = oncekiOrders.length ? Math.round((total-oncekiOrders.length)/oncekiOrders.length*100) : null;
+    const karFark  = oncekiKar > 0 ? Math.round((toplamKar-oncekiKar)/oncekiKar*100) : null;
+    const donemAd = period === 'week' ? 'hafta' : 'ay';
+    const fmtFark = function(f) {
+      if(f === null) return '<span style="color:var(--ink-dim);">önceki dönem verisi yok</span>';
+      const renk = f >= 0 ? 'var(--success)' : '#c0152a';
+      const ok = f >= 0 ? '▲' : '▼';
+      return '<span style="color:'+renk+';font-weight:800;">'+ok+' %'+Math.abs(f)+'</span>';
+    };
+    kiyasHtml = `<div class="card" style="margin:0 0 12px;background:linear-gradient(135deg,#fdf0f3,#fff);">
+      <div style="font-size:11px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Önceki ${donemAd} ile karşılaştırma</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <div style="font-size:10px;color:var(--ink-dim);font-weight:700;">SİPARİŞ ADEDİ</div>
+          <div style="font-size:15px;font-weight:800;margin-top:2px;">${total} <span style="font-size:11px;color:var(--ink-dim);font-weight:400;">(önceki: ${oncekiOrders.length})</span></div>
+          <div style="font-size:12px;margin-top:2px;">${fmtFark(adetFark)}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--ink-dim);font-weight:700;">KAR (GR)</div>
+          <div style="font-size:15px;font-weight:800;margin-top:2px;">${toplamKar.toFixed(3)} <span style="font-size:11px;color:var(--ink-dim);font-weight:400;">(önceki: ${oncekiKar.toFixed(3)})</span></div>
+          <div style="font-size:12px;margin-top:2px;">${fmtFark(karFark)}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+  const kiyasEl = document.getElementById('rapor-kiyas');
+  if(kiyasEl) kiyasEl.innerHTML = kiyasHtml;
+
+  // ── ORTALAMA TESLİM SÜRESİ (timeline.hazir - createdAt) ──
+  const teslimler = orders.filter(([,o]) => o.timeline && o.timeline.hazir && o.createdAt);
+  let teslimHtml = '';
+  if(teslimler.length) {
+    const sureler = teslimler.map(([,o]) => (o.timeline.hazir - o.createdAt) / 86400000);
+    const ortalama = sureler.reduce((a,b)=>a+b,0) / sureler.length;
+    const enUzun = Math.max.apply(null, sureler);
+    // Mağaza bazında
+    const magTeslim = {};
+    teslimler.forEach(([,o]) => {
+      const k = o.storeName || 'Bilinmiyor';
+      if(!magTeslim[k]) magTeslim[k] = [];
+      magTeslim[k].push((o.timeline.hazir - o.createdAt) / 86400000);
+    });
+    const magOrt = Object.entries(magTeslim).map(([n,arr]) => [n, arr.reduce((a,b)=>a+b,0)/arr.length, arr.length]).sort((a,b)=>b[1]-a[1]);
+    teslimHtml = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div class="stat-card"><div class="stat-label">Ortalama Teslim</div><div class="stat-value" style="font-size:18px;color:var(--rose);">${ortalama.toFixed(1)} gün</div></div>
+      <div class="stat-card"><div class="stat-label">En Uzun Teslim</div><div class="stat-value" style="font-size:18px;color:${enUzun>=5?'#c0152a':'var(--ink)'};">${enUzun.toFixed(1)} gün</div></div>
+    </div>
+    ${magOrt.map(([n,ort,adet]) => `
+      <div class="rapor-bar-wrap">
+        <div class="rapor-bar-label">
+          <span>${escHtml(n)}</span>
+          <span>${ort.toFixed(1)} gün <span style="color:var(--ink-dim);font-weight:400;">(${adet} teslim)</span></span>
+        </div>
+        <div class="rapor-bar-track"><div class="rapor-bar-fill blue" style="width:${Math.min(100,Math.round(ort/Math.max(enUzun,1)*100))}%;"></div></div>
+      </div>`).join('')}`;
+  } else {
+    teslimHtml = '<div style="font-size:12px;color:var(--ink-dim);">Henüz teslim edilen (Hazır durumuna geçen) sipariş yok. Siparişler Hazır olarak işaretlendikçe burada teslim süreleri görünecek.</div>';
+  }
+  const teslimEl = document.getElementById('rapor-teslim');
+  if(teslimEl) teslimEl.innerHTML = teslimHtml;
 
   // Özet kartlar
   document.getElementById('rapor-ozet-grid').innerHTML = [
