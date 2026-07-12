@@ -2882,8 +2882,18 @@ function submitOrder() {
   const ordProd = allProducts[currentOrderProductId];
   const ayar   = document.getElementById('ord-ayar')    ? document.getElementById('ord-ayar').value    : '';
   const icYapi = document.getElementById('ord-ic-yapi') ? document.getElementById('ord-ic-yapi').value : '';
-  if(ordProd && ordProd.ayarlar && ordProd.ayarlar.length && !ayar) { showToast('Ayar seçimi zorunlu.','error'); return; }
-  if(ordProd && ordProd.icYapi  && ordProd.icYapi.length  && !icYapi) { showToast('İçi dolu/boş seçimi zorunlu.','error'); return; }
+  if(cinsiyet === 'cift') {
+    // Çift: kadın ve erkek alanlarını kontrol et
+    const ayarK = document.getElementById('ord-ayar-kadin') ? document.getElementById('ord-ayar-kadin').value : '';
+    const ayarE = document.getElementById('ord-ayar-erkek') ? document.getElementById('ord-ayar-erkek').value : '';
+    const icK   = document.getElementById('ord-ic-yapi-kadin') ? document.getElementById('ord-ic-yapi-kadin').value : '';
+    const icE   = document.getElementById('ord-ic-yapi-erkek') ? document.getElementById('ord-ic-yapi-erkek').value : '';
+    if(ordProd && ordProd.ayarlar && ordProd.ayarlar.length && (!ayarK || !ayarE)) { showToast('Kadın ve erkek için ayar seç.','error'); return; }
+    if(ordProd && ordProd.icYapi  && ordProd.icYapi.length  && (!icK || !icE))     { showToast('Kadın ve erkek için içi dolu/boş seç.','error'); return; }
+  } else {
+    if(ordProd && ordProd.ayarlar && ordProd.ayarlar.length && !ayar) { showToast('Ayar seçimi zorunlu.','error'); return; }
+    if(ordProd && ordProd.icYapi  && ordProd.icYapi.length  && !icYapi) { showToast('İçi dolu/boş seçimi zorunlu.','error'); return; }
+  }
   const olcuKadin = olcuK;
   const olcuErkek = olcuE;
   const kalinlik  = document.getElementById('ord-kalinlik').value.trim();
@@ -2941,11 +2951,11 @@ function submitOrder() {
       btn.disabled = false;
       btn.innerHTML = '<i class="ph ph-paper-plane-tilt"></i>&nbsp; Sipariş Gönder';
       closeModal('modal-order');
-      // Telegram bildirimi
-      sendTelegram(buildTelegramMsg(order));
-      // Başarı popup
+      // Başarı popup — HER ZAMAN göster (sipariş kaydedildi)
       const musteri = document.getElementById('ord-musteri') ? document.getElementById('ord-musteri').value.trim() : '';
-      showSiparisBasari(order.orderNo, musteri, allProducts[currentOrderProductId]);
+      try { showSiparisBasari(order.orderNo, musteri, allProducts[currentOrderProductId]); } catch(e) { console.error(e); }
+      // Telegram bildirimi — hata olsa da başarıyı etkilemesin
+      try { sendTelegram(buildTelegramMsg(order)); } catch(e) { console.error('Telegram:', e); }
     })
     .catch(function(e) {
       btn.disabled = false;
@@ -5828,11 +5838,18 @@ const TG_TOKEN   = '8714596921:AAFal2JLkIktFRwqpanO8rdlla4t7o0bOpU';
 const TG_CHAT_ID = '8551802969';
 
 function sendTelegram(msg) {
-  var url = 'https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage'
+  var base = 'https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage'
     + '?chat_id=' + TG_CHAT_ID
-    + '&text=' + encodeURIComponent(msg)
-    + '&parse_mode=Markdown';
-  fetch(url).catch(function() {});
+    + '&text=' + encodeURIComponent(msg);
+  // Önce Markdown dene — reddedilirse (müşteri adında * _ [ gibi karakter varsa) düz metin gönder
+  fetch(base + '&parse_mode=Markdown')
+    .then(function(r) {
+      if(!r.ok) return fetch(base); // parse hatası → düz metin fallback
+    })
+    .catch(function() {
+      // Ağ hatası — bir kez daha düz dene
+      try { fetch(base).catch(function(){}); } catch(e) {}
+    });
 }
 
 function cleanSymbols(txt) {
