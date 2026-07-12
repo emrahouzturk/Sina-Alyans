@@ -47,6 +47,25 @@
   0%,100% { transform:scale(1); }
   50%      { transform:scale(1.12); }
 }
+@keyframes tikPop {
+  0%   { transform:scale(0); opacity:0; }
+  70%  { transform:scale(1.15); }
+  100% { transform:scale(1); opacity:1; }
+}
+@keyframes konfetiDus {
+  0%   { transform:translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(320px) rotate(540deg); opacity:0; }
+}
+.konfeti-parca {
+  position:absolute;
+  width:8px; height:8px;
+  border-radius:2px;
+  animation:konfetiDus 1.6s ease-in forwards;
+}
+@keyframes kartFlash {
+  0%   { background:var(--success-bg); }
+  100% { background:var(--surface); }
+}
 .ysb-text { flex:1; }
 .ysb-title { font-size:14px; font-weight:800; letter-spacing:.02em; }
 .ysb-sub   { font-size:11px; opacity:.85; margin-top:2px; }
@@ -1545,6 +1564,23 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
       </div>
       <hr class="divider" style="margin-top:0;">
 
+      <!-- Adım göstergesi -->
+      <div style="display:flex;gap:6px;margin-bottom:18px;" id="ord-steps-bar">
+        <div class="ord-step-dot" data-step="1" style="flex:1;text-align:center;">
+          <div class="osd-bar" style="height:4px;border-radius:2px;background:var(--rose);margin-bottom:6px;transition:background .3s;"></div>
+          <div class="osd-label" style="font-size:9px;font-weight:800;color:var(--rose);text-transform:uppercase;letter-spacing:.05em;transition:color .3s;">Müşteri</div>
+        </div>
+        <div class="ord-step-dot" data-step="2" style="flex:1;text-align:center;">
+          <div class="osd-bar" style="height:4px;border-radius:2px;background:var(--border);margin-bottom:6px;transition:background .3s;"></div>
+          <div class="osd-label" style="font-size:9px;font-weight:800;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em;transition:color .3s;">Ölçü & Ayar</div>
+        </div>
+        <div class="ord-step-dot" data-step="3" style="flex:1;text-align:center;">
+          <div class="osd-bar" style="height:4px;border-radius:2px;background:var(--border);margin-bottom:6px;transition:background .3s;"></div>
+          <div class="osd-label" style="font-size:9px;font-weight:800;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.05em;transition:color .3s;">Detaylar</div>
+        </div>
+      </div>
+
+      <div id="ord-step-1">
       <!-- Müşteri -->
       <div class="form-row">
         <div class="form-group">
@@ -1577,8 +1613,12 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <input type="hidden" id="ord-cinsiyet" value="kadin">
       </div>
 
+      </div><!-- /ord-step-1 -->
+
       <!-- Adet hidden — cinsiyet cift ise cift, değilse tek -->
       <input type="hidden" id="ord-adet" value="tek">
+
+      <div id="ord-step-2" style="display:none;">
 
       <!-- Ölçüler -->
       <div id="olcu-kadin-wrap" class="form-group">
@@ -1687,6 +1727,9 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <span id="hesap-gramaj" style="display:none;"></span>
       </div>
 
+      </div><!-- /ord-step-2 -->
+
+      <div id="ord-step-3" style="display:none;">
       <!-- Renk — tek yüzük için -->
       <div class="form-group" id="ord-renk-tek-wrap">
         <label class="field-label">Altın Rengi</label>
@@ -1742,10 +1785,13 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
         <label class="field-label">Not <span style="color:var(--ink-dim);font-weight:400;">(isteğe bağlı)</span></label>
         <textarea class="text-field" id="ord-not" placeholder="Eklemek istediğin not…" rows="2"></textarea>
       </div>
+      </div><!-- /ord-step-3 -->
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeModal('modal-order')">İptal</button>
-      <button class="btn-primary" id="btn-submit-order" onclick="submitOrder()">
+      <button class="btn-secondary" id="ord-cancel-btn" onclick="closeModal('modal-order')">İptal</button>
+      <button class="btn-secondary" id="ord-prev-btn" onclick="ordPrev()" style="display:none;">← Geri</button>
+      <button class="btn-primary" id="ord-next-btn" onclick="ordNext()" style="flex:1;justify-content:center;">İleri →</button>
+      <button class="btn-primary" id="btn-submit-order" onclick="submitOrder()" style="display:none;flex:1;justify-content:center;">
         <i class="ph ph-paper-plane-tilt"></i>&nbsp; Sipariş Gönder
       </button>
     </div>
@@ -2021,9 +2067,10 @@ textarea.text-field { resize:vertical; min-height:80px; font-size:12px; font-wei
 
 <!-- Sipariş Başarı Modal -->
 <div class="modal-overlay" id="modal-siparis-basari">
-  <div class="modal-box" style="max-width:340px;text-align:center;">
+  <div class="modal-box" style="max-width:340px;text-align:center;position:relative;overflow:hidden;">
+    <div id="konfeti-alan" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
     <div class="modal-body" style="padding:32px 28px;">
-      <div style="width:72px;height:72px;background:#1a7a4a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 20px rgba(26,122,74,.3);">
+      <div class="basari-tik" style="width:72px;height:72px;background:#1a7a4a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 20px rgba(26,122,74,.3);animation:tikPop .5s cubic-bezier(.34,1.56,.64,1);">
         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256" fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="40 144 96 200 216 72"></polyline>
         </svg>
@@ -2371,6 +2418,71 @@ function setKatalogFilter(type, value, btn) {
 // ── ORDER MODAL ────────────────────────────────────
 let currentOrderProductId = null;
 
+let ordCurrentStep = 1;
+
+function ordGoStep(n) {
+  ordCurrentStep = n;
+  [1,2,3].forEach(function(s) {
+    const el = document.getElementById('ord-step-'+s);
+    if(el) el.style.display = s === n ? '' : 'none';
+  });
+  // Gösterge güncelle
+  document.querySelectorAll('.ord-step-dot').forEach(function(dot) {
+    const s = parseInt(dot.getAttribute('data-step'));
+    const bar = dot.querySelector('.osd-bar');
+    const label = dot.querySelector('.osd-label');
+    if(s <= n) {
+      bar.style.background = 'var(--rose)';
+      label.style.color = 'var(--rose)';
+    } else {
+      bar.style.background = 'var(--border)';
+      label.style.color = 'var(--ink-dim)';
+    }
+  });
+  // Footer butonları
+  const prevBtn = document.getElementById('ord-prev-btn');
+  const nextBtn = document.getElementById('ord-next-btn');
+  const submitBtn = document.getElementById('btn-submit-order');
+  const cancelBtn = document.getElementById('ord-cancel-btn');
+  if(prevBtn)   prevBtn.style.display   = n > 1 ? '' : 'none';
+  if(cancelBtn) cancelBtn.style.display = n === 1 ? '' : 'none';
+  if(nextBtn)   nextBtn.style.display   = n < 3 ? '' : 'none';
+  if(submitBtn) submitBtn.style.display = n === 3 ? '' : 'none';
+  // Modal body en üste kaydır
+  const body = document.querySelector('#modal-order .modal-body');
+  if(body) body.scrollTop = 0;
+}
+
+function ordNext() {
+  if(ordCurrentStep === 1) {
+    const ad = document.getElementById('ord-musteri').value.trim();
+    if(!ad) {
+      showToast('Müşteri adını gir', 'warn');
+      document.getElementById('ord-musteri').focus();
+      return;
+    }
+  }
+  if(ordCurrentStep === 2) {
+    const cinsiyet = document.getElementById('ord-cinsiyet').value;
+    if(cinsiyet === 'cift') {
+      if(!document.getElementById('ord-ayar-kadin').value || !document.getElementById('ord-ayar-erkek').value) {
+        showToast('Kadın ve erkek için ayar seç', 'warn');
+        return;
+      }
+    } else {
+      if(!document.getElementById('ord-ayar').value) {
+        showToast('Ayar seçimi yap', 'warn');
+        return;
+      }
+    }
+  }
+  if(ordCurrentStep < 3) ordGoStep(ordCurrentStep + 1);
+}
+
+function ordPrev() {
+  if(ordCurrentStep > 1) ordGoStep(ordCurrentStep - 1);
+}
+
 function openOrderModal(productId) {
   const p = allProducts[productId];
   if(!p) return;
@@ -2395,7 +2507,7 @@ function openOrderModal(productId) {
   document.getElementById('ord-musteri').value   = '';
   document.getElementById('ord-cinsiyet').value  = 'kadin';
   document.getElementById('ord-adet').value      = 'tek';
-  document.getElementById('ord-olcu-kadin').value= '14';
+  document.getElementById('ord-olcu-kadin').value= '13';
   document.getElementById('ord-olcu-erkek').value= '20';
   document.getElementById('ord-kalinlik').value  = p.thickness || '';
 
@@ -2411,6 +2523,14 @@ function openOrderModal(productId) {
     const el = document.getElementById(id);
     if(el) el.classList.remove('active');
   });
+  // Akıllı varsayılan: tek iç yapı seçeneği varsa otomatik seç
+  if(p.icYapi && p.icYapi.length === 1) {
+    selectIcYapi(p.icYapi[0]);
+    if(typeof selectIcYapiCins === 'function') {
+      selectIcYapiCins('kadin', p.icYapi[0]);
+      selectIcYapiCins('erkek', p.icYapi[0]);
+    }
+  }
   updateHesap();
   document.getElementById('ord-ic-yazi-kadin').value = '';
   document.getElementById('ord-ic-yazi-erkek').value = '';
@@ -2430,6 +2550,7 @@ function openOrderModal(productId) {
   updateCiftTekView('kadin');
   updateOlcuFields();
 
+  ordGoStep(1);
   openModal('modal-order');
 }
 
@@ -2884,7 +3005,8 @@ function openEditOrder(orderId) {
     btn.innerHTML = '<i class="ph ph-floppy-disk"></i>&nbsp; Güncelle';
     btn.onclick = function() { updateOrder(orderId); };
 
-    openModal('modal-order');
+    ordGoStep(1);
+  openModal('modal-order');
   }
 }
 
@@ -2931,6 +3053,24 @@ function showSiparisBasari(orderNo, musteri, urun) {
   if(urun && urun.name) info += (info ? '<br>' : '') + escHtml(urun.name);
   document.getElementById('basari-musteri-info').innerHTML = info;
   openModal('modal-siparis-basari');
+  // Konfeti patlat
+  (function() {
+    const alan = document.getElementById('konfeti-alan');
+    if(!alan) return;
+    alan.innerHTML = '';
+    const renkler = ['#c8244c','#e8c4cc','#b8966a','#1a7a4a','#f5c842'];
+    for(let i=0; i<24; i++) {
+      const p = document.createElement('div');
+      p.className = 'konfeti-parca';
+      p.style.left = (5 + Math.random()*90) + '%';
+      p.style.top = '-10px';
+      p.style.background = renkler[Math.floor(Math.random()*renkler.length)];
+      p.style.animationDelay = (Math.random()*0.5) + 's';
+      p.style.animationDuration = (1.2 + Math.random()*0.8) + 's';
+      alan.appendChild(p);
+    }
+    setTimeout(function() { alan.innerHTML = ''; }, 2800);
+  })();
 }
 
 function updateBekleyenRozet() {
@@ -3268,6 +3408,12 @@ function buildOrderCard(id, o, isAdminView) {
           ${o.status === 'iptal' && o.iptalNeden ? `<div style="font-size:10px;color:var(--rose);margin-top:2px;font-weight:600;">İptal: ${escHtml(o.iptalNeden)}</div>` : ''}
           ${o.not ? `<div style="font-size:10px;color:var(--ink-dim);font-style:italic;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(o.not)}</div>` : ''}
         </div>
+        ${(function(){
+          const nextMap = {beklemede:['isleme','İşleme Al'], isleme:['hazir','Hazır'], hazir:['kargo','Kargo']};
+          const n = nextMap[o.status];
+          if(!n) return '';
+          return '<button onclick="event.stopPropagation();quickAdvance(\''+id+'\',\''+n[0]+'\',this)" style="flex-shrink:0;background:var(--rose-pale);color:var(--rose);border:1.5px solid var(--rose-soft);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px;transition:all .15s;">▶ '+n[1]+'</button>';
+        })()}
       </div>
     </div>`;
   }
@@ -3761,6 +3907,29 @@ function confirmIptal() {
       showToast('Sipariş iptal edildi.','warn');
     })
     .catch(function(e) { showToast('Hata: '+e.message,'error'); });
+}
+
+function quickAdvance(orderId, newStatus, btn) {
+  // Buton animasyonu
+  if(btn) {
+    btn.style.background = 'var(--success-bg)';
+    btn.style.color = 'var(--success)';
+    btn.style.borderColor = '#a0d8bc';
+    btn.innerHTML = '✓';
+  }
+  // Kartı bul ve yumuşak geçiş animasyonu
+  const kart = btn ? btn.closest('.order-item') : null;
+  if(kart) {
+    kart.style.transition = 'all .4s ease';
+    kart.style.background = 'var(--success-bg)';
+    setTimeout(function() {
+      kart.style.opacity = '0';
+      kart.style.transform = 'translateX(30px)';
+    }, 300);
+  }
+  setTimeout(function() {
+    quickUpdateStatus(orderId, newStatus);
+  }, 550);
 }
 
 function quickUpdateStatus(orderId, newStatus) {
