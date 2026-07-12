@@ -3423,12 +3423,6 @@ function buildOrderCard(id, o, isAdminView) {
           ${o.status === 'iptal' && o.iptalNeden ? `<div style="font-size:10px;color:var(--rose);margin-top:2px;font-weight:600;">İptal: ${escHtml(o.iptalNeden)}</div>` : ''}
           ${o.not ? `<div style="font-size:10px;color:var(--ink-dim);font-style:italic;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(o.not)}</div>` : ''}
         </div>
-        ${(function(){
-          const nextMap = {beklemede:['isleme','İşleme Al'], isleme:['hazir','Hazır'], hazir:['kargo','Kargo']};
-          const n = nextMap[o.status];
-          if(!n) return '';
-          return '<button onclick="event.stopPropagation();quickAdvance(\''+id+'\',\''+n[0]+'\',this)" style="flex-shrink:0;background:var(--rose-pale);color:var(--rose);border:1.5px solid var(--rose-soft);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:3px;transition:all .15s;">▶ '+n[1]+'</button>';
-        })()}
       </div>
     </div>`;
   }
