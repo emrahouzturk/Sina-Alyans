@@ -2178,7 +2178,22 @@ const FIREBASE_CONFIG = {
 };
 
 // Admin kullanıcı adı — bu kullanıcı admin panelini görür
-const ADMIN_EMAIL = "admin@sina.local"; // admin kullanıcı adı "admin" olarak girilir
+const ADMIN_EMAIL = "admin@sina.local";
+
+// ── LOGO BASE64 — PDF'lerde garantili görünüm ──
+const LOGO_URL = 'https://www.sinapirlanta.com/themes/custom/sina/logo.svg';
+let LOGO_B64 = ''; // açılışta doldurulur
+(function preloadLogo() {
+  fetch(LOGO_URL)
+    .then(function(r) { return r.blob(); })
+    .then(function(blob) {
+      const reader = new FileReader();
+      reader.onload = function() { LOGO_B64 = reader.result; };
+      reader.readAsDataURL(blob);
+    })
+    .catch(function() { /* CORS engellerse uzak URL kullanılır */ });
+})();
+function logoSrc() { return LOGO_B64 || LOGO_URL; } // admin kullanıcı adı "admin" olarak girilir
 
 // ── INIT ─────────────────────────────────────────
 firebase.initializeApp(FIREBASE_CONFIG);
@@ -5436,6 +5451,10 @@ function buildWhatsappText(orders) {
 
 // ── PRINT HELPER ────────────────────────────────────
 function printHtml(html) {
+  // Uzak logo URL'lerini base64 ile değiştir (varsa)
+  if(LOGO_B64) {
+    html = html.split(LOGO_URL).join(LOGO_B64);
+  }
   const win = window.open('', '_blank', 'width=900,height=700');
   if(!win) { showToast('Popup engelleyici açık. Lütfen izin ver.','error'); return; }
   win.document.write(`<!DOCTYPE html>
